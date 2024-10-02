@@ -1,60 +1,107 @@
 {
-  description = ''
-    For questions just DM me on X: https://twitter.com/@m3tam3re
-    There is also some NIXOS content on my YT channel: https://www.youtube.com/@m3tam3re
+  description = "My NixOS configuration";
+  # https://dotfiles.sioodmy.dev
 
-    One of the best ways to learn NIXOS is to read other peoples configurations. I have personally learned a lot from Gabriel Fontes configs:
-    https://github.com/Misterio77/nix-starter-configs
-    https://github.com/Misterio77/nix-config
+  outputs = {flake-parts, ...} @ inputs:
+    flake-parts.lib.mkFlake {inherit inputs;} ({...}: {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
-    Please also check out the starter configs mentioned above.
-  '';
+      imports = [
+        inputs.flake-parts.flakeModules.easyOverlay
+        inputs.treefmt-nix.flakeModule
+      ];
+
+      perSystem = {
+        config,
+        pkgs,
+        ...
+      }: {
+        devShells.default = pkgs.mkShell {
+          buildInputs = let
+            colors = inputs.nix-colors.colorSchemes.catppuccin-frappe.palette;
+          in
+            [
+              config.treefmt.build.wrapper
+              (pkgs.callPackage ./shell {inherit pkgs inputs colors;})
+            ]
+            ++ (import ./shell/packages.nix {inherit pkgs;});
+          shellHook = ''
+            nucleus
+          '';
+        };
+
+        # configure treefmt
+        treefmt = {
+          projectRootFile = "flake.nix";
+
+          programs = {
+            alejandra.enable = true;
+            black.enable = true;
+            deadnix.enable = false;
+            shellcheck.enable = true;
+            shfmt = {
+              enable = true;
+              indent_size = 4;
+            };
+          };
+        };
+      };
+
+      flake = {
+        nixosConfigurations = import ./hosts  inputs;
+      };
+    });
 
   inputs = {
+
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
-    agenix.url = "github:ryantm/agenix";
-  };
 
-  outputs = {
-    self,
-    agenix,
-    home-manager,
-    nixpkgs,
-    ...
-  } @ inputs: let
-    inherit (self) outputs;
-    systems = [
-      "aarch64-linux"
-      "i686-linux"
-      "x86_64-linux"
-      "aarch64-darwin"
-      "x86_64-darwin"
-    ];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
-  in {
-    packages =
-      forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
-    overlays = import ./overlays {inherit inputs;};
-    nixosConfigurations = {
-      appletun = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          ./hosts/appletun
-          agenix.nixosModules.default
-        ];
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    agenix.url = "github:ryantm/agenix";
+    nixos-hardware.url = "github:nixos/nixos-hardware";
+    impermanence.url = "github:nix-community/impermanence";
+    nix-colors.url = "github:Misterio77/nix-colors";
+
+    wrapper-manager = {
+      url = "github:viperML/wrapper-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # a tree-wide formatter
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    homix = {
+      url = "github:sioodmy/homix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
       };
     };
-    homeConfigurations = {
-      "jeffrey@appletun" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages."aarch64-linux";
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [./home/jeffrey/appletun.nix];
-      };
+
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    mkalias = {
+      url = "github:reckenrode/mkalias";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 }
+# see also:
+# - https://github.com/notashelf/nyx
+# - https://github.com/fufexan/dotfiles/
+# - https://github.com/n3oney/nixus
+# (I love you guys)
+

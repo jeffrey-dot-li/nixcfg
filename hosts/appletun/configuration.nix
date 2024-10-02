@@ -59,6 +59,11 @@ in {
       isNormalUser = true;
       hashedPasswordFile = config.age.secrets.login-password.path;
       extraGroups = ["wheel"];
+      homix = true;
+      shell = let 
+      	colors = config.colorScheme.palette;
+	in
+	pkgs.callPackage ../../shell {inherit pkgs inputs colors; };
     };
   };
   imports = [./hardware-configuration.nix];
