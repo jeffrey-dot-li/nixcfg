@@ -31,14 +31,14 @@ in {
     hostName = hostname;
     wireless = {
       enable = true;
-      environmentFile =  config.age.secrets.wifi-ssid.path;
-      networks."@WIFI_SSID@" = { 
-      psk = "@SSID_PASSWORD@"; 
+      environmentFile = config.age.secrets.wifi-ssid.path;
+      networks."@WIFI_SSID@" = {
+        psk = "@SSID_PASSWORD@";
       };
       interfaces = [interface];
     };
   };
-  environment.variables.EDITOR =  "nvim";
+  environment.variables.EDITOR = "nvim";
   environment.systemPackages = with pkgs; [
     vim
     kitty
@@ -49,12 +49,13 @@ in {
     inputs.agenix.packages.${system}.agenix
     gh
     cloudflared
+    alejandra
   ];
   users = {
     mutableUsers = false;
     users."${user}" = {
       isNormalUser = true;
-      hashedPasswordFile = config.age.secrets.login-password.path; 
+      hashedPasswordFile = config.age.secrets.login-password.path;
       extraGroups = ["wheel"];
     };
   };
@@ -81,17 +82,16 @@ in {
   users.groups.cloudflared = {};
   systemd.services.cloudflared = {
     description = "Cloudflare Tunnel";
-    after = [ "network.target" "network-online.target" ];
-    wants = [ "network.target" "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
+    after = ["network.target" "network-online.target"];
+    wants = ["network.target" "network-online.target"];
+    wantedBy = ["multi-user.target"];
     serviceConfig = {
       ExecStart = "${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run";
       Restart = "always";
-      EnvironmentFile = [ config.age.secrets.cloudflared-environment.path ];
+      EnvironmentFile = [config.age.secrets.cloudflared-environment.path];
       RestartSec = "5s";
       User = "cloudflared";
       Group = "cloudflared";
     };
   };
-
 }

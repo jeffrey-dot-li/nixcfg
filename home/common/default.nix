@@ -1,4 +1,10 @@
-{ config, lib, outputs, pkgs, ... }: {
+{
+  config,
+  lib,
+  outputs,
+  pkgs,
+  ...
+}: {
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -29,7 +35,7 @@
   nix = {
     package = lib.mkDefault pkgs.nix;
     settings = {
-      experimental-features = [ "nix-command" "flakes" "repl-flake" ];
+      experimental-features = ["nix-command" "flakes" "repl-flake"];
       warn-dirty = false;
     };
   };
