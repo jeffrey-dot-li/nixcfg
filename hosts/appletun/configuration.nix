@@ -50,6 +50,7 @@ in {
     gh
     cloudflared
     alejandra
+    starship
   ];
   users = {
     mutableUsers = false;
