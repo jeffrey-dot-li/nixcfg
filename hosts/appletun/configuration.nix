@@ -51,6 +51,7 @@ in {
     cloudflared
     alejandra
     starship
+    zoxide
   ];
   users = {
     mutableUsers = false;
