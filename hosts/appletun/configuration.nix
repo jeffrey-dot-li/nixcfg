@@ -48,6 +48,7 @@ in {
     bat
     inputs.agenix.packages.${system}.agenix
     gh
+    cloudflared
   ];
   users = {
     mutableUsers = false;
@@ -69,4 +70,28 @@ in {
     enable = true;
     allowedTCPPorts = [22];
   };
+
+  systemd.services.cloudflared = {
+    description = "Cloudflare Tunnel";
+    after = [ "network.target" "network-online.target" ];
+    wants = [ "network.target" "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run";
+      Restart = "always";
+      EnvironmentFile = [ config.age.secrets.cloudflared-environment.path ];
+      RestartSec = "5s";
+      User = "cloudflared";
+      Group = "cloudflared";
+    };
+  };
+
+  users.users.cloudflared = {
+    isSystemUser = true;
+    group = "cloudflared";
+    description = "Cloudflare Tunnel user";
+    home = "/var/lib/cloudflared";
+    createHome = true;
+  };
+  users.groups.cloudflared = {};
 }

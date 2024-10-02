@@ -3,4 +3,5 @@ let
 in {
 	"login-password.age".publicKeys = [ appletun ];
 	"wifi-ssid.age".publicKeys = [ appletun ];
+	"cloudflared-environment.age".publicKeys = [ appletun ];
 }
