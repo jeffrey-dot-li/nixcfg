@@ -6,7 +6,6 @@
 				};
 		
 			wifi-ssid = {
-
 				file =  ../../secrets/wifi-ssid.age;
 			};
 
