@@ -47,6 +47,7 @@ in {
     neovim
     bat
     inputs.agenix.packages.${system}.agenix
+    gh
   ];
   users = {
     mutableUsers = false;
