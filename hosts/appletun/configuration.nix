@@ -71,6 +71,14 @@ in {
     allowedTCPPorts = [22];
   };
 
+  users.users.cloudflared = {
+    isSystemUser = true;
+    group = "cloudflared";
+    description = "Cloudflare Tunnel user";
+    home = "/var/lib/cloudflared";
+    createHome = true;
+  };
+  users.groups.cloudflared = {};
   systemd.services.cloudflared = {
     description = "Cloudflare Tunnel";
     after = [ "network.target" "network-online.target" ];
@@ -86,12 +94,4 @@ in {
     };
   };
 
-  users.users.cloudflared = {
-    isSystemUser = true;
-    group = "cloudflared";
-    description = "Cloudflare Tunnel user";
-    home = "/var/lib/cloudflared";
-    createHome = true;
-  };
-  users.groups.cloudflared = {};
 }
