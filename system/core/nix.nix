@@ -32,13 +32,13 @@
       extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
 
       # use binary cache, its not gentoo
-      substituters = [
-        "https://cache.nixos.org"
-      ];
+      # substituters = [
+      #   "https://cache.nixos.org"
+      # ];
 
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      ];
+      # trusted-public-keys = [
+      #   "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      # ];
     };
   };
 
