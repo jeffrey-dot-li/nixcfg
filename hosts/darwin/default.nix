@@ -15,7 +15,6 @@ in {
 
   applin = nix-darwin.lib.darwinSystem {
     system = "aarch64-darwin";
-
     modules =
       [
         {

@@ -33,5 +33,5 @@
 #:w
 # networking.hostName = "nixos"; # Define your hostname.
 {
-  imports = [../common ./configuration.nix ./secrets.nix];
+  imports = [../shared ./configuration.nix ./secrets.nix];
 }

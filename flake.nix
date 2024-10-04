@@ -51,10 +51,10 @@
         };
       };
 
-      flake = {
-        nixosConfigurations = import ./hosts inputs;
-        darwinConfigurations = import ./darwin inputs;
-      };
+      flake =
+        (import ./hosts inputs)
+        // {
+        };
     });
 
   inputs = {
