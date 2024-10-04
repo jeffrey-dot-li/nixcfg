@@ -1,5 +1,8 @@
 {pkgs, ...}: let
-	ree = "";
+  ree = "";
 in (with pkgs; [
-
+  fish
+  bat
+  starship
+  zoxide
 ])

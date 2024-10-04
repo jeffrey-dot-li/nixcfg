@@ -40,7 +40,7 @@ in {
   };
   environment.variables.EDITOR = "nvim";
   environment.systemPackages = with pkgs; [
-	#devpkgs
+    #devpkgs
     clang
     gnumake
     cargo
@@ -48,27 +48,20 @@ in {
     cargo
     gcc
 
-
     # nix.nix
 
-      git
-      deadnix
-      alejandra
-      statix
-      nix-output-monitor
-      nvfetcher
-
-
+    git
+    deadnix
+    alejandra
+    statix
+    nix-output-monitor
+    nvfetcher
+    neovim
     vim
     kitty
-    fish
-    neovim
-    bat
     inputs.agenix.packages.${system}.agenix
     gh
     cloudflared
-    starship
-    zoxide
   ];
   users = {
     mutableUsers = false;
@@ -77,10 +70,10 @@ in {
       hashedPasswordFile = config.age.secrets.login-password.path;
       extraGroups = ["wheel"];
       homix = true;
-      shell = let 
-      	colors = config.colorScheme.palette;
-	in
-	pkgs.callPackage ../../shell {inherit pkgs inputs colors; };
+      shell = let
+        colors = config.colorScheme.palette;
+      in
+        pkgs.callPackage ../../shell {inherit pkgs inputs colors;};
     };
   };
   imports = [./hardware-configuration.nix];
@@ -119,13 +112,13 @@ in {
     };
   };
 
-  programs.starship = {
-    enable = true;
-    settings = {
-      character = {
-        success_symbol = "[➜](bold green)";
-        error_symbol = "[➜](bold red)";
-      };
-    };
-  };
+  # programs.starship = {
+  #   enable = true;
+  #   settings = {
+  #     character = {
+  #       success_symbol = "[➜](bold green)";
+  #       error_symbol = "[➜](bold red)";
+  #     };
+  #   };
+  # };
 }

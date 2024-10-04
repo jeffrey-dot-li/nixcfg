@@ -7,6 +7,7 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
+        "aarch64-darwin"
       ];
 
       imports = [
@@ -51,19 +52,20 @@
       };
 
       flake = {
-        nixosConfigurations = import ./hosts  inputs;
+        nixosConfigurations = import ./hosts inputs;
+        darwinConfigurations = import ./darwin inputs;
       };
     });
 
   inputs = {
-
-
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
     agenix.url = "github:ryantm/agenix";
     nixos-hardware.url = "github:nixos/nixos-hardware";
@@ -96,7 +98,6 @@
       url = "github:reckenrode/mkalias";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 }
 # see also:

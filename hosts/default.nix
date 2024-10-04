@@ -15,7 +15,7 @@
 in {
   # all my hosts are named after saturn moons btw
 
-  # thinkpad
+  # Raspberry Pi
   appletun = nixpkgs.lib.nixosSystem {
     system = "aarch64-linux";
     modules =
@@ -31,4 +31,3 @@ in {
     specialArgs = {inherit inputs agenix;};
   };
 }
-
