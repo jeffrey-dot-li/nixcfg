@@ -4,6 +4,7 @@
 	colors,
 	...
 } : let
+	configs = import ./configs {inherit inputs pkgs colors; };
 	toml = pkgs.formats.toml {};
 	starship-settings = import ./starship.nix;
 	aliases = import ./aliases.nix { inherit pkgs; };
@@ -33,9 +34,8 @@ in
 					"fish" = "nucleus";
 				};
 			};
-		};
-	
-	# configs;
+		}
+		// configs;
 	}];
 })
 .overrideAttrs(_: {

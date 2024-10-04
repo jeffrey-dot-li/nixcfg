@@ -40,16 +40,33 @@ in {
   };
   environment.variables.EDITOR = "nvim";
   environment.systemPackages = with pkgs; [
+	#devpkgs
+    clang
+    gnumake
+    cargo
+    go
+    cargo
+    gcc
+
+
+    # nix.nix
+
+      git
+      deadnix
+      alejandra
+      statix
+      nix-output-monitor
+      nvfetcher
+
+
     vim
     kitty
-    git
     fish
     neovim
     bat
     inputs.agenix.packages.${system}.agenix
     gh
     cloudflared
-    alejandra
     starship
     zoxide
   ];
