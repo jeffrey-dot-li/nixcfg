@@ -5,5 +5,5 @@
   ...
 }: {
   #bottom = import ./bottom.nix {inherit inputs pkgs;};
-  nvim = import ./nvim {inherit inputs pkgs colors;};
+  #nvim = import ./nvim {inherit inputs pkgs colors;};
 }

@@ -1,14 +1,80 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
-}: {
+}: let
+  nvfetcher = builtins.mapAttrs (
+    name: value:
+      pkgs.vimUtils.buildVimPlugin {
+        inherit name;
+        inherit (value) src;
+      }
+  ) (pkgs.callPackages ./_sources/generated.nix {});
+  plugins = let
+    vip = pkgs.vimPlugins;
+    # We don't like `with` statements it is confusing
+  in {
+    # https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/editors/vim/plugins/vim-plugin-names
+    everforest = {
+      # Alternatively set plugins using nvfetcher - these are equivilant if you are importing the package from nvfetcher.
+      # package = vip.everforest;
+      package = nvfetcher.everforest;
+      setup = ''
+        vim.opt.background = 'light'
+        vim.g.everforest_background = 'soft'
+        vim.g.everforest_better_performance = 1
+        vim.cmd('colorscheme everforest')
+      '';
+    };
+
+    alpha-nvim = {
+      package = vip.alpha-nvim;
+      setup = ''
+        local alpha = require("alpha")
+        local dashboard = require("alpha.themes.dashboard")
+        dashboard.section.header.val = {
+        	[[⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀]],
+        	[[⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀]],
+        	[[⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀]],
+        	[[⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀]],
+        	[[⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀]],
+        	[[⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀]],
+        	[[⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇]],
+        	[[⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀ ]],
+        }
+        dashboard.section.header.opts.hl = "Keyword"
+        dashboard.section.buttons.val = {
+        	dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
+        	dashboard.button("nf", "  Note Files", ":NoteFiles <CR>"),
+        	dashboard.button("ng", "  Search Notes", ":NoteText <CR>"),
+        	dashboard.button("c", "  Calendar", ":Calendar <CR>"),
+        	dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+        	dashboard.button("g", "󰺄  Live grep", ":Telescope live_grep <CR>"),
+        	dashboard.button("q", "󰅚  Quit NVIM", ":qa<CR>"),
+        }
+
+        dashboard.section.footer.val = "meoww :3"
+        dashboard.section.footer.opts.hl = "Keyword"
+
+        dashboard.config.opts.noautocmd = true
+
+        vim.cmd([[autocmd User AlphaReady set showtabline=0 | autocmd BufUnload <buffer> set showtabline=2]])
+
+        alpha.setup(dashboard.config)
+      '';
+    };
+  };
+  customRC = "vim.cmd('source ${./init.vim}')" + builtins.readFile ./init.lua;
+in {
   imports = [inputs.nvf.nixosModules.default];
 
   programs.nvf = {
     enable = true;
 
     settings.vim = {
+      luaConfigRC.custom = customRC;
+      extraPlugins = plugins;
       # package = inputs.neovim-overlay.packages.${pkgs.system}.neovim;
       viAlias = false;
       vimAlias = true;
@@ -34,10 +100,7 @@
       };
 
       theme = {
-        enable = true;
-        transparent = true;
-        name = "rose-pine";
-        style = "moon";
+        enable = false;
       };
 
       maps = {
