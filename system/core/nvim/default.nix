@@ -179,8 +179,11 @@ in {
 
       terminal.toggleterm = {
         enable = true;
-        setupOpts.direction = "tab";
+        setupOpts.direction = "horizontal";
         mappings.open = "<C-\\>";
+        lazygit = {
+          enable = true;
+        };
       };
 
       git = {
