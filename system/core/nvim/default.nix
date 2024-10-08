@@ -87,9 +87,22 @@ in {
       cmdHeight = 1;
       useSystemClipboard = true;
       mouseSupport = "a";
+
       scrollOffset = 6;
 
-      telescope.enable = true;
+      telescope = {
+        enable = true;
+        setupOpts.defaults.file_ignore_patterns = [
+          "node_modules"
+          ".git/"
+          "dist/"
+          "build/"
+          "target/"
+          "result/"
+          "_sources/"
+          "*.lock"
+        ];
+      };
 
       autopairs.enable = true;
 
@@ -109,10 +122,10 @@ in {
         normal = {
           "<leader>t" = {
             action = "<CMD>Telescope find_files<CR>";
-          };      
+          };
           "<leader>p" = {
             action = "<CMD>Telescope commands<CR>";
-          };  
+          };
           "<leader>f" = {
             action = "<CMD>Telescope live_grep<CR>";
           };
@@ -195,6 +208,8 @@ in {
 
       lsp = {
         enable = true;
+        formatOnSave = true;
+        lightbulb.enable = true;
         lspSignature.enable = true;
         lspconfig.enable = true;
         lsplines.enable = true;

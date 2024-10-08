@@ -5,4 +5,6 @@ in (with pkgs; [
   bat
   starship
   zoxide
+  uv
+  cargo
 ])

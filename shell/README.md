@@ -23,7 +23,13 @@ Shell environment variable should be set in both `$SHELL` and `cat /etc/shells` 
 
 Last just configure system to use it as default shell in `~/.zprofile`:
 ```sh
-source $SHELL
+if [ "$__USER_SHELL_SOURCED" = "1" ]; then
+    return
+fi
+__USER_SHELL_SOURCED=1
+export SHELL=$(dscl . -read /Users/$USER UserShell | sed 's/UserShell: //')
+exec $SHELL
 ```
+
 
 
