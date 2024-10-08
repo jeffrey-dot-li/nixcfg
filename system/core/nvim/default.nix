@@ -19,11 +19,13 @@
     everforest = {
       # Alternatively set plugins using nvfetcher - these are equivilant if you are importing the package from nvfetcher.
       # package = vip.everforest;
+      #
       package = nvfetcher.everforest;
       setup = ''
         vim.opt.background = 'light'
         vim.g.everforest_background = 'soft'
-        vim.g.everforest_better_performance = 1
+        -- vim.g.everforest_better_performance = 1 Unfortunately this is broken because it tries to write to readonly plugin dir `/after/syntax/`.
+        -- https://github.com/sainnhe/everforest/blob/87b8554b2872ef69018d4b13d288756dd4e47c0f/doc/everforest.txt#L495
         vim.cmd('colorscheme everforest')
       '';
     };
@@ -34,24 +36,24 @@
         local alpha = require("alpha")
         local dashboard = require("alpha.themes.dashboard")
         dashboard.section.header.val = {
-        	[[⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀]],
-        	[[⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀]],
-        	[[⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀]],
-        	[[⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀]],
-        	[[⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀]],
-        	[[⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀]],
-        	[[⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇]],
-        	[[⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀ ]],
+        [[⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀]],
+        [[⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀]],
+        [[⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀]],
+        [[⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀]],
+        [[⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀]],
+        [[⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀]],
+        [[⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇]],
+        [[⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀ ]],
         }
         dashboard.section.header.opts.hl = "Keyword"
         dashboard.section.buttons.val = {
-        	dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
-        	dashboard.button("nf", "  Note Files", ":NoteFiles <CR>"),
-        	dashboard.button("ng", "  Search Notes", ":NoteText <CR>"),
-        	dashboard.button("c", "  Calendar", ":Calendar <CR>"),
-        	dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
-        	dashboard.button("g", "󰺄  Live grep", ":Telescope live_grep <CR>"),
-        	dashboard.button("q", "󰅚  Quit NVIM", ":qa<CR>"),
+        dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
+        dashboard.button("nf", "  Note Files", ":NoteFiles <CR>"),
+        dashboard.button("ng", "  Search Notes", ":NoteText <CR>"),
+        dashboard.button("c", "  Calendar", ":Calendar <CR>"),
+        dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+        dashboard.button("g", "󰺄  Live grep", ":Telescope live_grep <CR>"),
+        dashboard.button("q", "󰅚  Quit NVIM", ":qa<CR>"),
         }
 
         dashboard.section.footer.val = "meoww :3"
@@ -105,6 +107,16 @@ in {
 
       maps = {
         normal = {
+          "<leader>t" = {
+            action = "<CMD>Telescope find_files<CR>";
+          };      
+          "<leader>p" = {
+            action = "<CMD>Telescope commands<CR>";
+          };  
+          "<leader>f" = {
+            action = "<CMD>Telescope live_grep<CR>";
+          };
+
           "<leader>v" = {
             action = "<CMD>Neotree toggle<CR>";
             silent = true;

@@ -45,7 +45,6 @@ in {
     gnumake
     cargo
     go
-    cargo
     gcc
 
     # nix.nix

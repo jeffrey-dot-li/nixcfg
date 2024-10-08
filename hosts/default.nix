@@ -40,9 +40,11 @@ in {
       modules =
         [
           ./applin
+          {system.configurationRevision = self.rev or self.dirtyRev or null;}
         ]
         ++ shared;
       specialArgs = {inherit inputs;};
     };
   };
+  darwinPackages = self.darwinConfigurations."applin".pkgs;
 }
