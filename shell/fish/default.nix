@@ -12,6 +12,8 @@ in
   pkgs.writeScript "config.fish" ''
     set fish_function_path $fish_function_path ${foreign-env-fish}/functions
     export STARSHIP_SHELL=fish
+    set PATH $PATH ~/.cargo/bin
+
     ${aliasesStr}
 
     starship init fish | source

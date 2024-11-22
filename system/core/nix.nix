@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   nix = {
     # gc kills ssds
     gc.automatic = false;
@@ -59,7 +63,11 @@
       # Wolność kocham i rozumiem
       # Wolności oddać nie umiem
       # <3333
-      allowUnfree = false;
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "vscode"
+        ];
+      # allowUnfree = false;
       allowBroken = true;
     };
   };
