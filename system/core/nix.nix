@@ -13,10 +13,9 @@
     # Make builds run with low priority so my system stays responsive
     # daemonCPUSchedPolicy = "idle";
     # daemonIOSchedClass = "idle";
-
+    optimise.automatic = true;
     settings = {
       flake-registry = "/etc/nix/registry.json";
-      auto-optimise-store = true;
       # use binary cache, its not gentoo
       builders-use-substitutes = true;
       # allow sudo users to mark the following values as trusted
