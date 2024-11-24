@@ -4,7 +4,7 @@
   self,
   ...
 }: let
-  inherit (self) inputs;
+  inputs = self.inputs;
   core = ../system/core;
   # bootloader = ../system/core/bootloader.nix;
   # impermanence = ../system/core/impermanence.nix;
@@ -13,6 +13,11 @@
   hw = inputs.nixos-hardware.nixosModules;
   homix = inputs.homix.nixosModules.default;
   shared = [core];
+  darwinConfigurations = import ./darwin {
+    nix-darwin = nix-darwin;
+    shared-modules = shared;
+    inputs = inputs;
+  };
 in {
   nixosConfigurations = {
     # Raspberry Pi
@@ -33,18 +38,6 @@ in {
       specialArgs = {inherit inputs;};
     };
   };
-  darwinConfigurations = {
-    # Macbook
-    applin = nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      modules =
-        [
-          ./applin
-          {system.configurationRevision = self.rev or self.dirtyRev or null;}
-        ]
-        ++ shared;
-      specialArgs = {inherit inputs;};
-    };
-  };
+  darwinConfigurations = darwinConfigurations;
   darwinPackages = self.darwinConfigurations."applin".pkgs;
 }

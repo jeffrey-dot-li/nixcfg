@@ -19,8 +19,8 @@
       # use binary cache, its not gentoo
       builders-use-substitutes = true;
       # allow sudo users to mark the following values as trusted
-      allowed-users = ["@wheel" "jeffrey"];
-      trusted-users = ["@wheel" "jeffrey"];
+      # allowed-users = ["@wheel" "jeffrey" "jeffreyli"];
+      # trusted-users = ["@wheel" "jeffrey" "jeffreyli"];
       commit-lockfile-summary = "chore: Update flake.lock";
       accept-flake-config = true;
       keep-derivations = true;
