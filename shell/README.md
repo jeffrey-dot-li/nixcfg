@@ -16,6 +16,7 @@ nix run nix-darwin -- switch --flake .\#applin
 
 ### Test it works
 ```sh
+nix flake update
 darwin-rebuild switch --flake .\#applin
 ```
 At this point `nvim` should also be configured. 
@@ -24,7 +25,7 @@ Shell environment variable should be set in both `$SHELL_PATH` and `cat /etc/she
 Last just configure system to use it as default shell in `~/.profile`:
 ```sh
 #! /bin/bash
-:
+
 eval "$(/opt/homebrew/bin/brew shellenv)"
 code() { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args "$argv"; }
 echo "HI FROM PROFILE $__USER_SHELL_SOURCED"
