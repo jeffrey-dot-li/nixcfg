@@ -27,7 +27,7 @@ in {
 
   environment.variables = {
     SHELL_PATH = "${shellWrapper}/bin/nucleus";
-    EDITOR = "${shellWrapper}/bin/nvim";
+    EDITOR = "nvim";
   };
   environment.shells = ["${shellWrapper}/bin/nucleus"];
   # environment.loginShell = "${shellWrapper}/bin/nucleus -l"; # This does nothing except for tmux (see https://github.com/LnL7/nix-darwin/issues/361)

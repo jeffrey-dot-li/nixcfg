@@ -72,3 +72,54 @@ Note also that kitty for some reason doesn't always update to shell defined by `
 ```sh
 nix flake update
 ```
+
+
+## Use this Shell as a dependency:
+The correct pattern is, in another project, create a `flake.nix` that uses that projects dependencies (node, python, etc).
+To use this shell as the base, add the following:
+
+```nix
+# Template from https://github.com/the-nix-way/dev-templates/blob/main/README.md
+# Run `nix develop`
+{
+  description = "A Nix-flake-based development environment";
+
+  inputs = {
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+    # Add your base development environment as an input
+    base-dev.url = "github:jeffrey-dot-li/nixcfg";
+  };
+
+  outputs = {
+    self,
+    nixpkgs,
+    base-dev,
+  }: let
+    supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    forEachSupportedSystem = f:
+      nixpkgs.lib.genAttrs supportedSystems (system:
+        f {
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [self.overlays.default];
+          };
+        });
+  in {
+    overlays.default = final: prev: rec {
+			# Add your project's dependency overrides here:
+    };
+
+    devShells = forEachSupportedSystem ({pkgs}: {
+      default = pkgs.mkShell {
+        inputsFrom = [base-dev.devShells.${pkgs.system}.default];
+        packages = with pkgs; [...]; # Add your project's dependencies here (e.g. `nodejs-18_x`)
+        shellHook = ''
+					... # Add your project's shellHook here
+        '';
+      };
+    });
+  };
+}
+```
+
+### TODO: Figure out how ot use direnv, auto configure default shell on Debian.
