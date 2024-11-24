@@ -13,6 +13,7 @@
   ) (pkgs.callPackages ./_sources/generated.nix {});
   plugins = let
     vip = pkgs.vimPlugins;
+    # This can also be done with `with pkgs.vimPlugins; { ... }`
     # We don't like `with` statements it is confusing
   in {
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/editors/vim/plugins/vim-plugin-names
@@ -68,13 +69,8 @@
     };
   };
   customRC = "vim.cmd('source ${./init.vim}')" + builtins.readFile ./init.lua;
-in {
-  imports = [inputs.nvf.nixosModules.default];
-
-  programs.nvf = {
-    enable = true;
-
-    settings.vim = {
+  nvfConfig = {
+    config.vim = {
       luaConfigRC.custom = customRC;
       extraPlugins = plugins;
       # package = inputs.neovim-overlay.packages.${pkgs.system}.neovim;
@@ -254,4 +250,10 @@ in {
       };
     };
   };
-}
+  customNeovim = inputs.nvf.lib.neovimConfiguration {
+    modules = [nvfConfig];
+    inherit pkgs;
+  };
+in (
+  customNeovim.neovim
+)

@@ -1,7 +1,13 @@
-{pkgs, ...}: let
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: let
   gdk = pkgs.google-cloud-sdk.withExtraComponents (with pkgs.google-cloud-sdk.components; [
     gke-gcloud-auth-plugin
   ]);
+  nvim = import ./nvim {inherit inputs pkgs lib;};
 in (with pkgs; [
   fish
   bat
@@ -13,9 +19,5 @@ in (with pkgs; [
   tmux
   rustup
   vscodium
-  # (
-  #   rWrapper.overridcode () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $argv ;}e {
-  #     packages = with rPackages; [ggplot2 dplyr xts devtools];
-  #   }
-  # )
+  nvim
 ])

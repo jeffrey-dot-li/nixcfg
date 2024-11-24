@@ -18,17 +18,14 @@
       perSystem = {
         config,
         pkgs,
+        lib,
         ...
       }: {
         devShells.default = pkgs.mkShell {
-          buildInputs = let
-            colors = inputs.nix-colors.colorSchemes.catppuccin-frappe.palette;
-          in
-            [
-              config.treefmt.build.wrapper
-              (pkgs.callPackage ./shell {inherit pkgs inputs colors;})
-            ]
-            ++ (import ./shell/packages.nix {inherit pkgs;});
+          buildInputs = [
+            config.treefmt.build.wrapper
+            (pkgs.callPackage ./shell {inherit pkgs inputs lib;})
+          ];
           shellHook = ''
             nucleus
           '';
@@ -37,7 +34,6 @@
         # configure treefmt
         treefmt = {
           projectRootFile = "flake.nix";
-
           programs = {
             alejandra.enable = true;
             black.enable = true;

@@ -1,15 +1,14 @@
 {
   pkgs,
   inputs,
-  colors,
+  lib,
   ...
 }: let
-  configs = import ./configs {inherit inputs pkgs colors;};
   toml = pkgs.formats.toml {};
   starship-settings = import ./starship.nix;
   aliases = import ./aliases.nix {inherit pkgs;};
   fishconfig = import ./fish {inherit pkgs aliasesStr;};
-  packages = import ./packages.nix {inherit pkgs;};
+  packages = import ./packages.nix {inherit inputs pkgs lib;};
   aliasesStr =
     pkgs.lib.concatStringsSep "\n"
     (pkgs.lib.mapAttrsToList (k: v: "alias ${k}=\"${v}\"") aliases);
@@ -35,7 +34,7 @@ in
             };
           };
         };
-        #// configs;
+        # Equivalent to adding { nvim = configs.nvim; } inside wrappers.
       }
     ];
   })
