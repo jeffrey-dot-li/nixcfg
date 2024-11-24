@@ -4,11 +4,17 @@
   inputs,
 }
 : let
-  darwin-defaults = ./darwin-defaults.nix;
+  darwin-defaults = import ./darwin-defaults.nix;
   makeDarwinConfig = system: module:
     nix-darwin.lib.darwinSystem {
       system = system;
-      modules = [module darwin-defaults] ++ shared-modules;
+      modules =
+        shared-modules
+        ++ [
+          darwin-defaults
+          {nixpkgs.hostPlatform = system;}
+          module
+        ];
       specialArgs = {inherit inputs;};
     };
 in {

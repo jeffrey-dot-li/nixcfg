@@ -12,7 +12,10 @@
   agenix = inputs.agenix.nixosModules.default;
   hw = inputs.nixos-hardware.nixosModules;
   homix = inputs.homix.nixosModules.default;
-  shared = [core];
+  shared = [
+    core
+    {system.configurationRevision = self.rev or self.dirtyRev or null;}
+  ];
   darwinConfigurations = import ./darwin {
     nix-darwin = nix-darwin;
     shared-modules = shared;
@@ -39,5 +42,6 @@ in {
     };
   };
   darwinConfigurations = darwinConfigurations;
-  darwinPackages = self.darwinConfigurations."applin".pkgs;
+  # I'm pretty sure this is not used?
+  # darwinPackages = self.darwinConfigurations."applin".pkgs;
 }

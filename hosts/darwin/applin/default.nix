@@ -6,7 +6,6 @@
 }: let
   user = "jeffrey";
 in {
-  nixpkgs.hostPlatform = "aarch64-darwin";
   users.knownUsers = [user];
   nix.settings = {
     allowed-users = ["@wheel" user];
