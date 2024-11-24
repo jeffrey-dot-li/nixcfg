@@ -12,7 +12,7 @@ in (with pkgs; [
   gdk
   tmux
   rustup
-  vscode
+  vscodium
   # (
   #   rWrapper.overridcode () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $argv ;}e {
   #     packages = with rPackages; [ggplot2 dplyr xts devtools];

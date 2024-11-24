@@ -67,3 +67,8 @@ Use `chsh -s /bin/zsh` to set the default shell to zsh.
 Use `dscl . -read ~/ UserShell` to check the current shell.
 
 Note also that kitty for some reason doesn't always update to shell defined by `dscl . -read ~/ UserShell` immediately. I don't know why there is a desync against default terminal program on Mac. Always check default terminal program on Mac to see what shell is actually being used.
+
+## Updating
+```sh
+nix flake update
+```
