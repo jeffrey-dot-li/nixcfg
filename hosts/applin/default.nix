@@ -1,21 +1,16 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }: let
   user = "jeffrey";
-  shellWrapper = let
-    colors = inputs.nix-colors.colorSchemes.catppuccin-frappe.palette;
-  in
-    pkgs.callPackage ../../shell {inherit pkgs inputs colors;};
+  shellWrapper = pkgs.callPackage ../../shell {inherit pkgs inputs lib;};
 in {
   programs.zsh.enable = true;
   services.nix-daemon.enable = true;
   nixpkgs.hostPlatform = "aarch64-darwin";
-  environment.systemPackages = with pkgs; [
-    cargo
-    alejandra
-  ];
+
   users.knownUsers = [user];
 
   networking.hostName = "applin";
@@ -32,7 +27,7 @@ in {
 
   environment.variables = {
     SHELL_PATH = "${shellWrapper}/bin/nucleus";
-    EDITOR = "vim";
+    EDITOR = "${shellWrapper}/bin/nvim";
   };
   environment.shells = ["${shellWrapper}/bin/nucleus"];
   # environment.loginShell = "${shellWrapper}/bin/nucleus -l"; # This does nothing except for tmux (see https://github.com/LnL7/nix-darwin/issues/361)
