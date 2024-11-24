@@ -122,4 +122,5 @@ To use this shell as the base, add the following:
 }
 ```
 
-### TODO: Figure out how ot use direnv, auto configure default shell on Debian.
+### TODO: Figure out how ot use direnv, auto configure default shell on Debian. 
+TODO: Document how to clean nix garbage after rebuilds.

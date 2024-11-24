@@ -11,6 +11,7 @@
   # Also, project specific packages (node, etc) should not be in dev-shell packages.
   # They should be in the project's flake.nix file, and pull this shell as a flake dependency.
   nvim = import ./nvim {inherit inputs pkgs lib;};
+  code = import ./code {inherit inputs pkgs lib;};
 in (with pkgs; [
   fish
   bat
@@ -20,6 +21,6 @@ in (with pkgs; [
   cargo
   tmux
   rustup
-  vscodium
+  code
   nvim
 ])
