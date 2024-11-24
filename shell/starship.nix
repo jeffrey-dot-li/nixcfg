@@ -1,6 +1,6 @@
 {
   add_newline = false;
-  command_timeout = 1000;
+  command_timeout = 3000;
   scan_timeout = 3;
   character = {
     error_symbol = "[󰊠](bold red)";
@@ -16,5 +16,11 @@
     ssh_only = true;
     format = "[$hostname](bold blue) ";
     disabled = false;
+  };
+  gcloud = {
+    disabled = true;
+  };
+  nix_shell = {
+    format = "[$symbol]($style)";
   };
 }
