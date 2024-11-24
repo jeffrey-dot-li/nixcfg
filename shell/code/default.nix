@@ -4,6 +4,7 @@
   lib,
   ...
 }: (
+  # TODO: VSCode: Read packages from local install
   pkgs.vscode
   # pkgs.vscode-with-extensions.override {
   # TODO:

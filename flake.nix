@@ -19,8 +19,17 @@
         config,
         pkgs,
         lib,
+        system,
         ...
       }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          config = {
+            allowUnfreePredicate = pkg:
+              builtins.elem (lib.getName pkg) ["vscode"]
+              || lib.hasInfix "vscode" (lib.getName pkg);
+          };
+        };
         devShells.default = pkgs.mkShell {
           buildInputs = [
             config.treefmt.build.wrapper

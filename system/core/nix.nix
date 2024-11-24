@@ -62,10 +62,8 @@
       # Wolność kocham i rozumiem
       # Wolności oddać nie umiem
       # <3333
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) ["vscode"]
-        || lib.hasInfix "vscode" (lib.getName pkg);
       # allowUnfree = false;
+      # Overridden in root flake.nix
       allowBroken = true;
     };
   };
