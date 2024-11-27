@@ -25,4 +25,6 @@ in (with pkgs; [
   nvim
   alejandra
   neofetch
+  lazygit
+  htop
 ])
