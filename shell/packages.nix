@@ -2,7 +2,7 @@
   inputs,
   pkgs,
   lib,
-  ... 
+  ...
 }: let
   # Gcloud should not be in dev-shell packages. Dev-Shell packages should be dev-only related
   # (I.E. stuff that is does not need to be persistent in the system, that you only need to use in the shell)
@@ -24,4 +24,5 @@ in (with pkgs; [
   code
   nvim
   alejandra
+  neofetch
 ])
