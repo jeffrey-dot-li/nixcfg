@@ -18,9 +18,14 @@ in (with pkgs; [
   starship
   zoxide
   uv
-  cargo
+  # Always use latest version of rust
+  # https://github.com/oxalica/rust-overlay
+  # rust-bin.selectLatestNightlyWith (toolchain: toolchain.default) # or `toolchain.minimal`
+  # rust-bin.stable."1.48.0".default
+  # TODO: Probably use https://github.com/cargo2nix/cargo2nix for my rust repos
+  rust-bin.beta.latest.default
   tmux
-  rustup
+  # rustup
   code
   nvim
   alejandra

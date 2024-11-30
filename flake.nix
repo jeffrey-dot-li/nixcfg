@@ -21,9 +21,11 @@
         lib,
         system,
         ...
-      }: {
+      }: let
+        overlays = [(import inputs.rust-overlay)];
+      in {
         _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
+          inherit system overlays;
           config = {
             allowUnfreePredicate = pkg:
               builtins.elem (lib.getName pkg) ["vscode"]
@@ -81,6 +83,7 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
     impermanence.url = "github:nix-community/impermanence";
     nix-colors.url = "github:Misterio77/nix-colors";
+    rust-overlay.url = "github:oxalica/rust-overlay";
 
     wrapper-manager = {
       url = "github:viperML/wrapper-manager";

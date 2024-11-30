@@ -14,6 +14,7 @@
   homix = inputs.homix.nixosModules.default;
   shared = [
     core
+    {nixpkgs.overlays = [inputs.rust-overlay.overlays.default];}
     {system.configurationRevision = self.rev or self.dirtyRev or null;}
   ];
   darwinConfigurations = import ./darwin {
