@@ -23,7 +23,9 @@ in (with pkgs; [
   # rust-bin.selectLatestNightlyWith (toolchain: toolchain.default) # or `toolchain.minimal`
   # rust-bin.stable."1.48.0".default
   # TODO: Probably use https://github.com/cargo2nix/cargo2nix for my rust repos
-  rust-bin.beta.latest.default
+  (rust-bin.beta.latest.default.override {
+    extensions = ["rust-src"];
+  })
   # (rust-bin.selectLatestNightlyWith (toolchain: toolchain.default)) # or `toolchain.minimal`
   tmux
   # rustup
