@@ -24,6 +24,7 @@ in (with pkgs; [
   # rust-bin.stable."1.48.0".default
   # TODO: Probably use https://github.com/cargo2nix/cargo2nix for my rust repos
   rust-bin.beta.latest.default
+  # (rust-bin.selectLatestNightlyWith (toolchain: toolchain.default)) # or `toolchain.minimal`
   tmux
   # rustup
   code
@@ -32,4 +33,6 @@ in (with pkgs; [
   neofetch
   lazygit
   htop
+  # Probably put lean in a project flake.nix file instead.
+  elan
 ])

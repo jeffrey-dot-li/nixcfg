@@ -78,11 +78,13 @@
       vimAlias = true;
       enableLuaLoader = true;
       preventJunkFiles = true;
-      tabWidth = 4;
-      autoIndent = true;
-      cmdHeight = 1;
+      # tabWidth = 4;
       useSystemClipboard = true;
-      mouseSupport = "a";
+      options = {
+        mouse = "a";
+        cmdheight = 1;
+        autoindent = true;
+      };
 
       scrollOffset = 6;
 
@@ -99,8 +101,7 @@
           "*.lock"
         ];
       };
-
-      autopairs.enable = true;
+      autopairs.nvim-autopairs.enable = true;
 
       notes = {
         todo-comments.enable = true;
@@ -163,24 +164,21 @@
         addDefaultGrammars = false; # cuz its broken rn
       };
 
-      autocomplete = {
-        enable = true;
-        alwaysComplete = false;
-      };
+      autocomplete.nvim-cmp.enable = true;
 
       ui = {
         noice.enable = true;
       };
 
-      visuals = {
-        enable = true;
-        indentBlankline = {
-          enable = true;
-          #          eolChar = null;
-          #fillChar = null;
-        };
-        highlight-undo.enable = true;
-      };
+      # visuals = {
+      #   enable = true;
+      #   indentBlankline = {
+      #     enable = true;
+      #     #          eolChar = null;
+      #     #fillChar = null;
+      #   };
+      #   highlight-undo.enable = true;
+      # };
 
       notify = {
         nvim-notify.enable = true;

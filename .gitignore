@@ -1,2 +1,3 @@
 *.log
 .history.local.nixcfg
+.DS_Store
