@@ -148,6 +148,8 @@ Install nix, clone repo. (TODO: Add instructions for installing nix on Debian)
 # Then install:
 pushd nixcfg
 nix profile install
+# Also install direnv:
+nix profile install nixpkgs#nix-direnv
 
 # Upgrade:
 nix profile upgrade "nixcfg"

@@ -37,13 +37,13 @@
             default = packageConfiguration.packages.fish;
           };
         devShells.default = pkgs.mkShell {
-          # packages = [
-          #   # packageConfiguration.packages.fish
-          # ];
+          packages = [
+            packageConfiguration.packages.fish
+          ];
           # # This is what actually calls nucleus in the shell. Without this, even if shell is in buildInputs, it will run bash.
-          # shellHook = ''
-          #   fish
-          # '';
+          shellHook = ''
+            fish
+          '';
         };
       };
 

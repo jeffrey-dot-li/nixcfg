@@ -31,9 +31,11 @@
         # Better ls
         eza
         # I'll keep alejandra here just because I assume that whereever you are working you will need to edit nix files.
+        # I.E. to use this shell, you need a flake.nix, so you need to format that nix anyways.
         alejandra
-        direnv
-        nix-direnv
+        # Note: DONT use direnv and nix-direnv here, otherwise it will be pulled as part of this
+        # devshell / package. nix-direnv should be pulled by the SYSTEM, that way you don't get recursive direnv loading
+        # I.E. direnv loads fish, which comes with direnv, which will reload etc.
       ];
     };
 in {

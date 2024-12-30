@@ -23,6 +23,8 @@
   fq,
   vscode,
   nixfmt-rfc-style,
+  # direnv,
+  nix-direnv,
   # psmisc,
 } @ args:
 symlinkJoin {
