@@ -30,7 +30,12 @@
         };
       in {
         _module.args.pkgs = packageConfiguration._module.args.pkgs;
-        packages = packageConfiguration.packages;
+        packages =
+          packageConfiguration.packages
+          // {
+            # Export shell as default package.
+            default = packageConfiguration.packages.fish;
+          };
         devShells.default = pkgs.mkShell {
           packages = [
             packageConfiguration.packages.fish
