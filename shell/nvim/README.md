@@ -1,1 +1,0 @@
-nix run github:berberman/nvfetcher
