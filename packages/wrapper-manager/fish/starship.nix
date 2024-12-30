@@ -1,20 +1,29 @@
 {
   add_newline = false;
-  command_timeout = 3000;
-  scan_timeout = 3;
+  command_timeout = 1000;
+  scan_timeout = 10;
+  directory = {
+    truncation_length = 3;
+    truncation_symbol = "…";
+  };
   character = {
-    error_symbol = "[󰊠](bold red)";
-    success_symbol = "[󰊠](bold green)";
-    vicmd_symbol = "[󰊠](bold yellow)";
+    use_symbol_for_status = true;
+    error_symbol = "[✗](bold red)";
+    vicmd_symbol = "[V](bold green)";
     format = "$symbol [|](bold bright-black) ";
   };
   git_commit = {commit_hash_length = 7;};
   line_break.disabled = false;
-  lua.symbol = "[](blue) ";
-  python.symbol = "[](blue) ";
+  python.symbol = "[🐍](blue) ";
   hostname = {
-    ssh_only = true;
+    ssh_only = false;
     format = "[$hostname](bold blue) ";
+    disabled = false;
+  };
+  git_branch = {
+    symbol = "🌿 ";
+  };
+  git_commit = {
     disabled = false;
   };
   gcloud = {
