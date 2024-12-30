@@ -66,11 +66,6 @@ set -gx fish_pager_color_prefix green
 set -gx fish_pager_color_completion white
 set -gx fish_pager_color_description brblack
 
-if command -v direnv >/dev/null
-    direnv hook fish | source
-else
-    echo "direnv not found"
-end
 # Configure FZF keybinds
 # https://github.com/PatrickF1/fzf.fish
 fzf_configure_bindings --directory=\cf

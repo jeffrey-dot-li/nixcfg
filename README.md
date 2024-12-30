@@ -85,8 +85,10 @@ Note also that kitty for some reason doesn't always update to shell defined by `
 nix flake update
 ```
 
-
 ## Use this Shell as a dependency:
+### Deprecated! Don't do this, just use direnv + whatever flake.nix you wnat to use
+### TODO: Write a guide on how to use direnv with nix flakes
+
 The correct pattern is, in another project, create a `flake.nix` that uses that projects dependencies (node, python, etc).
 To use this shell as the base, add the following:
 
@@ -148,9 +150,9 @@ Install nix, clone repo. (TODO: Add instructions for installing nix on Debian)
 # Then install:
 pushd nixcfg
 nix profile install
-# Also install direnv:
-nix profile install nixpkgs#nix-direnv
-
+# Don't need to install direnv seperately, comes with the shell package.
+# Run:
+direnv allow
 # Upgrade:
 nix profile upgrade "nixcfg"
 ```

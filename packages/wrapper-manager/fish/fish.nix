@@ -46,8 +46,7 @@
     if status is-interactive
       ${lib.fileContents ./interactive.fish}
       ${lib.fileContents ./pushd_mod.fish}
-
-
+      ${lib.fileContents ./direnv.fish}
 
       set -gx STARSHIP_CONFIG ${toml.generate "starship.toml" starship-settings}
       function starship_transient_prompt_func

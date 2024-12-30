@@ -36,14 +36,19 @@
             # Export shell as default package.
             default = packageConfiguration.packages.fish;
           };
-        devShells.default = pkgs.mkShell {
+        devShells.develop = pkgs.mkShell {
+          # This is for this project development. Don't depend on this devShell in another devShell,
+          # Just install the package yourself.
           packages = [
-            packageConfiguration.packages.fish
+            # lua-language-server
+            # config.packages.stylua
+            # taplo
           ];
-          # # This is what actually calls nucleus in the shell. Without this, even if shell is in buildInputs, it will run bash.
-          shellHook = ''
-            fish
-          '';
+          # This is what actually calls nucleus in the shell. Without this, even if shell is in buildInputs, it will run bash.
+          # Don't call this here, because with direnv this will recursive build a ton of direnvs.
+          # shellHook = ''
+          #   fish
+          # '';
         };
       };
 
