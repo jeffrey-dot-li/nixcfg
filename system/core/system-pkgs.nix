@@ -1,10 +1,14 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     alejandra
+    uv
+    (rust-bin.beta.latest.default.override {
+      extensions = ["rust-src"];
+    })
+    lazygit
+    (rust-bin.beta.latest.default.override {
+      extensions = ["rust-src"];
+    })
     elan
     (
       pkgs.google-cloud-sdk.withExtraComponents [

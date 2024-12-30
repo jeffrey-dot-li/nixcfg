@@ -3,7 +3,9 @@
   # https://dotfiles.sioodmy.dev
 
   outputs = {flake-parts, ...} @ inputs:
-    flake-parts.lib.mkFlake {inherit inputs;} ({...}: {
+  # For some reason, if you don't take `withSystem` here as an explicit argument,
+  # then the `withSystem` field is not filled in the `inputs'` object.
+    flake-parts.lib.mkFlake {inherit inputs;} ({withSystem, ...} @ inputs': {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -20,46 +22,28 @@
         pkgs,
         lib,
         system,
+        inputs',
         ...
       }: let
-        overlays = [(import inputs.rust-overlay)];
+        packageConfiguration = import ./packages {
+          inherit config pkgs lib system inputs inputs';
+        };
       in {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system overlays;
-          config = {
-            allowUnfreePredicate = pkg:
-              builtins.elem (lib.getName pkg) ["vscode"]
-              || lib.hasInfix "vscode" (lib.getName pkg);
-          };
-        };
+        _module.args.pkgs = packageConfiguration._module.args.pkgs;
+        packages = packageConfiguration.packages;
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            config.treefmt.build.wrapper
-            (pkgs.callPackage ./shell {inherit pkgs inputs lib;})
+          packages = [
+            packageConfiguration.packages.fish
           ];
+          # This is what actually calls nucleus in the shell. Without this, even if shell is in buildInputs, it will run bash.
           shellHook = ''
-            nucleus
+            fish
           '';
-        };
-
-        # configure treefmt
-        treefmt = {
-          projectRootFile = "flake.nix";
-          programs = {
-            alejandra.enable = true;
-            black.enable = true;
-            deadnix.enable = false;
-            shellcheck.enable = true;
-            shfmt = {
-              enable = true;
-              indent_size = 4;
-            };
-          };
         };
       };
 
       flake =
-        (import ./hosts inputs)
+        (import ./hosts inputs')
         // {
         };
     });
@@ -78,6 +62,14 @@
 
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-index-database = {
+      url = "github:Mic92/nix-index-database";
+    };
+    in-nix = {
+      url = "github:viperML/in-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     agenix.url = "github:ryantm/agenix";
     nixos-hardware.url = "github:nixos/nixos-hardware";
@@ -110,6 +102,16 @@
     mkalias = {
       url = "github:reckenrode/mkalias";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
+    nil = {
+      url = "github:oxalica/nil?ref=main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
   };
 }
