@@ -6,12 +6,12 @@ bind \e\[3\;5~ kill-word
 
 
 # EXA
-# alias ls="eza --icons"
-# alias la="eza --icons --all"
-# alias ll="eza --icons --long --header --group"
-# alias lla="eza --icons --all --long --header --group"
-# alias lal="eza --icons --all --long --header --group"
-# alias lt="eza --sort modified -1"
+alias ls="eza --icons"
+alias la="eza --icons --all"
+alias ll="eza --icons --long --header --group"
+alias lla="eza --icons --all --long --header --group"
+alias lal="eza --icons --all --long --header --group"
+alias lt="eza --sort modified -1"
 abbr -a -g e eza
 
 # Bat
@@ -41,7 +41,7 @@ abbr -a -g ga "git add"
 abbr -a -g gs "git status"
 abbr -a -g gm "git merge"
 abbr -a -g gp "git push"
-abbr -a -g gl "git logs"
+abbr -a -g gl "git log --oneline"
 abbr -a -g gr "cd (git-root)"
 abbr -a -g gcm "git commit -m"
 

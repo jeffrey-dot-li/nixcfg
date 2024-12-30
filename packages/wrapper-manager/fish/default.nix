@@ -16,15 +16,24 @@
       # Other tools are project specific: I.E. uv / cargo, you don't necessarily want to be bringing these around everywhere.
       paths = with pkgs; [
         starship
+        # cd with memory
         zoxide
+        # better cat
         bat
         tmux
         nvim
         neofetch
         htop
         fzf
+        # Search
         ripgrep
         neofetch
+        # Better ls
+        eza
+        # I'll keep alejandra here just because I assume that whereever you are working you will need to edit nix files.
+        alejandra
+        direnv
+        nix-direnv
       ];
     };
 in {

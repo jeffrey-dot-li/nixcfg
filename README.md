@@ -148,6 +148,9 @@ Install nix, clone repo. (TODO: Add instructions for installing nix on Debian)
 # Then install:
 pushd nixcfg
 nix profile install
+
+# Upgrade:
+nix profile upgrade "nixcfg"
 ```
 
 This will install into `~/.nix-profile/bin`. Can list with `nix profile list` and remove with `nix profile remove`.

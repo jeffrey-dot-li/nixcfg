@@ -5,9 +5,7 @@
   symlinkJoin,
   #
   # TODO: Configure direnv
-  direnv,
   nix-index,
-  eza,
   fish,
   elf-info,
   gh,
@@ -23,7 +21,6 @@
   # elfutils-cli,
   # lurk,
   fq,
-  alejandra,
   vscode,
   nixfmt-rfc-style,
   # psmisc,
