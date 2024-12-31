@@ -9,6 +9,7 @@
   zoxide,
   direnv,
   formats,
+  nvim,
 }: let
   toml = formats.toml {};
   starship-settings = import ./starship.nix;
@@ -43,10 +44,12 @@
       fenv source /etc/profile
     end
 
+
     if status is-interactive
       ${lib.fileContents ./interactive.fish}
       ${lib.fileContents ./pushd_mod.fish}
       ${lib.fileContents ./direnv.fish}
+      set -gx EDITOR ${lib.getExe nvim}
 
       set -gx STARSHIP_CONFIG ${toml.generate "starship.toml" starship-settings}
       function starship_transient_prompt_func

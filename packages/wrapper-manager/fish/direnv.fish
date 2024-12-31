@@ -23,5 +23,5 @@ function flakify
         direnv allow
     end
     
-    eval $EDITOR flake.nix 2>/dev/null; or vim default.nix
+    eval $EDITOR flake.nix 2>/dev/null; or vim flake.nix
 end
