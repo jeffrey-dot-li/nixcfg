@@ -49,6 +49,8 @@
       ${lib.fileContents ./interactive.fish}
       ${lib.fileContents ./pushd_mod.fish}
       ${lib.fileContents ./direnv.fish}
+      ${lib.fileContents ./open.fish}
+
       set -gx EDITOR ${lib.getExe nvim}
 
       set -gx STARSHIP_CONFIG ${toml.generate "starship.toml" starship-settings}
