@@ -16,7 +16,7 @@
   fd,
   libarchive,
   dogdns,
-  git,
+  # git,
   difftastic,
   # elfutils-cli,
   # lurk,

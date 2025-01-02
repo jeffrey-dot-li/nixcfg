@@ -11,7 +11,8 @@
   nix.settings = {
     experimental-features = "nix-command flakes";
   };
-  environment.systemPackages = builtins.attrValues self'.packages;
+  environment.systemPackages =
+    builtins.attrValues self'.packages;
   environment.variables = {
     SHELL_PATH = "${self'.packages.fish}/bin/fish";
     EDITOR = "nvim";

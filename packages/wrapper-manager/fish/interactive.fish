@@ -41,7 +41,7 @@ abbr -a -g ga "git add"
 abbr -a -g gs "git status"
 abbr -a -g gm "git merge"
 abbr -a -g gp "git push"
-abbr -a -g gl "git log --oneline"
+abbr -a -g gl "git logs" # Defined in git/gitconfig
 abbr -a -g gr "cd (git-root)"
 abbr -a -g gcm "git commit -m"
 

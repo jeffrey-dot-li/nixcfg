@@ -1,0 +1,73 @@
+# TODO: For mac:
+# Default write this into gitconfig?
+# Right now I just have this manually in ~/.config/git/local
+# [credential]
+# helper = osxkeychain
+[include]
+  path = ~/.config/git/local
+
+# [core]
+#   eol=lf
+#   autocrlf=input
+#   untrackedcache = true
+#   fsmonitor = true
+[credential "https://github.com"]
+  helper=
+  helper=!gh auth git-credential
+[credential "https://gist.github.com"]
+  helper=
+  helper=!gh auth git-credential
+
+[init]
+  defaultbranch=main
+[pull]
+  ff=only
+  rebase=true
+[push]
+  default=simple
+[user]
+  email=jeffrey.dot.li@gmail.com
+  name=Jeffrey Li
+[merge]
+  conflictstyle = diff3
+[diff]
+  colorMoved = default
+  tool = difftastic
+[difftool]
+  prompt = false
+[difftool "difftastic"]
+  cmd = difft "$LOCAL" "$REMOTE"
+[pager]
+  difftool = true
+
+  
+[rerere]
+  enabled = true
+[fetch]
+  writeCommitGraph = true
+  showForcedUpdates = true
+[rebase]
+  updateRegs = true
+[safe]
+  directory=*
+[alias]
+  logs = log --pretty=format:\"%Cgreen%h%Creset - %Cblue%an%Creset @ %ar : %s\"
+  logtags = log --tags --simplify-by-decoration --pretty=format:\"%Cgreen%h%Creset -%d - %Cblue%an%Creset @ %ar : %s\"
+  logg = log --stat
+[feature]
+  manyFiles = true
+[submodule]
+  recurse = true
+  fetchJobs = 0
+[clone]
+  filterSubmodules = true
+[checkout]
+  workers = 0
+
+# We need to do this here because I can't figure out how to run `git lfs install` in postBuild.
+# Apparently according to claude if I do this I don't need to run `git lfs install`. Hopefully.
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
