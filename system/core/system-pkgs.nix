@@ -9,6 +9,7 @@
     (rust-bin.beta.latest.default.override {
       extensions = ["rust-src"];
     })
+    vscode
     elan
     (
       pkgs.google-cloud-sdk.withExtraComponents [

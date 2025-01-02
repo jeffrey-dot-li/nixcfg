@@ -34,7 +34,7 @@
           packageConfiguration.packages
           // {
             # Export shell as default package.
-            default = packageConfiguration.packages.fish;
+            default = packageConfiguration.packages.env;
           };
         devShells.default = pkgs.mkShell {
           # This is for this project development. Don't depend on this devShell in another devShell,
