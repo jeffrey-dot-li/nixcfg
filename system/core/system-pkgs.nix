@@ -2,13 +2,11 @@
   environment.systemPackages = with pkgs; [
     alejandra
     uv
-    (rust-bin.beta.latest.default.override {
-      extensions = ["rust-src"];
-    })
     lazygit
     # (rust-bin.beta.latest.default.override {
     #   extensions = ["rust-src"];
     # })
+    # TODO: Run rustup update after rustup
     rustup
     vscode
     elan
