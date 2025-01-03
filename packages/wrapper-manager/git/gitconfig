@@ -11,6 +11,9 @@
 #   autocrlf=input
 #   untrackedcache = true
 #   fsmonitor = true
+[credential]
+    helper = store
+
 [credential "https://github.com"]
   helper=
   helper=!gh auth git-credential
