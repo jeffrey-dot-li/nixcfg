@@ -6,9 +6,10 @@
       extensions = ["rust-src"];
     })
     lazygit
-    (rust-bin.beta.latest.default.override {
-      extensions = ["rust-src"];
-    })
+    # (rust-bin.beta.latest.default.override {
+    #   extensions = ["rust-src"];
+    # })
+    rustup
     vscode
     elan
     (
