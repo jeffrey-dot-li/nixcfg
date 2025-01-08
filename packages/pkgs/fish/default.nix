@@ -39,6 +39,7 @@
     # set -q __fish_config_sourced; and exit
     # set -gx __fish_config_sourced 1
     ${lib.concatMapStringsSep "\n" initPlugin plugins}
+    set -x PATH $HOME/.cargo/bin $PATH
 
     if status is-login
       fenv source /etc/profile
