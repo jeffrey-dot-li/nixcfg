@@ -175,3 +175,17 @@ chsh -s ~/.nix-profile/bin/fish
 
 # TODO: Figure out how to use direnv
 TODO: Document how to clean nix garbage after rebuilds.
+
+
+
+
+
+# COMMON ERRORS:
+
+## Git: `No user exists for uid xxxx`
+-> https://discourse.nixos.org/t/unable-to-use-nixpkgs-git-on-rhel-7/12598
+
+```sh
+sudo apt install nscd
+sudo systemctl enable nscd
+sudo systemctl start nscd```
