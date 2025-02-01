@@ -28,8 +28,10 @@ nix run nix-darwin -- switch --flake .\#applin
 ### Test it works
 ```sh
 nix flake update
-darwin-rebuild switch --flake .\#applin
+darwin-rebuild switch --flake .\#applin --option extra-sandbox-paths /nix/store
 ```
+ - Note: the extra option is to make sure it doesn't exceed max sandbox size, not 100% sure why it does this but it wil exceed when building latex. See https://github.com/NixOS/nix/issues/4119#issuecomment-2561973914.
+
 At this point `nvim` should also be configured. 
 Shell environment variable should be set in both `$SHELL_PATH` and `cat /etc/shells` (it will resolve to something like `/nix/store/js5ylmh31vk4zr23vs9jasj1s51rz43f-wrapper-manager/bin/nucleus`).
 
