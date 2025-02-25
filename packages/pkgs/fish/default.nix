@@ -41,6 +41,18 @@
     ${lib.concatMapStringsSep "\n" initPlugin plugins}
     set -x PATH $HOME/.cargo/bin $PATH
 
+    # Source user defined `config.fish`
+    set config_path ~/.config/fish/config.fish
+    # Check if config.fish exists
+    if test -e $config_path
+        # Source the config file
+        echo "Sourcing $config_path"
+        source $config_path
+    end
+
+
+
+
     if status is-login
       fenv source /etc/profile
     end

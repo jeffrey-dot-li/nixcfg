@@ -44,6 +44,8 @@
   nix-direnv,
   xdg-utils,
   nil,
+  # go
+  go,
 } @ args:
 symlinkJoin {
   name = "env";
