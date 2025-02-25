@@ -28,7 +28,7 @@ nix run nix-darwin -- switch --flake .\#applin
 ### Test it works
 ```sh
 nix flake update
-darwin-rebuild switch --flake .\#applin --option extra-sandbox-paths /nix/store
+darwin-rebuild switch --flake .\#applin --option extra-sandbox-paths /nix/store --option sandbox relaxed
 ```
  - Note: the extra option is to make sure it doesn't exceed max sandbox size, not 100% sure why it does this but it wil exceed when building latex. See https://github.com/NixOS/nix/issues/4119#issuecomment-2561973914.
 
