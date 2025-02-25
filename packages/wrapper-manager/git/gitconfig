@@ -21,6 +21,9 @@
   helper=
   helper=!gh auth git-credential
 
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+    
 [init]
   defaultbranch=main
 [pull]
