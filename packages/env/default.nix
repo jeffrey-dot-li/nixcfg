@@ -35,6 +35,7 @@
   fzf,
   # Search
   ripgrep,
+  less,
   # Better ls
   eza,
   # I'll keep alejandra here just because I assume that whereever you are working you will need to edit nix files.
@@ -46,6 +47,8 @@
   nil,
   # go
   go,
+  gcc,
+  pipx
 } @ args:
 symlinkJoin {
   name = "env";
