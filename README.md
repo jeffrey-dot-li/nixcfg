@@ -190,4 +190,5 @@ TODO: Document how to clean nix garbage after rebuilds.
 ```sh
 sudo apt install nscd
 sudo systemctl enable nscd
-sudo systemctl start nscd```
+sudo systemctl start nscd
+```

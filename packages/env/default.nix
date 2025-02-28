@@ -47,8 +47,9 @@
   nil,
   # go
   go,
-  gcc,
-  pipx
+  # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
+  # gcc,
+  # pipx
 } @ args:
 symlinkJoin {
   name = "env";
