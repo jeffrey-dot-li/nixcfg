@@ -47,6 +47,7 @@
   nil,
   # go
   go,
+  pre-commit,
   # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
   # gcc,
   # pipx
