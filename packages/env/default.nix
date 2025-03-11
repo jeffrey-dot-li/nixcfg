@@ -50,7 +50,7 @@
   pre-commit,
   # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
   # gcc,
-  # pipx
+  pipx
 } @ args:
 symlinkJoin {
   name = "env";
