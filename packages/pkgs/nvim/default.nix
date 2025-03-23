@@ -109,12 +109,24 @@
 
       utility = {
         surround.enable = true;
+        ccc.enable = false;
+        vim-wakatime.enable = false;
+        diffview-nvim.enable = true;
+        yanky-nvim.enable = false;
+        # multicursors.enable=true;
+
+        motion = {
+          hop.enable = true;
+          leap.enable = true;
+          precognition.enable = true;
+        };
       };
 
       theme = {
         enable = false;
       };
 
+      globals.mapleader = "\\";
       maps = {
         normal = {
           "<leader>t" = {
@@ -153,6 +165,10 @@
       statusline.lualine = {
         enable = true;
         theme = "auto";
+      };
+      minimap = {
+        minimap-vim.enable = false;
+        codewindow.enable = true; # lighter, faster, and uses lua for configuration
       };
 
       treesitter = {
@@ -198,6 +214,13 @@
         gitsigns = {
           enable = true;
         };
+      };
+      tabline = {
+        nvimBufferline.enable = true;
+      };
+      binds = {
+        whichKey.enable = true;
+        cheatsheet.enable = true;
       };
 
       lsp = {

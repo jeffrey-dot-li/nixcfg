@@ -1,0 +1,19 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/CVS": true,
+    "**/.classpath": true,
+    "**/.factorypath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/*.js.map": true,
+    "**/*.olean": true,
+    "**/swagger*": true
+  },
+  "alejandra.program": "/run/current-system/sw/bin/alejandra",
+  "hide-files.files": []
+}

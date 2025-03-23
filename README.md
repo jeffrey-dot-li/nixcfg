@@ -152,7 +152,7 @@ Install nix, clone repo. (TODO: Add instructions for installing nix on Debian)
 # Then install:
 pushd nixcfg
 nix profile install
-# Don't need to install direnv seperately, comes with the shell package.
+# Don't need to install direnv separately, comes with the shell package.
 # Run:
 direnv allow
 # Upgrade:

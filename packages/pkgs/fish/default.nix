@@ -29,6 +29,10 @@
       end
     end
   '';
+  # TODO: Nixify kitty config
+  # TODO: Make it so that we build fish normally first, with plugins
+  # Then add configuration after, so it doesn't trigger big rebuild every time
+  # I change fish / nvim config
   plugins = with fishPlugins; [foreign-env fzf-fish];
   direnvConfig = writeTextDir "direnvrc" ''
     source ${nix-direnv}/share/nix-direnv/direnvrc
