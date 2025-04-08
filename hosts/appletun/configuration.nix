@@ -47,9 +47,6 @@ in {
     cargo
     go
     gcc
-
-    # nix.nix
-
     git
     deadnix
     alejandra

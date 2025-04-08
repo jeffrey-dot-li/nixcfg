@@ -34,6 +34,7 @@
       keep-going = true;
       log-lines = 20;
       extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
+      experimental-features = "nix-command flakes";
 
       # use binary cache, its not gentoo
       # substituters = [
