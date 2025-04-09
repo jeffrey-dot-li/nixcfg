@@ -7,9 +7,12 @@
   ...
 }: let
   user = "jeffreyli";
+  keys = import ../../../secrets/ssh_keys.nix;
 in {
   imports = [
     ./hardware-configuration.nix
+    ./cloudflare.nix
+    ./secrets.nix
   ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -76,6 +79,7 @@ in {
     isNormalUser = true;
     shell = self'.packages.fish;
     description = "Li";
+    openssh.authorizedKeys.keys = [keys.users.jeffreyli];
     extraGroups = ["networkmanager" "wheel"];
     packages = with pkgs; [
       kdePackages.kate

@@ -12,8 +12,10 @@
       modules =
         shared-modules
         ++ [
+          inputs.vscode-server.nixosModules.default
           (import ./nixos-defaults.nix)
           {nixpkgs.hostPlatform = system;}
+          inputs.agenix.nixosModules.default
           module
         ];
       specialArgs = mkSpecialArgs system;

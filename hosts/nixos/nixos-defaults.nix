@@ -5,10 +5,6 @@
   self',
   ...
 }: {
-  # programs.zsh.enable = true;
-  # services.nix-daemon.enable = true;
-  # system.stateVersion = 4;
-
   environment.systemPackages =
     builtins.attrValues self'.packages;
 
@@ -20,5 +16,5 @@
     SHELL = "fish";
   };
   environment.shells = [self'.packages.fish];
-  # security.pam.enableSudoTouchIdAuth = true;
+  services.vscode-server.enable = true;
 }
