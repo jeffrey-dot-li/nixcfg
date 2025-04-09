@@ -9,6 +9,7 @@
     # })
     # TODO: Run rustup update after rustup
     rustup
+    pciutils
     vscode
     elan
     (
