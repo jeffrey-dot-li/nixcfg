@@ -4,7 +4,9 @@
   lib,
   config,
   ...
-}: {
+}: let
+  user = "jeffreyli";
+in {
   imports = [
     ./hardware-configuration.nix
   ];
@@ -69,7 +71,7 @@
   services.printing.enable = true;
 
   # User account:
-  users.users.li = {
+  users.users."${user}" = {
     isNormalUser = true;
     description = "Li";
     extraGroups = ["networkmanager" "wheel"];
@@ -81,7 +83,7 @@
   # Auto login
 
   services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "li";
+  services.displayManager.autoLogin.user = user;
 
   # Install firefox.
   programs.firefox.enable = true;
