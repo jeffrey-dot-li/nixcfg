@@ -20,8 +20,8 @@
 
       builders-use-substitutes = true;
       # allow sudo users to mark the following values as trusted
-      # allowed-users = ["@wheel" "jeffrey" "jeffreyli"];
-      # trusted-users = ["@wheel" "jeffrey" "jeffreyli"];
+      allowed-users = ["@wheel" "jeffrey" "jeffreyli"];
+      trusted-users = ["@wheel" "jeffrey" "jeffreyli"];
       commit-lockfile-summary = "chore: Update flake.lock";
       accept-flake-config = true;
       keep-derivations = true;
@@ -37,13 +37,13 @@
       experimental-features = "nix-command flakes";
 
       # use binary cache, its not gentoo
-      # substituters = [
-      #   "https://cache.nixos.org"
-      # ];
+      substituters = [
+        "https://cache.nixos.org"
+      ];
 
-      # trusted-public-keys = [
-      #   "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      # ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      ];
     };
   };
 

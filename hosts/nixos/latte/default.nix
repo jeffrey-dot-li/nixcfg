@@ -3,6 +3,7 @@
   pkgs,
   lib,
   config,
+  self',
   ...
 }: let
   user = "jeffreyli";
@@ -73,6 +74,7 @@ in {
   # User account:
   users.users."${user}" = {
     isNormalUser = true;
+    shell = self'.packages.fish;
     description = "Li";
     extraGroups = ["networkmanager" "wheel"];
     packages = with pkgs; [
