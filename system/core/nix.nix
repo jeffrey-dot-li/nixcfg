@@ -15,7 +15,7 @@
     # daemonIOSchedClass = "idle";
     optimise.automatic = true;
     settings = {
-      flake-registry = "/etc/nix/registry.json";
+      # flake-registry = "/etc/nix/registry.json";
       # use binary cache, its not gentoo
 
       builders-use-substitutes = true;
