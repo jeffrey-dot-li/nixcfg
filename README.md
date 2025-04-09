@@ -2,6 +2,7 @@
 ```sh
 sudo nixos-rebuild switch --flake .#appletun
 sudo nix run nix-darwin -- switch --flake '.#applin' --show-trace
+darwin-rebuild switch --flake .\#applin --option extra-sandbox-paths /nix/store
 nix profile install
 # List with
 nix profile list

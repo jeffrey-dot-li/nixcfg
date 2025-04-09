@@ -14,13 +14,17 @@
 [credential]
     helper = store
 
-[credential "https://github.com"]
-  helper=
-  helper=!gh auth git-credential
 [credential "https://gist.github.com"]
   helper=
   helper=!gh auth git-credential
 
+
+# We don't need github auth anyways because we force ssh auth in all github cases anyways.
+# [credential "https://github.com"]
+#   helper=
+#   helper=!gh auth git-credential
+
+# This forces to use ssh for git. Configure SSH key and add to git for authentication.
 [url "git@github.com:"]
     insteadOf = https://github.com/
     
