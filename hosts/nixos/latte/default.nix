@@ -17,12 +17,20 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "latte";
-  # networking.wireless.enable = true;
-
   # Network proxy
-
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "latte";
+    networkmanager.enable = true;
+    # TODO: Investigate why this does't work. I think it is because of the usb wifi card
+    # wireless = {
+    #   enable = true;
+    #   secretsFile = config.age.secrets.wifi-ssid.path;
+    #   networks."ext:WIFI_SSID" = {
+    #     pskRaw = "ext:SSID_PASSWORD";
+    #   };
+    #   interfaces = ["wlan0" "wlp11s0" "wlp16s0u1u2"];
+    # };
+  };
 
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";

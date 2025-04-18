@@ -6,6 +6,9 @@
         owner = "cloudflared";
         group = "cloudflared";
       };
+      wifi-ssid = {
+        file = ../../../secrets/wifi/empress.age;
+      };
     };
   };
 }
