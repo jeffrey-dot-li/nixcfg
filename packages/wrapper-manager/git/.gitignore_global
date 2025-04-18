@@ -1,0 +1,5 @@
+# Just to test that it works
+test.test
+# This can be overridden with `!.envrc`
+.envrc
+.code-workspace

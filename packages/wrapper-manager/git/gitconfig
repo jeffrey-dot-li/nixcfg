@@ -3,14 +3,19 @@
 # Right now I just have this manually in ~/.config/git/local
 # [credential]
 # helper = osxkeychain
+
+
 [include]
   path = ~/.config/git/local
 
-# [core]
-#   eol=lf
-#   autocrlf=input
-#   untrackedcache = true
-#   fsmonitor = true
+[core]
+  eol=lf
+  autocrlf=input
+  untrackedcache = true
+  fsmonitor = true
+  # This is replaced by actual value in nix build
+  excludesFile = $GLOBAL_GITIGNORE
+
 [credential]
     helper = store
 
@@ -49,8 +54,6 @@
   cmd = difft "$LOCAL" "$REMOTE"
 [pager]
   difftool = true
-
-  
 [rerere]
   enabled = true
 [fetch]
