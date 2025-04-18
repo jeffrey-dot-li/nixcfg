@@ -20,16 +20,16 @@ in {
   # Network proxy
   networking = {
     hostName = "latte";
-    networkmanager.enable = true;
-    # TODO: Investigate why this does't work. I think it is because of the usb wifi card
-    # wireless = {
-    #   enable = true;
-    #   secretsFile = config.age.secrets.wifi-ssid.path;
-    #   networks."ext:WIFI_SSID" = {
-    #     pskRaw = "ext:SSID_PASSWORD";
-    #   };
-    #   interfaces = ["wlan0" "wlp11s0" "wlp16s0u1u2"];
-    # };
+    # networkmanager.enable = true;
+    wireless = {
+      enable = true;
+      secretsFile = config.age.secrets.wifi-ssid.path;
+      # Bruh our fcking wifi ssid has a space in it :/ otherwise can use ext:WIFI_SSID
+      networks."Bill Wi the Science Fi" = {
+        pskRaw = "ext:SSID_PASSWORD";
+      };
+      interfaces = ["wlan0" "wlp11s0" "wlp16s0u1u2"];
+    };
   };
 
   time.timeZone = "America/New_York";
