@@ -28,7 +28,7 @@ in {
       networks."Bill Wi the Science Fi" = {
         pskRaw = "ext:SSID_PASSWORD";
       };
-      interfaces = ["wlan0" "wlp11s0" "wlp16s0u1u2"];
+      interfaces = ["wlp11s0" "wlp16s0u1u2"];
     };
   };
 
