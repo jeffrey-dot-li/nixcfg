@@ -7,7 +7,9 @@
 }: {
   services.openssh = {
     enable = true;
-    passwordAuthentication = false;
+    settings = {
+      PasswordAuthentication = false;
+    };
     # We don't need to add user keys to host keys. These will be keys in /etc/ssh by default. See `secrets/README.md` for explanation of the difference.
     # hostKeys = ["~/.ssh/id_ed25519"];
   };

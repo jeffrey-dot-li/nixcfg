@@ -65,7 +65,7 @@ in {
     variant = "";
   };
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -99,6 +99,14 @@ in {
 
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = user;
+
+  # Disable auto sleep
+  services.logind.extraConfig = ''
+    HandleSuspendKey=ignore
+    HandleLidSwitch=ignore
+    HandleLidSwitchDocked=ignore
+    IdleAction=ignore
+  '';
 
   # Install firefox.
   programs.firefox.enable = true;
