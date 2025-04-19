@@ -33,16 +33,16 @@
           }
           // nixpkgsConfig);
 
-        packageConfiguration = import ./packages {
+        packages = import ./packages {
           inherit config pkgs lib system inputs inputs';
         };
       in {
         _module.args.pkgs = pkgs;
         packages =
-          packageConfiguration.packages
+          packages
           // {
             # Export shell as default package.
-            default = packageConfiguration.packages.env;
+            default = packages.env;
           };
         devShells.default = pkgs.mkShell {
           # This is for this project development. Don't depend on this devShell in another devShell,
