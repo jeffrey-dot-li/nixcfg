@@ -67,6 +67,7 @@
       stage3
   );
 in {
+  # TODO: Deduplicate this against system/core/nix.nix
   _module.args.pkgs = import inputs.nixpkgs {
     inherit system;
 
@@ -91,13 +92,14 @@ in {
           "vscode"
           "slack"
           "steam"
+          "nvidia-x11"
         ];
         byLicense = builtins.elem pkg.meta.license.shortName [
           "CUDA EULA"
           "bsl11"
         ];
       in
-        if byName || byLicense
+        if byName || byLicense || true
         then lib.warn "Allowing unfree package: ${pname}" true
         else false;
     };

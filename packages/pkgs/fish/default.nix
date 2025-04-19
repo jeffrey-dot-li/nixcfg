@@ -84,7 +84,6 @@
   '';
 in
   fish.overrideAttrs (old: {
-    patches = [./fish-on-tmpfs.patch];
     doCheck = false;
     postInstall =
       old.postInstall

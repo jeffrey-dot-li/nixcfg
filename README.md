@@ -176,7 +176,14 @@ chsh -s ~/.nix-profile/bin/fish
 
 
 
-# TODO: Figure out how to use direnv
+# Cleaning out old builds:
+TODO: add these as aliases 
+
+```sh
+sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations 123
+```
+
 TODO: Document how to clean nix garbage after rebuilds.
 
 

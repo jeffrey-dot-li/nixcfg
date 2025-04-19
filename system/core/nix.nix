@@ -39,10 +39,12 @@
       # use binary cache, its not gentoo
       substituters = [
         "https://cache.nixos.org"
+        "https://nix-community.cachix.org"
       ];
 
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
     };
   };
@@ -64,10 +66,10 @@
       # Wolność kocham i rozumiem
       # Wolności oddać nie umiem
       # <3333
-      # allowUnfree = false;
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) ["vscode"]
-        || lib.hasInfix "vscode" (lib.getName pkg);
+      allowUnfree = true;
+      # allowUnfreePredicate = pkg:
+      # builtins.elem (lib.getName pkg) ["vscode"]
+      # || lib.hasInfix "vscode" (lib.getName pkg);
       # Overridden in root flake.nix
       allowBroken = true;
     };

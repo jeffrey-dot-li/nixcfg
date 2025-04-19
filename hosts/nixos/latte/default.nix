@@ -13,6 +13,7 @@ in {
     ./hardware-configuration.nix
     ./cloudflare.nix
     ./secrets.nix
+    ./gpu.nix
   ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -101,9 +102,6 @@ in {
 
   # Install firefox.
   programs.firefox.enable = true;
-
-  # Allow unfree
-  nixpkgs.config.allowUnfree = true;
 
   system.stateVersion = "24.11";
 }
