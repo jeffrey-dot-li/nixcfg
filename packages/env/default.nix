@@ -30,7 +30,8 @@
   bat,
   tmux,
   nvim,
-  neofetch,
+  # TODO: Customize: https://github.com/NotAShelf/microfetch
+  microfetch,
   htop,
   fzf,
   # Search
@@ -50,7 +51,7 @@
   pre-commit,
   # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
   # gcc,
-  pipx
+  pipx,
 } @ args:
 symlinkJoin {
   name = "env";

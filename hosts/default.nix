@@ -1,18 +1,19 @@
 {
-  # nixpkgs,
-  # nix-darwin,
-  # self,
   inputs,
   config,
   withSystem,
+  lib,
   ...
 }: let
   core = ../system/core;
   nix-darwin = inputs.nix-darwin;
   nixpkgs = inputs.nixpkgs;
+  nixpkgsConfig = import ../nixpkgsConfig.nix {
+    inherit inputs lib;
+  };
   shared = [
     core
-    {nixpkgs.overlays = [inputs.rust-overlay.overlays.default];}
+    {nixpkgs = nixpkgsConfig;}
     # {system.configurationRevision = self.rev or self.dirtyRev or null;}
   ];
 

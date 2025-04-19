@@ -1,6 +1,5 @@
 {
   description = "My NixOS configuration";
-  # https://dotfiles.sioodmy.dev
 
   outputs = {flake-parts, ...} @ inputs:
   # For some reason, if you don't take `withSystem` here as an explicit argument,
@@ -19,17 +18,26 @@
 
       perSystem = {
         config,
-        pkgs,
+        # pkgs,
         lib,
         system,
         inputs',
         ...
       }: let
+        # TODO: Figure out how to configure nixpkgs globally.
+        nixpkgsConfig = import ./nixpkgsConfig.nix {
+          inherit lib inputs;
+        };
+        pkgs = import inputs.nixpkgs ({
+            inherit system;
+          }
+          // nixpkgsConfig);
+
         packageConfiguration = import ./packages {
           inherit config pkgs lib system inputs inputs';
         };
       in {
-        _module.args.pkgs = packageConfiguration._module.args.pkgs;
+        _module.args.pkgs = pkgs;
         packages =
           packageConfiguration.packages
           // {
