@@ -38,9 +38,6 @@ in {
 
   services.xserver.enable = true;
   hardware.graphics.enable = true;
-  # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
-  # hardware.nvidia.modesetting.enable = true;
-  # services.xserver.videoDrivers = ["nvidia"];
   # KDE Plasma Desktop Environment
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
