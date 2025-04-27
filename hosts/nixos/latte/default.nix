@@ -21,15 +21,16 @@ in {
   # Network proxy
   networking = {
     hostName = "latte";
+    # Juse use ethernet by default.
     # networkmanager.enable = true;
     wireless = {
       enable = true;
       secretsFile = config.age.secrets.wifi-ssid.path;
       # Bruh our fcking wifi ssid has a space in it :/ otherwise can use ext:WIFI_SSID
-      networks."Bill Wi the Science Fi" = {
+      networks."Wabu Wabu" = {
         pskRaw = "ext:SSID_PASSWORD";
       };
-      interfaces = ["wlp11s0" "wlp16s0u1u2"];
+      interfaces = ["wlp11s0"];
     };
   };
 

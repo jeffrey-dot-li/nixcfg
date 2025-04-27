@@ -13,5 +13,6 @@ in {
   "login-password.age".publicKeys = [keys.systems.appletun keys.users.jeffreyli];
   "wifi-ssid.age".publicKeys = [keys.systems.appletun keys.users.jeffreyli];
   "wifi/empress.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
+  "wifi/wabuwabu.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
   "cloudflared-environment.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
 }

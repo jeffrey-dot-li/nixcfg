@@ -7,7 +7,7 @@
         group = "cloudflared";
       };
       wifi-ssid = {
-        file = ../../../secrets/wifi/empress.age;
+        file = ../../../secrets/wifi/wabuwabu.age;
       };
     };
   };
