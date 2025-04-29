@@ -14,7 +14,7 @@
   shared = [
     core
     {nixpkgs = nixpkgsConfig;}
-    # {system.configurationRevision = self.rev or self.dirtyRev or null;}
+    inputs.lix-module.nixosModules.default
   ];
 
   # This allows passing through the system-specific `self'` and `inputs'` to each system configuration.

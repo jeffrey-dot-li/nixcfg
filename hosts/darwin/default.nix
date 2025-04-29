@@ -5,7 +5,6 @@
   mkSpecialArgs,
 }
 : let
-  # darwin-defaults = import ./darwin-defaults.nix;
   makeDarwinConfig = system: module:
     nix-darwin.lib.darwinSystem {
       system = system;
