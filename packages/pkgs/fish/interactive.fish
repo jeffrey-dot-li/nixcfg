@@ -99,13 +99,14 @@ if not set -q SSH_AUTH_SOCK
 end
 
 # Check and add RSA key if it exists
-if test -f ~/.ssh/id_rsa
-    ssh-add ~/.ssh/id_rsa
-    echo_light "[SSH Key]" "Added RSA key to SSH agent"
-else
-    echo_light "[SSH Key]" "RSA key not found"
+# Only activate id_ed25519 not id_rsa.
+# if test -f ~/.ssh/id_rsa
+#     ssh-add ~/.ssh/id_rsa
+#     echo_light "[SSH Key]" "Added RSA key to SSH agent"
+# else
+#     echo_light "[SSH Key]" "RSA key not found"
 
-end
+# end
 
 # Check and add Ed25519 key if it exists
 if test -f ~/.ssh/id_ed25519

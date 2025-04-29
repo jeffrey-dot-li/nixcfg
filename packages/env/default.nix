@@ -31,7 +31,7 @@
   tmux,
   nvim,
   # TODO: Customize: https://github.com/NotAShelf/microfetch
-  microfetch,
+  fastfetch,
   htop,
   fzf,
   # Search
