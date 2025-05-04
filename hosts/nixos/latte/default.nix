@@ -86,7 +86,10 @@ in {
     isNormalUser = true;
     shell = self'.packages.fish;
     description = "Li";
-    openssh.authorizedKeys.keys = [keys.users.jeffreyli];
+    openssh.authorizedKeys.keys = [
+      keys.users.jeffreyli
+      keys.users.junli
+    ];
     extraGroups = ["networkmanager" "wheel"];
     packages = with pkgs; [
       kdePackages.kate
