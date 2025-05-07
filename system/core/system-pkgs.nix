@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     alejandra
-    uv
+    # uv
     lazygit
     # texlive.combined.scheme-full # This includes latexmk
     # (rust-bin.beta.latest.default.override {

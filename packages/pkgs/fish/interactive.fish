@@ -118,3 +118,25 @@ else
 end
 
 ssh-add -l
+
+# Check if NIX_LD_LIBRARY_PATH is set
+if set -q NIX_LD_LIBRARY_PATH
+    # Append to LD_LIBRARY_PATH (or set if not exists)
+    if set -q LD_LIBRARY_PATH
+        set -gx LD_LIBRARY_PATH $LD_LIBRARY_PATH:$NIX_LD_LIBRARY_PATH
+    else
+        set -gx LD_LIBRARY_PATH $NIX_LD_LIBRARY_PATH
+    end
+    
+    # Append to LIBRARY_PATH (or set if not exists)
+    if set -q LIBRARY_PATH
+        set -gx LIBRARY_PATH $LIBRARY_PATH:$NIX_LD_LIBRARY_PATH
+    else
+        set -gx LIBRARY_PATH $NIX_LD_LIBRARY_PATH
+    end
+    
+    echo_light "[LD_LIBRARY_PATH] Updated LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+    echo_light "[LD_LIBRARY_PATH] Updated LIBRARY_PATH: $LIBRARY_PATH"
+else
+    echo_light "[LD_LIBRARY_PATH] NIX_LD_LIBRARY_PATH is not set"
+end

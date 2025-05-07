@@ -18,6 +18,7 @@
   dogdns,
   git,
   difftastic,
+  devenv,
   # elfutils-cli,
   # lurk,
   fq,

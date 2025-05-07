@@ -61,7 +61,6 @@
       fenv source /etc/profile
     end
 
-
     if status is-interactive
       ${lib.fileContents ./interactive.fish}
       ${lib.fileContents ./pushd_mod.fish}
