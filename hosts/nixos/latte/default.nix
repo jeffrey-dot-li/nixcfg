@@ -90,10 +90,30 @@ in {
       keys.users.jeffreyli
       keys.users.junli
     ];
-    extraGroups = ["networkmanager" "wheel"];
+    extraGroups = ["networkmanager" "wheel" "docker"];
     packages = with pkgs; [
       kdePackages.kate
     ];
+  };
+
+  environment.systemPackages = with pkgs; [
+    kind
+    docker
+    kubernetes-helm
+    kubectl # You'll likely want this too
+  ];
+
+  # Enable Docker service
+  virtualisation.docker.enable = true;
+
+  systemd.services.create-bash-symlink = {
+    description = "Create /bin/bash symlink";
+    wantedBy = ["multi-user.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.coreutils}/bin/ln -sf /run/current-system/sw/bin/bash /bin/bash";
+      RemainAfterExit = true;
+    };
   };
 
   # Auto login

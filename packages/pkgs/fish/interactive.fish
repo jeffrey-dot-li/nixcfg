@@ -22,7 +22,7 @@ abbr -a -g p python
 abbr -a -g n nvim
 abbr -a -g pd pushd
 abbr -a -g cdx cd \$XDG_RUNTIME_DIR
-
+abbr -a -g k kubectl
 # Admin
 abbr -a -g ss sudo systemctl
 abbr -a -g us systemctl --user
@@ -140,3 +140,4 @@ if set -q NIX_LD_LIBRARY_PATH
 else
     echo_light "[LD_LIBRARY_PATH] NIX_LD_LIBRARY_PATH is not set"
 end
+
