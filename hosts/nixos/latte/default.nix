@@ -22,16 +22,17 @@ in {
   networking = {
     hostName = "latte";
     # Juse use ethernet by default.
-    # networkmanager.enable = true;
-    wireless = {
-      enable = true;
-      secretsFile = config.age.secrets.wifi-ssid.path;
-      # Bruh our fcking wifi ssid has a space in it :/ otherwise can use ext:WIFI_SSID
-      networks."Wabu Wabu" = {
-        pskRaw = "ext:SSID_PASSWORD";
-      };
-      interfaces = ["wlp11s0"];
-    };
+
+    # wlps11s0 not working for some reason in `ip a`? TODO: Figure this out
+    # wireless = {
+    #   enable = true;
+    #   secretsFile = config.age.secrets.wifi-ssid.path;
+    #   # Bruh our fcking wifi ssid has a space in it :/ otherwise can use ext:WIFI_SSID
+    #   networks."Wabu Wabu" = {
+    #     pskRaw = "ext:SSID_PASSWORD";
+    #   };
+    #   interfaces = ["wlp11s0"];
+    # };
   };
 
   time.timeZone = "America/New_York";
