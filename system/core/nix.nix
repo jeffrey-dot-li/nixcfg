@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   nix = {
@@ -34,6 +35,8 @@
       keep-going = true;
       log-lines = 20;
       extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
+      extra-sandbox-paths = [config.programs.ccache.cacheDir];
+
       experimental-features = "nix-command flakes";
 
       # use binary cache, its not gentoo
@@ -48,6 +51,7 @@
       ];
     };
   };
+  programs.ccache.enable = true;
 
   # WE DONT WANT TO BUILD STUFF ON TMPFS
   # ITS NOT A GOOD IDEA
