@@ -19,6 +19,7 @@
     ];
     postBuild = ''
       ln -s $out/lib $out/lib64
+      sed -i "1i\_HERE_ = $out/bin" $out/bin/nvcc.profile
     '';
   };
 in {
@@ -37,6 +38,7 @@ in {
     # Currently version 570.133.07, CUDA Version 12.8
     package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
+  hardware.nvidia-container-toolkit.enable = true;
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     cmake
