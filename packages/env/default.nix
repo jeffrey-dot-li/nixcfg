@@ -47,6 +47,7 @@
   nix-direnv,
   xdg-utils,
   nil,
+  jq,
   # go
   go,
   pre-commit,
