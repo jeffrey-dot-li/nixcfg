@@ -40,6 +40,7 @@ in {
 
   services.xserver.enable = true;
   hardware.graphics.enable = true;
+  # hardware.graphics.enable32Bit = true;
   # KDE Plasma Desktop Environment
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
@@ -98,14 +99,19 @@ in {
   };
 
   environment.systemPackages = with pkgs; [
-    kind
+    minikube
     docker
+    k3s
     kubernetes-helm
     kubectl # You'll likely want this too
+    runc
   ];
+  virtualisation.docker = {
+    enable = true;
+    # enableNvidia = true;
+  };
 
   # Enable Docker service
-  virtualisation.docker.enable = true;
 
   systemd.services.create-bash-symlink = {
     description = "Create /bin/bash symlink";

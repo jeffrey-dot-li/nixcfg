@@ -182,10 +182,14 @@ TODO: add these as aliases
 ```sh
 sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations 123
+sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations +5 # keeps the last 5 generations
+sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations 30d # keeps the last 30 days
 ```
 
 TODO: Document how to clean nix garbage after rebuilds.
-
+```sh
+nix-store --gc
+```
 
 
 

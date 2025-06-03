@@ -79,7 +79,9 @@
       enableLuaLoader = true;
       preventJunkFiles = true;
       # tabWidth = 4;
-      useSystemClipboard = true;
+      clipboard = {
+      };
+      # useSystemClipboard = true;
       options = {
         mouse = "a";
         cmdheight = 1;
