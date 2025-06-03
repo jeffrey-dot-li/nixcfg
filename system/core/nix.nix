@@ -35,7 +35,7 @@
       keep-going = true;
       log-lines = 20;
       extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
-      extra-sandbox-paths = [config.programs.ccache.cacheDir];
+      # extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
       experimental-features = "nix-command flakes";
 
@@ -51,7 +51,6 @@
       ];
     };
   };
-  programs.ccache.enable = true;
 
   # WE DONT WANT TO BUILD STUFF ON TMPFS
   # ITS NOT A GOOD IDEA

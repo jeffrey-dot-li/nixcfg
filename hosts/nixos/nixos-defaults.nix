@@ -7,6 +7,8 @@
 }: {
   environment.systemPackages =
     builtins.attrValues self'.packages;
+  programs.ccache.enable = true;
+  nix.settings.extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
   environment.variables = {
     # I'm not sure which one of these is the thing that actually makes it work (could also be `users.user.shell`).
