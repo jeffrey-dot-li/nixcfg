@@ -1,4 +1,14 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  # https://nixos.wiki/wiki/Visual_Studio_Code
+  # https://code.visualstudio.com/updates/v1_101
+  customVscode = (pkgs.vscode.override {}).overrideAttrs (oldAttrs: rec {
+    src = builtins.fetchTarball {
+      url = "https://update.code.visualstudio.com/1.101.2/darwin-universal/stable";
+      sha256 = "0iwxc11k77xkp1a722wpqkanbl68z7n6rwb67sr0lkr356laqyy1";
+    };
+    version = "1.101";
+  });
+in {
   environment.systemPackages = with pkgs; [
     alejandra
     # uv
@@ -10,8 +20,12 @@
     # TODO: Run rustup update after rustup
     rustup
     pciutils
-    vscode
-    elan
+    (
+      if stdenv.isDarwin
+      then customVscode
+      else vscode
+    )
+
     (
       pkgs.google-cloud-sdk.withExtraComponents [
         pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
