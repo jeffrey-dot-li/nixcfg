@@ -62,7 +62,7 @@ lib.fix (
 
       callPackageScoped = callPackageScopedWith (pkgs // self);
     in
-      stage2 // {env = callPackage ./env {inherit inputs';};};
+      stage2 // {env = callPackage ./env {inherit inputs' pkgs;};};
   in
     stage3
 )

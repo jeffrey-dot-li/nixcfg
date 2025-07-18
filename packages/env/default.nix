@@ -1,6 +1,7 @@
 {
   # This is the everything package. This is the shell env that I am shipping basically.
   inputs',
+  pkgs,
   #
   lib,
   symlinkJoin,
@@ -16,7 +17,8 @@
   fd,
   libarchive,
   dogdns,
-  git,
+  # Use custom git
+  # git
   difftastic,
   devenv,
   # elfutils-cli,
@@ -53,13 +55,19 @@
   pre-commit,
   # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
   # gcc,
-  pipx,
+  # pipx,
+  kubectl,
 } @ args:
 symlinkJoin {
   name = "env";
   paths =
     (builtins.filter lib.isDerivation (builtins.attrValues args))
     ++ [
+      (
+        pkgs.google-cloud-sdk.withExtraComponents [
+          pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+        ]
+      )
       # inputs'.nil.packages.default
       # inputs'.nh.packages.default
       # inputs'.hover-rs.packages.default
