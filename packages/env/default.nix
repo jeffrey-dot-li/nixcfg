@@ -17,8 +17,8 @@
   fd,
   libarchive,
   dogdns,
-  # Use custom git
-  # git
+  # Use custom git - this is override
+  git,
   difftastic,
   devenv,
   # elfutils-cli,
