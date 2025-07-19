@@ -29,4 +29,8 @@
   nix_shell = {
     format = "[$symbol]($style)";
   };
+  kubernetes = {
+    format = "[$symbol\($context\) ](bold blue)";
+    disabled = false;
+  };
 }
