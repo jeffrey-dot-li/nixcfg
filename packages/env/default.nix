@@ -57,6 +57,7 @@
   # gcc,
   # pipx,
   kubectl,
+  kubernetes-helm,
 } @ args:
 symlinkJoin {
   name = "env";
