@@ -5,6 +5,8 @@
   #
   lib,
   symlinkJoin,
+  watch,
+  dig,
   #
   nix-index,
   fish,
