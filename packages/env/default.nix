@@ -60,6 +60,9 @@
   # pipx,
   kubectl,
   kubernetes-helm,
+  awscli2,
+  eksctl,
+  azure-cli,
 } @ args:
 symlinkJoin {
   name = "env";
