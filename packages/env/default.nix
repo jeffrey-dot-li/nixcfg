@@ -63,6 +63,7 @@
   awscli2,
   eksctl,
   lsof,
+  tailscale,
 } @ args:
 symlinkJoin {
   name = "env";
