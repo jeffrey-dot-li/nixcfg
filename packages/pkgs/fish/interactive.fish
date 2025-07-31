@@ -23,6 +23,20 @@ abbr -a -g n nvim
 abbr -a -g pd pushd
 abbr -a -g cdx cd \$XDG_RUNTIME_DIR
 abbr -a -g k kubectl
+abbr -a -g kx kubectl exec -it
+
+function kctl
+    if test "$argv[1]" = "stop"
+        kubectl patch job $argv[2] -p '{"spec":{"activeDeadlineSeconds":1}}'
+    else
+        # Optional: handle other kctl commands or pass through to kubectl
+        kubectl $argv
+    end
+end
+
+
+
+
 # Admin
 abbr -a -g ss sudo systemctl
 abbr -a -g us systemctl --user

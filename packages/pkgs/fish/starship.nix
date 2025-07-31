@@ -17,10 +17,10 @@
     symbol = "🌿 ";
   };
   line_break.disabled = false;
-  python.symbol = "[🐍](blue) ";
+  python.symbol = "[🐍](green) ";
   hostname = {
     ssh_only = false;
-    format = "[$hostname](bold blue) ";
+    format = "[$hostname](bold green) ";
     disabled = false;
   };
   gcloud = {
@@ -30,7 +30,7 @@
     format = "[$symbol]($style)";
   };
   kubernetes = {
-    format = "[$symbol\($context\) ](bold blue)";
+    format = "[$symbol{$context} ](bold blue)";
     disabled = false;
   };
 }
