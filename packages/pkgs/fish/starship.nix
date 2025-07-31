@@ -30,7 +30,7 @@
     format = "[$symbol]($style)";
   };
   kubernetes = {
-    format = "[$symbol{$context} ](bold blue)";
+    format = "[{$context} ](bold blue)";
     disabled = false;
   };
 }
