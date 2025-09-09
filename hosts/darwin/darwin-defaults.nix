@@ -19,5 +19,5 @@
   environment.shells = ["${self'.packages.fish}/bin/fish"];
   # environment.loginShell = "${shellWrapper}/bin/nucleus -l"; # This does nothing except for tmux (see https://github.com/LnL7/nix-darwin/issues/361)
   security.pam.services.sudo_local.touchIdAuth = true;
-  services.tailscale.enable = true;
+  # services.tailscale.enable = true;
 }

@@ -35,7 +35,24 @@ function kctl
 end
 
 
+function kcluster
+    if test (count $argv) -eq 0
+        kubectl config get-contexts
+        return
+    end
 
+    if test "$argv[1]" = "-"
+        if test -z "$KCLUSTER_PREV"
+            echo "No previous context"
+            return 1
+        end
+        kubectl config use-context "$KCLUSTER_PREV"
+        return
+    end
+
+    set -g KCLUSTER_PREV (kubectl config current-context 2>/dev/null)
+    kubectl config use-context "$argv[1]"
+end
 
 # Admin
 abbr -a -g ss sudo systemctl
