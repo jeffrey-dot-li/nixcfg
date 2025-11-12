@@ -29,7 +29,7 @@
       end
     end
   '';
-  # TODO: Nixify kitty config  
+  # TODO: Nixify kitty config
   # TODO: Make it so that we build fish normally first, with plugins
   # Then add configuration after, so it doesn't trigger big rebuild every time
   # I change fish / nvim config
@@ -60,7 +60,7 @@
     if status is-login
       fenv source /etc/profile
     end
-
+    ${lib.fileContents ./ssh.fish}
     if status is-interactive
       ${lib.fileContents ./interactive.fish}
       ${lib.fileContents ./pushd_mod.fish}
