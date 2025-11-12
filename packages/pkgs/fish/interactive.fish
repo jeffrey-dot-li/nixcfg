@@ -125,7 +125,10 @@ function echo_light
 end
 
 # Start SSH agent if not already running
-if not set -q SSH_AUTH_SOCK
+# Sometimes mac is stupid and sets SSH_AUTH_SOCK to /private/tmp/com.apple.launchd.H7aAgQtped/Listeners I'm not sure why
+if not set -q SSH_AUTH_SOCK \
+    or not string match -r '.*/agent\.[0-9]+$' -- $SSH_AUTH_SOCK
+    echo "Starting SSH agent"
     eval (ssh-agent -c)
 end
 
