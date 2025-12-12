@@ -24,6 +24,7 @@
         "slack"
         "steam"
         "nvidia-x11"
+        "steam-unwrapped"
       ];
       byLicense =
         builtins.any (license: (builtins.elem license.shortName [

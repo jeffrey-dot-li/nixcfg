@@ -14,6 +14,7 @@ in {
     ./cloudflare.nix
     ./secrets.nix
     ./gpu.nix
+    ./steam.nix
   ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
