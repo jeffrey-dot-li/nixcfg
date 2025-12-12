@@ -7,7 +7,8 @@
   ...
 }: {
   environment.systemPackages =
-    builtins.attrValues self'.packages;
+    # TODO: Add kitty configuration
+    builtins.attrValues self'.packages ++ [pkgs.kitty];
   programs.ccache.enable = true;
   nix.settings.extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
