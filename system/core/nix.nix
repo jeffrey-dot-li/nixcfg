@@ -34,7 +34,9 @@
       # continue building derivations if one fails
       keep-going = true;
       log-lines = 20;
-      extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
+      extra-experimental-features = ["flakes" "nix-command"];
+      # extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
+
       # extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
       experimental-features = "nix-command flakes";

@@ -25,10 +25,16 @@
         "steam"
         "nvidia-x11"
       ];
-      byLicense = builtins.elem pkg.meta.license.shortName [
-        "CUDA EULA"
-        "bsl11"
-      ];
+      byLicense =
+        builtins.any (license: (builtins.elem license.shortName [
+          "CUDA EULA"
+          "bsl11"
+        ]))
+        (
+          if builtins.isList pkg.meta.license
+          then pkg.meta.license
+          else [pkg.meta.license]
+        );
     in
       if byName || byLicense || true
       then lib.warn "Allowing unfree package: ${pname}" true

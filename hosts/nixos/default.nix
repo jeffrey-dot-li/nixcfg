@@ -5,7 +5,6 @@
   mkSpecialArgs,
 }
 : let
-  # darwin-defaults = import ./darwin-defaults.nix;
   makeNixosConfig = system: module:
     nixpkgs.lib.nixosSystem {
       system = system;

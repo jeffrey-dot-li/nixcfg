@@ -11,6 +11,7 @@
   nixpkgsConfig = import ../nixpkgsConfig.nix {
     inherit inputs lib;
   };
+  # https://wiki.lix.systems/books/lix-contributors/page/running-lix-main
   shared = [
     core
     {nixpkgs = nixpkgsConfig;}

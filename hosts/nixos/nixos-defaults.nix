@@ -3,6 +3,7 @@
   pkgs,
   lib,
   self',
+  config,
   ...
 }: {
   environment.systemPackages =

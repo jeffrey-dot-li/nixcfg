@@ -12,7 +12,9 @@ alias ll="eza --icons --long --header --group"
 alias lla="eza --icons --all --long --header --group"
 alias lal="eza --icons --all --long --header --group"
 alias lt="eza --sort modified -1"
+
 abbr -a -g e eza
+
 
 # Bat
 alias bat="bat --theme=base16 --style=changes,header --plain"
@@ -109,6 +111,16 @@ end
 
 function __fish_command_not_found_handler --on-event fish_command_not_found
     echo -e >&2 "\e[31m$argv[1]: command not found\e[0m"
+end
+
+
+function duls
+    # Usage: duls [target_directory]
+    if test (count $argv) -eq 0
+        du -h -d 1 | sort -hr
+    else
+        du -h -d 1 $argv[1] | sort -hr
+    end    
 end
 
 function echo_light

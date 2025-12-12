@@ -129,12 +129,12 @@ in {
   services.displayManager.autoLogin.user = user;
 
   # Disable auto sleep
-  services.logind.extraConfig = ''
-    HandleSuspendKey=ignore
-    HandleLidSwitch=ignore
-    HandleLidSwitchDocked=ignore
-    IdleAction=ignore
-  '';
+  services.logind.settings.Login = {
+    "HandleSuspendKey" = "ignore";
+    "HandleLidSwitch" = "ignore";
+    "HandleLidSwitchDocked" = "ignore";
+    "IdleAction" = "ignore";
+  };
 
   # Install firefox.
   programs.firefox.enable = true;
