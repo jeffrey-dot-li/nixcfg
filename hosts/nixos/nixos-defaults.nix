@@ -8,7 +8,7 @@
 }: {
   environment.systemPackages =
     # TODO: Add kitty configuration
-    builtins.attrValues self'.packages ++ [pkgs.kitty];
+    builtins.attrValues self'.packages ++ [pkgs.kitty pkgs.proton-pass];
   programs.ccache.enable = true;
   nix.settings.extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
