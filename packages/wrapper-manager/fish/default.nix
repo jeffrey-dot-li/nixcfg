@@ -42,7 +42,7 @@
   fzf_plugin =
     if isDarwin
     then pkgs.fzf
-    else pkgs.fzf-fish;
+    else pkgs.fishPlugins.fzf-fish;
 
   fish_user_config =
     writeTextDir "${vendorConf}/viper_config.fish"
