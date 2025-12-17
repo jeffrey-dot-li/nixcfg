@@ -19,6 +19,7 @@ in {
     # })
     # TODO: Run rustup update after rustup
     rustup
+    gcc
     pciutils
     (
       if stdenv.isDarwin
