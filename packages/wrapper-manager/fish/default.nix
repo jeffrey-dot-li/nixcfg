@@ -37,10 +37,12 @@
   starship-settings = import ./starship.nix;
 
   # TODO: Nixify kitty config
-  # TODO: Make it so that we build fish normally first, with plugins
-  # Then add configuration after, so it doesn't trigger big rebuild every time
-  # I change fish / nvim config
-  # plugins = with pkgs.fishPlugins; [foreign-env fzf bass]; # todo: fzf-fish is broken here on mac
+  # todo: fzf-fish is broken here on mac
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  fzf_plugin =
+    if isDarwin
+    then pkgs.fzf
+    else pkgs.fzf-fish;
 
   fish_user_config =
     writeTextDir "${vendorConf}/viper_config.fish"
@@ -50,13 +52,15 @@
       # set -gx __fish_config_sourced 1
 
       ${
-        (with pkgs.fishPlugins; [
-          foreign-env
-          fzf-fish
-          bass
-        ])
-        |> (map (elem: "viper_load_plugin ${elem}"))
-        |> (lib.concatStringsSep "\n")
+        lib.concatStringsSep "\n" (
+          map
+          (elem: "viper_load_plugin ${elem}")
+          (with pkgs.fishPlugins; [
+            foreign-env
+            fzf_plugin
+            bass
+          ])
+        )
       }
 
       # NixOS's /etc/profile already exits early with __ETC_PROFILE_SOURCED
