@@ -10,6 +10,7 @@
     # TODO: Add kitty configuration
     builtins.attrValues self'.packages ++ [pkgs.kitty pkgs.proton-pass];
   programs.ccache.enable = true;
+  programs.fish.enable = true;
   nix.settings.extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
   environment.variables = {
