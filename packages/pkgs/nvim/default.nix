@@ -11,6 +11,10 @@
         inherit (value) src;
       }
   ) (pkgs.callPackages ./_sources/generated.nix {});
+  nvim-osc52 = pkgs.vimUtils.buildVimPlugin {
+    name = "nvim-osc52";
+    src = inputs.nvim-osc52;
+  };
   plugins = let
     vip = pkgs.vimPlugins;
     # This can also be done with `with pkgs.vimPlugins; { ... }`
@@ -28,6 +32,22 @@
         -- vim.g.everforest_better_performance = 1 Unfortunately this is broken because it tries to write to readonly plugin dir `/after/syntax/`.
         -- https://github.com/sainnhe/everforest/blob/87b8554b2872ef69018d4b13d288756dd4e47c0f/doc/everforest.txt#L495
         vim.cmd('colorscheme everforest')
+      '';
+    };
+    nvim-osc52 = {
+      package = nvim-osc52;
+      setup = ''
+        vim.g.clipboard = {
+        name = "OSC 52",
+        copy = {
+        ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+        ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+        },
+        paste = {
+        ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+        ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+        },
+        }
       '';
     };
 
@@ -80,8 +100,11 @@
       preventJunkFiles = true;
       # tabWidth = 4;
       clipboard = {
+        # enable = true;
+        # Use system register for clipboard
+        # registers = "unnamedplus";
+        # Don't use this, instead, to copy in vim, use "+y
       };
-      # useSystemClipboard = true;
       options = {
         mouse = "a";
         cmdheight = 1;
@@ -276,6 +299,4 @@
     modules = [nvfConfig];
     inherit pkgs;
   };
-in (
-  customNeovim.neovim
-)
+in (customNeovim.neovim)
