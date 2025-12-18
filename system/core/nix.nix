@@ -36,7 +36,7 @@
       log-lines = 20;
       # https://discourse.nixos.org/t/lix-mismatch-in-feature-name-compared-to-nix/59879/8
       # Pipe operators is broken in lix
-      extra-experimental-features = ["flakes" "nix-command"];
+      extra-experimental-features = ["flakes" "nix-command" "pipe-operator"];
       # extra-experimental-features = ["flakes" "nix-command" "recursive-nix" "ca-derivations"];
 
       # extra-sandbox-paths = [config.programs.ccache.cacheDir];
