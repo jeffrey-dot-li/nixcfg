@@ -30,7 +30,6 @@ lib.fix (
           # };
           # preventing infrec
           nvim = callPackage ./pkgs/nvim {inherit inputs pkgs lib;};
-          fish = pkgs.fish;
           # fish = callPackage ./pkgs/fish {inherit (pkgs) fish;};
           # guix = callPackage ./guix {
           #   inherit (pkgs) guix;

@@ -87,7 +87,8 @@ in {
   # User account:
   users.users."${user}" = {
     isNormalUser = true;
-    shell = self'.packages.fish;
+    # See note about login shell being se to bash.
+    # shell = self'.packages.fish;
     description = "Li";
     openssh.authorizedKeys.keys = [
       keys.users.jeffreyli

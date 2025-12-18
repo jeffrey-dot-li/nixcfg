@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  inputs',
   ...
 }: let
   inherit (pkgs) writeTextDir formats;
@@ -65,8 +64,7 @@
 
       # NixOS's /etc/profile already exits early with __ETC_PROFILE_SOURCED
       # For some reason, status is-login doesn't work consistently
-      fenv source /etc/profile
-      # set -x PATH $HOME/.cargo/bin $PATH
+      # fenv source /etc/profile
 
       if status is-login
         fenv source /etc/profile
