@@ -47,6 +47,7 @@ end
 if not is_ssh_set
     echo_light "[SSH Agent]" "Starting SSH agent"
     eval (ssh-agent -c)
+    ssh_add_key ~/.ssh/id_ed25519
 end
 
 if not is_ssh_set
