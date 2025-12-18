@@ -102,8 +102,10 @@ set -gx fish_color_autosuggestion lightgrey
 
 # Configure FZF keybinds
 # https://github.com/PatrickF1/fzf.fish
-fzf_configure_bindings --directory=\cf
-
+# We only use this on linux because fzf-fish is broken on mac
+if functions -q fzf_configure_bindings
+    fzf_configure_bindings --directory=\cf
+end
 # Print newline after a command
 function postexec_test --on-event fish_postexec
     echo
@@ -123,19 +125,6 @@ function duls
     end    
 end
 
-function echo_light
-    # Arguments:
-    #   $argv[1]: prefix (displayed in normal color)
-    #   $argv[2]: text (displayed in light grey)
-    
-    if test (count $argv) -lt 2
-        echo "Usage: echo_light prefix text"
-        return 1
-    end
-    
-    echo -s $argv[1] " " (set_color 999999) $argv[2] (set_color normal)
-end
-
 
 # Check if NIX_LD_LIBRARY_PATH is set
 if set -q NIX_LD_LIBRARY_PATH
@@ -153,9 +142,6 @@ if set -q NIX_LD_LIBRARY_PATH
         set -gx LIBRARY_PATH $NIX_LD_LIBRARY_PATH
     end
     
-    echo_light "[LD_LIBRARY_PATH] Updated LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-    echo_light "[LD_LIBRARY_PATH] Updated LIBRARY_PATH: $LIBRARY_PATH"
-else
-    echo_light "[LD_LIBRARY_PATH] NIX_LD_LIBRARY_PATH is not set"
+    echo_light "[LD_LIBRARY_PATH]" "Updated LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+    echo_light "[LD_LIBRARY_PATH]" "Updated LIBRARY_PATH: $LIBRARY_PATH"
 end
-

@@ -50,6 +50,13 @@
       # set -q __fish_config_sourced; and exit
       # set -gx __fish_config_sourced 1
 
+      echo "HI FROM SYSTEM FISH CONFIG"
+
+      if not set -q __NIX_DARWIN_PATH_SET
+          set -gx __NIX_DARWIN_PATH_SET 1
+          set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
+      end
+
       ${
         lib.concatStringsSep "\n" (
           map
@@ -69,6 +76,7 @@
       if status is-login
         fenv source /etc/profile
       end
+      ${lib.fileContents ./echo_light.fish}
       ${lib.fileContents ./ssh.fish}
 
       if status is-interactive
@@ -98,16 +106,8 @@
           echo "Sourcing $config_path"
           source $config_path
       end
-
       # For it to work on mac, need to put this into local `~/.config/fish/config.fish` for some reason
       # otherwise `/usr/local/bin` will always be higher on mac. :/
-
-      # if not set -q __NIX_DARWIN_PATH_SET
-      #     set -gx __NIX_DARWIN_PATH_SET 1
-      #     echo "SETTING PATH TO TOP"
-      #     set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
-      # end
-
     '';
 in {
   wrappers.fish = {
