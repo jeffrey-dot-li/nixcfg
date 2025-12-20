@@ -19,23 +19,3 @@ vim.api.nvim_create_user_command("SwapRegisters", function()
 end, { desc = "Swap unnamed and system clipboard registers" })
 
 
-
-
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    local session = vim.fn.getcwd() .. "/Session.vim"
-    if vim.fn.filereadable(session) == 1 then
-      vim.cmd("source " .. session)
-    end
-  end,
-})
-
-
-vim.api.nvim_create_autocmd("VimLeavePre", {
-  callback = function()
-    local session = vim.fn.getcwd() .. "/Session.vim"
-    if vim.fn.filereadable(session) == 1 then
-      vim.cmd("mksession! Session.vim")
-    end
-  end,
-})

@@ -4,17 +4,18 @@
   fetchurl,
   fetchFromGitHub,
   dockerTools,
-}: {
+}:
+{
   everforest = {
     pname = "everforest";
-    version = "87b8554b2872ef69018d4b13d288756dd4e47c0f";
+    version = "b10ed9a8b37d6b7448908be98ff8f58f550adc48";
     src = fetchFromGitHub {
       owner = "sainnhe";
       repo = "everforest";
-      rev = "87b8554b2872ef69018d4b13d288756dd4e47c0f";
+      rev = "b10ed9a8b37d6b7448908be98ff8f58f550adc48";
       fetchSubmodules = false;
-      sha256 = "sha256-afe4oojyoNTGRPpykCsG0Sg5VOXno+tNNJlviOnrbQQ=";
+      sha256 = "sha256-2mljM3Gwl3oXa2xF5Nh+WXDrjJWhwgRHgRiTJieWhsg=";
     };
-    date = "2024-09-30";
+    date = "2025-12-06";
   };
 }

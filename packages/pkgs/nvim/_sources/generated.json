@@ -1,7 +1,7 @@
 {
     "everforest": {
-        "cargoLocks": null,
-        "date": "2024-09-30",
+        "cargoLock": null,
+        "date": "2025-12-06",
         "extract": null,
         "name": "everforest",
         "passthru": null,
@@ -13,11 +13,11 @@
             "name": null,
             "owner": "sainnhe",
             "repo": "everforest",
-            "rev": "87b8554b2872ef69018d4b13d288756dd4e47c0f",
-            "sha256": "sha256-afe4oojyoNTGRPpykCsG0Sg5VOXno+tNNJlviOnrbQQ=",
+            "rev": "b10ed9a8b37d6b7448908be98ff8f58f550adc48",
+            "sha256": "sha256-2mljM3Gwl3oXa2xF5Nh+WXDrjJWhwgRHgRiTJieWhsg=",
             "sparseCheckout": [],
             "type": "github"
         },
-        "version": "87b8554b2872ef69018d4b13d288756dd4e47c0f"
+        "version": "b10ed9a8b37d6b7448908be98ff8f58f550adc48"
     }
 }

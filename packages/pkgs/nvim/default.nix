@@ -34,6 +34,34 @@
         vim.cmd('colorscheme everforest')
       '';
     };
+    cmp-cmdline = {
+      package = vip.cmp-cmdline;
+      setup = ''
+        local cmp = require("cmp")
+
+        -- Enable completion for ':' (cmdline)
+        cmp.setup.cmdline(':', {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = cmp.config.sources({
+            { name = 'path' }    -- Hints for file paths
+          }, {
+            { name = 'cmdline' } -- Hints for commands (e.g., :wq, :noh)
+          })
+        })
+        cmp.setup.cmdline('/', {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = {
+            { name = 'buffer' } -- Hints words from the current file
+          }
+        })
+      '';
+    };
+    auto-session = {
+      package = vip.auto-session;
+      setup = ''
+        require("auto-session").setup({})
+      '';
+    };
     nvim-osc52 = {
       package = nvim-osc52;
       setup = ''
@@ -158,7 +186,7 @@
             action = "<CMD>Telescope find_files<CR>";
           };
           "<leader>p" = {
-            action = "<CMD>Telescope commands<CR>";
+            action = "<CMD>Telescope buffers<CR>";
           };
           "<leader>f" = {
             action = "<CMD>Telescope live_grep<CR>";
@@ -168,10 +196,6 @@
             action = "<CMD>Neotree toggle<CR>";
             silent = true;
           };
-          # "<leader>m" = {
-          #   action = "<CMD>MarkdownPreviewToggle<CR>";
-          #   silent = true;
-          # };
 
           # Navigation override
           "<C-u>" = {
@@ -195,6 +219,21 @@
           "<leader>ys" = {
             action = "<cmd>SwapRegisters<cr>";
             desc = "Swap \" and + registers";
+          };
+        };
+        # Command line mode
+        command = {
+          "<M-Left>" = {
+            action = "<S-Left>";
+            desc = "Move back a word";
+          };
+          "<M-Right>" = {
+            action = "<S-Right>";
+            desc = "Move forward a word";
+          };
+          "<M-BS>" = {
+            action = "<C-w>";
+            desc = "Delete a word";
           };
         };
 
@@ -234,7 +273,19 @@
         addDefaultGrammars = false; # cuz its broken rn
       };
 
-      autocomplete.nvim-cmp.enable = true;
+      autocomplete = {
+        nvim-cmp = {
+          enable = true;
+          mappings = {
+            # previous = "<Up>";
+            # next = "<Down>";
+            # confirm = "<Right>";
+          };
+        };
+        blink-cmp = {
+          # enable = true;
+        };
+      };
 
       ui = {
         noice.enable = true;
@@ -319,7 +370,7 @@
         };
         rust = {
           enable = true;
-          crates.enable = true;
+          extensions.crates-nvim.enable = true;
         };
       };
     };
