@@ -168,10 +168,12 @@
             action = "<CMD>Neotree toggle<CR>";
             silent = true;
           };
-          "<leader>m" = {
-            action = "<CMD>MarkdownPreviewToggle<CR>";
-            silent = true;
-          };
+          # "<leader>m" = {
+          #   action = "<CMD>MarkdownPreviewToggle<CR>";
+          #   silent = true;
+          # };
+
+          # Navigation override
           "<C-u>" = {
             action = "<C-u>zz";
             desc = "Half page up + recenter";
@@ -184,15 +186,25 @@
             action = "<C-f>zz";
             desc = "Full page up + recenter";
           };
-
           "<C-b>" = {
             action = "<C-b>zz";
             desc = "Full page down + recenter";
           };
+
+          # Swap registers
+          "<leader>ys" = {
+            action = "<cmd>SwapRegisters<cr>";
+            desc = "Swap \" and + registers";
+          };
         };
 
         terminal = {
+          # <C-\\> toggles terminal in nvim
           # get out of terminal mode in toggleterm
+          "<leader>ys" = {
+            action = "<cmd>SwapRegisters<cr>";
+            desc = "Swap \" and + registers";
+          };
           "<ESC>" = {
             action = "<C-\\><C-n>";
             silent = true;
