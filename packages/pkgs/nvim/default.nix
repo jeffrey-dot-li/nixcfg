@@ -151,7 +151,7 @@
         enable = false;
       };
 
-      globals.mapleader = "\\";
+      globals.mapleader = " ";
       maps = {
         normal = {
           "<leader>t" = {
@@ -171,6 +171,23 @@
           "<leader>m" = {
             action = "<CMD>MarkdownPreviewToggle<CR>";
             silent = true;
+          };
+          "<C-u>" = {
+            action = "<C-u>zz";
+            desc = "Half page up + recenter";
+          };
+          "<C-d>" = {
+            action = "<C-d>zz";
+            desc = "Half page down + recenter";
+          };
+          "<C-f>" = {
+            action = "<C-f>zz";
+            desc = "Full page up + recenter";
+          };
+
+          "<C-b>" = {
+            action = "<C-b>zz";
+            desc = "Full page down + recenter";
           };
         };
 
