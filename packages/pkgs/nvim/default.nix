@@ -56,6 +56,37 @@
         })
       '';
     };
+    nvim-ufo = {
+      package = vip.nvim-ufo;
+      setup = ''
+        vim.o.foldcolumn = '1' -- '0' is not bad
+        vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+        vim.o.foldlevelstart = 99
+        vim.o.foldenable = true
+
+
+        -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+        vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+        -- zM: Close All but keep Top Level (Level 1)
+        vim.keymap.set('n', 'zM', function()
+            require('ufo').closeFoldsWith(1)
+        end)
+
+        -- K: Peek Fold (or hover if not folded)
+        vim.keymap.set('n', 'K', function()
+            local winid = require('ufo').peekFoldedLinesUnderCursor()
+            if not winid then
+                vim.lsp.buf.hover()
+            end
+        end)
+        -- 3. Setup UFO
+        require('ufo').setup({
+            provider_selector = function(bufnr, filetype, buftype)
+                return { 'treesitter', 'indent' }
+            end
+        })--
+      '';
+    };
     auto-session = {
       package = vip.auto-session;
       setup = ''
@@ -138,14 +169,12 @@
         cmdheight = 1;
         scrolloff = 6;
         autoindent = true;
-        foldmethod = "expr";
-        foldexpr = "nvim_treesitter#foldexpr()";
 
         # Can see function signatures
         # We also override zM to fold to 1
-        foldlevel = 1;
-        foldlevelstart = 1;
-        # foldlevel = 99;
+        # foldlevel = 1;
+        # foldlevelstart = 1;
+        foldlevel = 99;
       };
 
       telescope = {
@@ -264,14 +293,14 @@
             desc = "Clear search highlight";
           };
 
-          # Fold
-          "zM" = {
-            action = "function() 
-  vim.wo.foldlevel = 1
-end";
-            lua = true;
-            desc = "Close to top level fold";
-          };
+          #           # Fold
+          #           "zM" = {
+          #             action = "function()
+          #   vim.wo.foldlevel = 1
+          # end";
+          #             lua = true;
+          #             desc = "Close to top level fold";
+          #           };
         };
         # Command line mode
         command = {
@@ -323,6 +352,15 @@ end";
         };
       };
 
+      assistant = {
+        supermaven-nvim = {
+          enable = true;
+          setupOpts.keymaps = {
+            accept-suggestion = "<M-Tab>";
+          };
+        };
+      };
+
       filetree.neo-tree = {
         enable = true;
       };
@@ -350,6 +388,7 @@ end";
           enable = true;
           # https://github.com/NotAShelf/nvf/blob/4b95ae106c832bea347ad2bd53f2c40d880f0d27/modules/plugins/completion/nvim-cmp/nvim-cmp.nix#L64
           # mappings = {};
+          sourcePlugins = ["supermaven-nvim" "telescope" "nvim-treesitter"];
         };
         blink-cmp = {
           # enable = true;
@@ -358,7 +397,6 @@ end";
 
       ui = {
         noice.enable = true;
-        nvim-ufo.enable = true;
       };
 
       # visuals = {
@@ -418,8 +456,8 @@ end";
           listImplementations = "gi";
           listReferences = "gr";
           listWorkspaceFolders = "<leader>wl";
-          nextDiagnostic = "<leader>k";
-          previousDiagnostic = "<leader>j";
+          nextDiagnostic = "<leader>j";
+          previousDiagnostic = "<leader>k";
           openDiagnosticFloat = "<leader>e";
           removeWorkspaceFolder = "<leader>wr";
           renameSymbol = "<leader>r";
