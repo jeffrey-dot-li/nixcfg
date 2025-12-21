@@ -199,20 +199,21 @@
             action = "<CMD>ToggleTerm<CR>";
             desc = "Toggle terminal";
           };
+          # Enter insert by default when toggling terminal
           "<leader>t1" = {
-            action = "<CMD>ToggleTermSingle 1<CR>";
+            action = "<CMD>ToggleTermSingle 1 true<CR>";
             desc = "Toggle terminal";
           };
           "<leader>t2" = {
-            action = "<CMD>ToggleTermSingle 2<CR>";
+            action = "<CMD>ToggleTermSingle 2 true<CR>";
             desc = "Toggle terminal";
           };
           "<leader>t3" = {
-            action = "<CMD>ToggleTermSingle 3<CR>";
+            action = "<CMD>ToggleTermSingle 3 true<CR>";
             desc = "Toggle terminal";
           };
           "<leader>t4" = {
-            action = "<CMD>ToggleTermSingle 4<CR>";
+            action = "<CMD>ToggleTermSingle 4 true<CR>";
             desc = "Toggle terminal";
           };
 
@@ -283,19 +284,19 @@
             desc = "Toggle terminal";
           };
           "<leader>t1" = {
-            action = "<CMD>ToggleTermSingle 1<CR>";
+            action = "<CMD>ToggleTermSingle 1 <CR>";
             desc = "Toggle terminal";
           };
           "<leader>t2" = {
-            action = "<CMD>ToggleTermSingle 2<CR>";
+            action = "<CMD>ToggleTermSingle 2 <CR>";
             desc = "Toggle terminal";
           };
           "<leader>t3" = {
-            action = "<CMD>ToggleTermSingle 3<CR>";
+            action = "<CMD>ToggleTermSingle 3 <CR>";
             desc = "Toggle terminal";
           };
           "<leader>t4" = {
-            action = "<CMD>ToggleTermSingle 4<CR>";
+            action = "<CMD>ToggleTermSingle 4 <CR>";
             desc = "Toggle terminal";
           };
           "<C-Esc>" = {

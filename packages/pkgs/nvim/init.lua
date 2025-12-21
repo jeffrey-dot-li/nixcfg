@@ -35,8 +35,11 @@ end, { desc = 'Swap unnamed (") and system clipboard (+) registers' })
 local terminal_msg = require("toggleterm.terminal")
 -- 2. Grab the Terminal class from it
 local Terminal = terminal_msg.Terminal 
+-- 2. Update function to take 'start_insert' bool
+local function toggleterm_single(id, start_insert)
+  -- Default to false if not provided
+  start_insert = start_insert or false
 
-local function toggleterm_single(id)
   -- Close any visible ToggleTerm windows
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     local buf = vim.api.nvim_win_get_buf(win)
@@ -45,7 +48,7 @@ local function toggleterm_single(id)
     end
   end
 
-  -- FIX: Use 'terminal_msg.get' (the module function), not 'Terminal.get'
+  -- Get (or create) the terminal
   local term = terminal_msg.get(id)
   
   if term == nil then
@@ -53,9 +56,18 @@ local function toggleterm_single(id)
   end
   
   term:open()
-end
 
+  -- Conditionally enter insert mode
+  if start_insert then
+    vim.cmd("startinsert")
+  end
+end
+-- 3. Update the User Command (Optional: parses args like "1 true")
 vim.api.nvim_create_user_command("ToggleTermSingle", function(opts)
-  local id = tonumber(opts.args) or 1
-  toggleterm_single(id)
-end, { nargs = "?", desc = "Open ToggleTerm in a single bottom pane" })
+  -- Split args by space (e.g., ":ToggleTermSingle 1 true")
+  local args = vim.split(opts.args, " ")
+  local id = tonumber(args[1]) or 1
+  local start_insert = args[2] == "true" -- simple string check
+
+  toggleterm_single(id, start_insert)
+end, { nargs = "*", desc = "Open ToggleTerm. Args: [id] [true/false]" })
