@@ -34,6 +34,23 @@
         vim.cmd('colorscheme everforest')
       '';
     };
+    neoscroll-nvim = {
+      package = vip.neoscroll-nvim;
+      setup = ''
+            require('neoscroll').setup({
+          -- All these keys will now be smooth:
+          mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', 'zt', 'zz', 'zb' },
+          hide_cursor = true,          -- Hide cursor while scrolling
+          stop_eof = true,             -- Stop at <EOF>
+          respect_scrolloff = false,   -- Stop at scrolloff margin
+          cursor_scrolls_alone = true, -- The cursor will keep scrolling even if the window cannot
+          easing_function = "quadratic", -- simple easing function
+          pre_hook = nil,              -- Function to run before scrolling
+          post_hook = nil,             -- Function to run after scrolling
+          duration_multiplier = 0.5,
+        })
+      '';
+    };
     vim-visual-multi = {
       package = vip.vim-visual-multi;
     };
@@ -265,22 +282,22 @@
           # TODO: Figure out how to open hover / peek def
 
           # Navigation override
-          "<C-u>" = {
-            action = "<C-u>zz";
-            desc = "Half page up + recenter";
-          };
-          "<C-d>" = {
-            action = "<C-d>zz";
-            desc = "Half page down + recenter";
-          };
-          "<C-f>" = {
-            action = "<C-f>zz";
-            desc = "Full page up + recenter";
-          };
-          "<C-b>" = {
-            action = "<C-b>zz";
-            desc = "Full page down + recenter";
-          };
+          # "<C-u>" = {
+          #   action = "<C-u>zz";
+          #   desc = "Half page up + recenter";
+          # };
+          # "<C-d>" = {
+          #   action = "<C-d>zz";
+          #   desc = "Half page down + recenter";
+          # };
+          # "<C-f>" = {
+          #   action = "<C-f>zz";
+          #   desc = "Full page up + recenter";
+          # };
+          # "<C-b>" = {
+          #   action = "<C-b>zz";
+          #   desc = "Full page down + recenter";
+          # };
 
           # Swap registers
           "<leader>y" = {
