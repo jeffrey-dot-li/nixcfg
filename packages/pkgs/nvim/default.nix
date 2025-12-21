@@ -136,7 +136,7 @@
       options = {
         mouse = "a";
         cmdheight = 1;
-        scrollOffset = 6;
+        scrolloff = 6;
         autoindent = true;
       };
 
@@ -181,15 +181,19 @@
       globals.mapleader = " ";
       maps = {
         normal = {
-          "<leader>\\" = {
-            action = "<CMD>Telescope find_files<CR>";
-          };
-          "<leader>p" = {
+          # Can bind something to this if it makes sense
+          # "<leader>\\" = {
+          #   action = "<CMD>Telescope find_files<CR>";
+          # };
+          "<leader>fp" = {
             action = "<CMD>Telescope buffers<CR>";
           };
-          "<leader>f" = {
-            action = "<CMD>Telescope live_grep<CR>";
+          "<leader>fo" = {
+            action = "<CMD>Telescope current_buffer_fuzzy_find<CR>";
           };
+          # "<leader>f" = {
+          #   action = "<CMD>Telescope live_grep<CR>";
+          # };
 
           "<leader>tt" = {
             action = "<CMD>ToggleTerm<CR>";
@@ -243,7 +247,10 @@
             desc = "Swap \" and + registers";
           };
 
-          "<Esc><Esc>" = {
+          # Apparent sometimes Ctrl + / is sent as Ctrl + _ (apparently ascii is pretty troll)
+          # To test, go to insert mode, then do Ctrl + V then Ctrl + / (or whatever character)
+          # And it will print the control character it receives
+          "<C-/>" = {
             action = "<cmd>nohlsearch<cr>";
             desc = "Clear search highlight";
           };
@@ -291,7 +298,7 @@
             action = "<CMD>ToggleTermSingle 4<CR>";
             desc = "Toggle terminal";
           };
-          "<ESC>" = {
+          "<C-Esc>" = {
             action = "<C-\\><C-n>";
             silent = true;
           };
