@@ -136,10 +136,9 @@
       options = {
         mouse = "a";
         cmdheight = 1;
+        scrollOffset = 6;
         autoindent = true;
       };
-
-      scrollOffset = 6;
 
       telescope = {
         enable = true;
@@ -406,7 +405,6 @@
         enableDAP = true;
         enableExtraDiagnostics = true;
         enableFormat = true;
-        enableLSP = true;
         enableTreesitter = true;
         bash.enable = true;
         clang = {
