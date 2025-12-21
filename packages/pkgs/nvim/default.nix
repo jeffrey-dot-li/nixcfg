@@ -182,7 +182,7 @@
       globals.mapleader = " ";
       maps = {
         normal = {
-          "<leader>t" = {
+          "<leader>\\" = {
             action = "<CMD>Telescope find_files<CR>";
           };
           "<leader>p" = {
@@ -192,10 +192,33 @@
             action = "<CMD>Telescope live_grep<CR>";
           };
 
+          "<leader>tt" = {
+            action = "<CMD>ToggleTerm<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t1" = {
+            action = "<CMD>ToggleTermSingle 1<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t2" = {
+            action = "<CMD>ToggleTermSingle 2<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t3" = {
+            action = "<CMD>ToggleTermSingle 3<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t4" = {
+            action = "<CMD>ToggleTermSingle 4<CR>";
+            desc = "Toggle terminal";
+          };
+
           "<leader>v" = {
             action = "<CMD>Neotree toggle<CR>";
             silent = true;
           };
+          # TODO: Override leader k /j which are go to prev / next diagnostic
+          # TODO: Figure out how to open hover / peek def
 
           # Navigation override
           "<C-u>" = {
@@ -216,9 +239,14 @@
           };
 
           # Swap registers
-          "<leader>ys" = {
+          "<leader>y" = {
             action = "<cmd>SwapRegisters<cr>";
             desc = "Swap \" and + registers";
+          };
+
+          "<Esc><Esc>" = {
+            action = "<cmd>nohlsearch<cr>";
+            desc = "Clear search highlight";
           };
         };
         # Command line mode
@@ -243,6 +271,26 @@
           "<leader>ys" = {
             action = "<cmd>SwapRegisters<cr>";
             desc = "Swap \" and + registers";
+          };
+          "<leader>tt" = {
+            action = "<CMD>ToggleTerm<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t1" = {
+            action = "<CMD>ToggleTermSingle 1<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t2" = {
+            action = "<CMD>ToggleTermSingle 2<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t3" = {
+            action = "<CMD>ToggleTermSingle 3<CR>";
+            desc = "Toggle terminal";
+          };
+          "<leader>t4" = {
+            action = "<CMD>ToggleTermSingle 4<CR>";
+            desc = "Toggle terminal";
           };
           "<ESC>" = {
             action = "<C-\\><C-n>";
@@ -276,11 +324,8 @@
       autocomplete = {
         nvim-cmp = {
           enable = true;
-          mappings = {
-            # previous = "<Up>";
-            # next = "<Down>";
-            # confirm = "<Right>";
-          };
+          # https://github.com/NotAShelf/nvf/blob/4b95ae106c832bea347ad2bd53f2c40d880f0d27/modules/plugins/completion/nvim-cmp/nvim-cmp.nix#L64
+          # mappings = {};
         };
         blink-cmp = {
           # enable = true;
@@ -307,7 +352,11 @@
 
       terminal.toggleterm = {
         enable = true;
-        setupOpts.direction = "horizontal";
+        setupOpts = {
+          direction = "horizontal";
+          winbar.enabled = true;
+          enable_winbar = true;
+        };
         mappings.open = "<C-\\>";
         lazygit = {
           enable = true;
