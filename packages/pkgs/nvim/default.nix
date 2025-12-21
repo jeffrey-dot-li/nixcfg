@@ -138,6 +138,14 @@
         cmdheight = 1;
         scrolloff = 6;
         autoindent = true;
+        foldmethod = "expr";
+        foldexpr = "nvim_treesitter#foldexpr()";
+
+        # Can see function signatures
+        # We also override zM to fold to 1
+        foldlevel = 1;
+        foldlevelstart = 1;
+        # foldlevel = 99;
       };
 
       telescope = {
@@ -221,7 +229,7 @@
             action = "<CMD>Neotree toggle<CR>";
             silent = true;
           };
-          # TODO: Override leader k /j which are go to prev / next diagnostic
+          # Leader k /j which are go to prev / next diagnostic
           # TODO: Figure out how to open hover / peek def
 
           # Navigation override
@@ -254,6 +262,15 @@
           "<C-/>" = {
             action = "<cmd>nohlsearch<cr>";
             desc = "Clear search highlight";
+          };
+
+          # Fold
+          "zM" = {
+            action = "function() 
+  vim.wo.foldlevel = 1
+end";
+            lua = true;
+            desc = "Close to top level fold";
           };
         };
         # Command line mode
@@ -341,6 +358,7 @@
 
       ui = {
         noice.enable = true;
+        nvim-ufo.enable = true;
       };
 
       # visuals = {

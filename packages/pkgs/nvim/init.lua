@@ -71,3 +71,8 @@ vim.api.nvim_create_user_command("ToggleTermSingle", function(opts)
 
   toggleterm_single(id, start_insert)
 end, { nargs = "*", desc = "Open ToggleTerm. Args: [id] [true/false]" })
+
+
+-- When we search a file make sure it opens the fold
+-- Don't do this this doesn't actually work, just do `zv` after search it is the same thing
+-- vim.opt.foldopen:append({ "search", "jump", "mark" })
