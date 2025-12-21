@@ -34,6 +34,9 @@
         vim.cmd('colorscheme everforest')
       '';
     };
+    vim-visual-multi = {
+      package = vip.vim-visual-multi;
+    };
     cmp-cmdline = {
       package = vip.cmp-cmdline;
       setup = ''
@@ -356,7 +359,7 @@
         supermaven-nvim = {
           enable = true;
           setupOpts.keymaps = {
-            accept-suggestion = "<M-Tab>";
+            accept-suggestion = "<C-j>";
           };
         };
       };
