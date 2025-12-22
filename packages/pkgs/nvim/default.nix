@@ -225,8 +225,10 @@
         # multicursors.enable=true;
 
         motion = {
-          hop.enable = true;
-          leap.enable = true;
+          flash-nvim.enable = true;
+          hop.enable = false;
+          leap.enable = false;
+          # Shows the vim ewE W on the line
           precognition.enable = true;
         };
       };
