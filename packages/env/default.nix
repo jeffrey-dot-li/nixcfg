@@ -5,6 +5,7 @@
   #
   lib,
   symlinkJoin,
+  pixi,
   watch,
   dig,
   #

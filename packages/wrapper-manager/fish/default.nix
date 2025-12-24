@@ -51,11 +51,12 @@
       # set -gx __fish_config_sourced 1
 
       echo "HI FROM SYSTEM FISH CONFIG"
+      set IS_DARWIN ${lib.boolToString isDarwin}
 
-      if not set -q __NIX_DARWIN_PATH_SET
-          set -gx __NIX_DARWIN_PATH_SET 1
-          set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
-          set -gx PATH (string match -v $HOME/.cargo/bin $PATH) $HOME/.cargo/bin
+      if test $IS_DARWIN -eq 1; and not set -q __NIX_DARWIN_PATH_SET
+        set -gx __NIX_DARWIN_PATH_SET 1
+        set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
+        set -gx PATH (string match -v $HOME/.cargo/bin $PATH) $HOME/.cargo/bin
       end
 
       ${
