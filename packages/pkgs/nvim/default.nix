@@ -15,6 +15,25 @@
     name = "nvim-osc52";
     src = inputs.nvim-osc52;
   };
+  min-plugins = let
+    vip = pkgs.vimPlugins;
+  in {
+    # substitute = {
+    #   package = vip.substitute-nvim;
+    #   # Normally q is record macro
+    #   setup = ''
+    #     require('substitute').setup({})
+    #     vim.keymap.set("n", "x", subst.operator, { desc = "Substitute" })
+    #     vim.keymap.set("n", "xx", subst.line, { desc = "Substitute line" })
+    #     vim.keymap.set("x", "x", subst.visual, { desc = "Substitute visual" })
+    #   '';
+    # };
+    vim-visual-multi = {
+      # package = nvfetcher.mc;
+      package = vip.vim-visual-multi;
+    };
+  };
+
   plugins = let
     vip = pkgs.vimPlugins;
     # This can also be done with `with pkgs.vimPlugins; { ... }`
@@ -51,14 +70,11 @@
         })
       '';
     };
-    vim-visual-multi = {
-      package = vip.vim-visual-multi;
-    };
+
     cmp-cmdline = {
       package = vip.cmp-cmdline;
       setup = ''
         local cmp = require("cmp")
-
         -- Enable completion for ':' (cmdline)
         cmp.setup.cmdline(':', {
           mapping = cmp.mapping.preset.cmdline(),
@@ -167,7 +183,45 @@
       '';
     };
   };
-  customRC = "vim.cmd('source ${./init.vim}')" + builtins.readFile ./init.lua;
+
+  customRC = "vim.cmd('source ${./init.vim}')" + builtins.readFile ./min_init.lua + builtins.readFile ./init.lua;
+  min-init = builtins.readFile ./min_init.lua;
+
+  nvfMinConfig = {
+    config.vim = {
+      globals.mapleader = " ";
+      luaConfigRC.custom = min-init;
+      extraPlugins = min-plugins;
+      viAlias = lib.mkDefault true;
+      vimAlias = lib.mkDefault false;
+
+      mini = {
+        ai.enable = true;
+      };
+
+      treesitter = {
+        enable = true;
+        fold = true;
+        context.enable = true;
+        # technically shouldn't enable highlight in minimal but whatever
+        highlight.enable = true;
+        indent.enable = true;
+        addDefaultGrammars = false; # cuz its broken rn
+      };
+
+      utility = {
+        surround.enable = true;
+        motion = {
+          flash-nvim.enable = true;
+          hop.enable = false;
+          leap.enable = false;
+          # Shows the vim ewE W on the line
+          precognition.enable = true;
+        };
+      };
+    };
+  };
+
   nvfConfig = {
     config.vim = {
       luaConfigRC.custom = customRC;
@@ -197,6 +251,13 @@
         foldlevel = 99;
       };
 
+      utility = {
+        ccc.enable = false;
+        vim-wakatime.enable = false;
+        diffview-nvim.enable = true;
+        yanky-nvim.enable = false;
+      };
+
       telescope = {
         enable = true;
         setupOpts.defaults.file_ignore_patterns = [
@@ -216,28 +277,10 @@
         todo-comments.enable = true;
       };
 
-      utility = {
-        surround.enable = true;
-        ccc.enable = false;
-        vim-wakatime.enable = false;
-        diffview-nvim.enable = true;
-        yanky-nvim.enable = false;
-        # multicursors.enable=true;
-
-        motion = {
-          flash-nvim.enable = true;
-          hop.enable = false;
-          leap.enable = false;
-          # Shows the vim ewE W on the line
-          precognition.enable = true;
-        };
-      };
-
       theme = {
         enable = false;
       };
 
-      globals.mapleader = " ";
       maps = {
         normal = {
           # Can bind something to this if it makes sense
@@ -396,15 +439,6 @@
         codewindow.enable = true; # lighter, faster, and uses lua for configuration
       };
 
-      treesitter = {
-        enable = true;
-        fold = true;
-        context.enable = true;
-        highlight.enable = true;
-        indent.enable = true;
-        addDefaultGrammars = false; # cuz its broken rn
-      };
-
       autocomplete = {
         nvim-cmp = {
           enable = true;
@@ -509,7 +543,14 @@
     };
   };
   customNeovim = inputs.nvf.lib.neovimConfiguration {
-    modules = [nvfConfig];
+    modules = [nvfMinConfig nvfConfig];
     inherit pkgs;
   };
-in (customNeovim.neovim)
+  neovimMin = inputs.nvf.lib.neovimConfiguration {
+    modules = [nvfMinConfig];
+    inherit pkgs;
+  };
+in {
+  nvim = customNeovim.neovim;
+  nvim-min = neovimMin.neovim;
+}

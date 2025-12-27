@@ -8,14 +8,26 @@
 {
   everforest = {
     pname = "everforest";
-    version = "b10ed9a8b37d6b7448908be98ff8f58f550adc48";
+    version = "b90025cc84dbb9c46df5a2ae540d3f01cf85af74";
     src = fetchFromGitHub {
       owner = "sainnhe";
       repo = "everforest";
-      rev = "b10ed9a8b37d6b7448908be98ff8f58f550adc48";
+      rev = "b90025cc84dbb9c46df5a2ae540d3f01cf85af74";
       fetchSubmodules = false;
-      sha256 = "sha256-2mljM3Gwl3oXa2xF5Nh+WXDrjJWhwgRHgRiTJieWhsg=";
+      sha256 = "sha256-9uyxMDnlTyqX3pEZoIxnndlpCD/HfB8iMynrppzouNg=";
     };
-    date = "2025-12-06";
+    date = "2025-12-23";
+  };
+  mc = {
+    pname = "mc";
+    version = "b2eced172cc19523066752deb8ba93321d7ccb0e";
+    src = fetchFromGitHub {
+      owner = "YacineDo";
+      repo = "mc.nvim";
+      rev = "b2eced172cc19523066752deb8ba93321d7ccb0e";
+      fetchSubmodules = false;
+      sha256 = "sha256-ewG8myDaGHpkbic78KYzj8dc+H96ld/WICsPcUCd8S4=";
+    };
+    date = "2022-09-18";
   };
 }

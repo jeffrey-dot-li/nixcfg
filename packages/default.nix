@@ -19,6 +19,7 @@ lib.fix (
           (lib.filterAttrs (name: value: value == "directory"))
           (builtins.mapAttrs (name: _: callPackage ./pkgs/${name} {}))
         ];
+        nvims = callPackage ./pkgs/nvim {inherit inputs pkgs lib;};
       in
         auto
         // {
@@ -29,7 +30,8 @@ lib.fix (
           #   databaseDate = config.flake.lib.mkDate inputs.nix-index-database.lastModifiedDate;
           # };
           # preventing infrec
-          nvim = callPackage ./pkgs/nvim {inherit inputs pkgs lib;};
+          nvim = nvims.nvim;
+          nvim-min = nvims.nvim-min;
           # fish = callPackage ./pkgs/fish {inherit (pkgs) fish;};
           # guix = callPackage ./guix {
           #   inherit (pkgs) guix;

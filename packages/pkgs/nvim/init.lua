@@ -1,35 +1,18 @@
+if vim.g.vscode then
+  print("DEBUG: VS Code branch loaded")
+else
+  print("DEBUG: Regular Neovim branch loaded")
+  -- Regular Neovim config
+end
 
 vim.api.nvim_create_augroup("fish_fmt", { clear = true })
+
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = "fish_fmt",
   pattern = "*.fish",
   command = "silent! %!fish_indent",
 })
-
-vim.api.nvim_create_user_command("SwapRegisters", function()
-  local unnamed = vim.fn.getreg('"')
-  local unnamed_type = vim.fn.getregtype('"')
-
-  local plus = vim.fn.getreg('+')
-  local plus_type = vim.fn.getregtype('+')
-
-  vim.fn.setreg('"', plus, plus_type)
-  vim.fn.setreg('+', unnamed, unnamed_type)
-
-  -- Notify
-  local ok, notify = pcall(require, "notify")
-  if ok then
-    notify(
-      'Swapped registers: " ↔ +',
-      "info",
-      { title = "Registers" }
-    )
-  else
-    vim.notify('Swapped registers: " ↔ +', vim.log.levels.INFO)
-  end
-end, { desc = 'Swap unnamed (") and system clipboard (+) registers' })
-
 
 -- 1. Import the whole module first
 local terminal_msg = require("toggleterm.terminal")

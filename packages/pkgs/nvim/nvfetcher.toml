@@ -30,3 +30,8 @@ fetch.github = "sainnhe/everforest"
 # [auto-session]
 # src.git = "https://github.com/rmagatti/auto-session"
 # fetch.github = "rmagatti/auto-session"
+
+
+[mc]
+src.git = "https://github.com/YacineDo/mc.nvim"
+fetch.github = "YacineDo/mc.nvim"
