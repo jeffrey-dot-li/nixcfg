@@ -54,10 +54,18 @@
       set IS_DARWIN ${lib.boolToString isDarwin}
 
       if test $IS_DARWIN; and not set -q __NIX_DARWIN_PATH_SET
+        echo "Setting darwin path"
         set -gx __NIX_DARWIN_PATH_SET 1
         set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
         set -gx PATH (string match -v $HOME/.cargo/bin $PATH) $HOME/.cargo/bin
       end
+
+      if string match -q '/run/wrappers/bin' -- $PATH
+        echo "Setting nixos path";
+        set -gx PATH /run/wrappers/bin (string match -v /run/wrappers/bin $PATH)
+      end
+
+
 
       ${
         lib.concatStringsSep "\n" (
@@ -108,8 +116,6 @@
           echo "Sourcing $config_path"
           source $config_path
       end
-      # For it to work on mac, need to put this into local `~/.config/fish/config.fish` for some reason
-      # otherwise `/usr/local/bin` will always be higher on mac. :/
     '';
 in {
   wrappers.fish = {
