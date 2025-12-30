@@ -71,11 +71,11 @@ symlinkJoin {
   paths =
     (builtins.filter lib.isDerivation (builtins.attrValues args))
     ++ [
-      # (
-      #   pkgs.google-cloud-sdk.withExtraComponents [
-      #     pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
-      #   ]
-      # )
+      (
+        pkgs.google-cloud-sdk.withExtraComponents [
+          pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+        ]
+      )
       # (pkgs.azure-cli.withExtensions [
       #   pkgs.azure-cli.extensions.aks-preview
       #   pkgs.azure-cli.extensions.k8s-extension

@@ -417,14 +417,14 @@
         };
       };
 
-      assistant = {
-        supermaven-nvim = {
-          enable = true;
-          setupOpts.keymaps = {
-            accept-suggestion = "<C-j>";
-          };
-        };
-      };
+      # assistant = {
+      #   supermaven-nvim = {
+      #     enable = true;
+      #     setupOpts.keymaps = {
+      #       accept-suggestion = "<C-j>";
+      #     };
+      #   };
+      # };
 
       filetree.neo-tree = {
         enable = true;
@@ -444,7 +444,11 @@
           enable = true;
           # https://github.com/NotAShelf/nvf/blob/4b95ae106c832bea347ad2bd53f2c40d880f0d27/modules/plugins/completion/nvim-cmp/nvim-cmp.nix#L64
           # mappings = {};
-          sourcePlugins = ["supermaven-nvim" "telescope" "nvim-treesitter"];
+          sourcePlugins = [
+            # "supermaven-nvim"
+            "telescope"
+            "nvim-treesitter"
+          ];
         };
         blink-cmp = {
           # enable = true;
