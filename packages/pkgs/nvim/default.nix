@@ -198,6 +198,25 @@
       mini = {
         ai.enable = true;
       };
+      languages = {
+        enableDAP = true;
+        enableExtraDiagnostics = true;
+        enableFormat = true;
+        enableTreesitter = true;
+        bash.enable = true;
+        clang = {
+          enable = true;
+          cHeader = true;
+        };
+        markdown.enable = true;
+        nix = {
+          enable = true;
+        };
+        rust = {
+          enable = true;
+          extensions.crates-nvim.enable = true;
+        };
+      };
 
       treesitter = {
         enable = true;
@@ -522,26 +541,6 @@
           removeWorkspaceFolder = "<leader>wr";
           renameSymbol = "<leader>r";
           signatureHelp = "<C-k>";
-        };
-      };
-
-      languages = {
-        enableDAP = true;
-        enableExtraDiagnostics = true;
-        enableFormat = true;
-        enableTreesitter = true;
-        bash.enable = true;
-        clang = {
-          enable = true;
-          cHeader = true;
-        };
-        markdown.enable = true;
-        nix = {
-          enable = true;
-        };
-        rust = {
-          enable = true;
-          extensions.crates-nvim.enable = true;
         };
       };
     };
