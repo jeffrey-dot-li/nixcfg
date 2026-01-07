@@ -64,6 +64,7 @@
   awscli2,
   eksctl,
   lsof,
+  lazygit,
   # tailscale,
 } @ args:
 symlinkJoin {

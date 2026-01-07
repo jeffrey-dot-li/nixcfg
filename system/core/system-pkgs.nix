@@ -12,7 +12,6 @@ in {
   environment.systemPackages = with pkgs; [
     alejandra
     # uv
-    lazygit
     # texlive.combined.scheme-full # This includes latexmk
     # (rust-bin.beta.latest.default.override {
     #   extensions = ["rust-src"];
