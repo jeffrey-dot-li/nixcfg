@@ -11,7 +11,14 @@
   ids.gids.nixbld = 350;
 
   environment.systemPackages =
-    builtins.attrValues self'.packages;
+    builtins.attrValues self'.packages
+    ++ [
+      (
+        pkgs.google-cloud-sdk.withExtraComponents [
+          pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+        ]
+      )
+    ];
   environment.variables = {
     SHELL_PATH = "${self'.packages.fish}/bin/fish";
     EDITOR = "nvim";

@@ -216,6 +216,9 @@
           enable = true;
           extensions.crates-nvim.enable = true;
         };
+        python = {
+          enable = true;
+        };
       };
 
       treesitter = {
@@ -227,7 +230,30 @@
         indent.enable = true;
         addDefaultGrammars = false; # cuz its broken rn
       };
-
+      lsp = {
+        enable = true;
+        formatOnSave = true;
+        lightbulb.enable = true;
+        lspSignature.enable = true;
+        lspconfig.enable = true;
+        mappings = {
+          addWorkspaceFolder = "<leader>wa";
+          codeAction = "<leader>a";
+          format = "<C-f>";
+          goToDeclaration = "gD";
+          goToDefinition = "gd";
+          hover = "K";
+          listImplementations = "gi";
+          listReferences = "gr";
+          listWorkspaceFolders = "<leader>wl";
+          nextDiagnostic = "<leader>j";
+          previousDiagnostic = "<leader>k";
+          openDiagnosticFloat = "<leader>e";
+          removeWorkspaceFolder = "<leader>wr";
+          renameSymbol = "<leader>r";
+          signatureHelp = "<C-k>";
+        };
+      };
       utility = {
         surround.enable = true;
         motion = {
@@ -517,31 +543,6 @@
       binds = {
         whichKey.enable = true;
         cheatsheet.enable = true;
-      };
-
-      lsp = {
-        enable = true;
-        formatOnSave = true;
-        lightbulb.enable = true;
-        lspSignature.enable = true;
-        lspconfig.enable = true;
-        mappings = {
-          addWorkspaceFolder = "<leader>wa";
-          codeAction = "<leader>a";
-          format = "<C-f>";
-          goToDeclaration = "gD";
-          goToDefinition = "gd";
-          hover = "K";
-          listImplementations = "gi";
-          listReferences = "gr";
-          listWorkspaceFolders = "<leader>wl";
-          nextDiagnostic = "<leader>j";
-          previousDiagnostic = "<leader>k";
-          openDiagnosticFloat = "<leader>e";
-          removeWorkspaceFolder = "<leader>wr";
-          renameSymbol = "<leader>r";
-          signatureHelp = "<C-k>";
-        };
       };
     };
   };
