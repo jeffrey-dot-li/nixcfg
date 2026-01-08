@@ -100,6 +100,11 @@ in {
     ];
   };
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
   environment.systemPackages = with pkgs; [
     minikube
     docker
