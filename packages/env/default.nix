@@ -61,10 +61,11 @@
   # pipx,
   kubectl,
   kubernetes-helm,
-  awscli2,
-  eksctl,
+  # awscli2,
+  # eksctl,
   lsof,
   lazygit,
+  elan,
   # tailscale,
 } @ args:
 symlinkJoin {
