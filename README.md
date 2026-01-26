@@ -40,22 +40,57 @@ Last just configure system to use it as default shell in `~/.profile`:
 ```sh
 #! /bin/bash
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
-code() { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args "$argv"; }
-echo "HI FROM PROFILE $__USER_SHELL_SOURCED"
+echo "Sourcing ~/.profile ${__USER_SHELL_SOURCED}"
 
 if [ "$__USER_SHELL_SOURCED" = "1" ]; then
-	return
+        return
 fi
+
 __USER_SHELL_SOURCED=1
-if [ -n "${SHELL_PATH}" ]; then
-	export SHELL="$SHELL_PATH"
-	exec $SHELL
-else
-	echo "Error: SHELL_PATH is not defined" >&2
-	echo "Default shell is $(dscl . -read /Users/"$USER" UserShell | sed 's/UserShell: //')"
+
+. "$HOME/.local/bin/env"
+
+if [ -z "${SHELL_PATH:-}" ]; then
+        echo "Error: SHELL_PATH is not defined" >&2
+        exit 1
 fi
-```
+
+export SHELL="$SHELL_PATH"
+# ---- Case 1: non-interactive login shell running a single command ----
+# zsh exports ZSH_EXECUTION_STRING even when sourcing ~/.profile
+if [ -n "${ZSH_EXECUTION_STRING:-}" ]; then
+  cmd="$ZSH_EXECUTION_STRING"
+
+  # Strip zsh-only prelude Claude injects
+  case "$cmd" in
+    setopt\ NO_EXTENDED_GLOB*'&&'*)
+      cmd="${cmd#*&& }"
+      ;;
+  esac
+  # 2) fish doesn't support bash's ">|" (noclobber override). Replace with ">"
+  cmd=$(printf '%s' "$cmd" | sed 's/>|/>/g')
+
+  # 3) Claude sometimes escapes "<" as "\<" — remove the backslash
+  cmd=$(printf '%s' "$cmd" | sed 's/\\</</g')
+
+  exec "$SHELL_PATH" -c "$cmd"
+fi
+
+# ---- Case 2: SSH command (common for automation) ----
+if [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
+        exec "$SHELL" -c "$SSH_ORIGINAL_COMMAND"
+fi
+
+# ---- Case 3: interactive login shell for a human ----
+# $- contains 'i' when interactive (POSIX-safe)
+case "$-" in
+*i*)
+        if [ -t 0 ] && [ -t 1 ]; then
+                exec "$SHELL" -l
+        fi
+        ;;
+esac
+#```
 
 Finally, in `~/.zprofile` just source the `~/.profile`:
 ```sh

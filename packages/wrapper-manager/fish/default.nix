@@ -86,10 +86,11 @@
       if status is-login
         fenv source /etc/profile
       end
-      ${lib.fileContents ./echo_light.fish}
-      ${lib.fileContents ./ssh.fish}
+
 
       if status is-interactive
+        ${lib.fileContents ./echo_light.fish}
+        ${lib.fileContents ./ssh.fish}
         ${lib.fileContents ./interactive.fish}
         ${lib.fileContents ./pushd_mod.fish}
         ${lib.fileContents ./direnv.fish}
