@@ -90,7 +90,10 @@
 
       if status is-interactive
         ${lib.fileContents ./echo_light.fish}
-        ${lib.fileContents ./ssh.fish}
+
+        # TODO: Fix for Linux Desktop as well use keychain
+        # lib.fileContents ./ssh.fish
+
         ${lib.fileContents ./interactive.fish}
         ${lib.fileContents ./pushd_mod.fish}
         ${lib.fileContents ./direnv.fish}
