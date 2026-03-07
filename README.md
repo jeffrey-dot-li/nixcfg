@@ -62,11 +62,9 @@ if [ -n "${ZSH_EXECUTION_STRING:-}" ]; then
   cmd="$ZSH_EXECUTION_STRING"
 
   # Strip zsh-only prelude Claude injects
-  case "$cmd" in
-    setopt\ NO_EXTENDED_GLOB*'&&'*)
-      cmd="${cmd#*&& }"
-      ;;
-  esac
+  # Strip "setopt NO_EXTENDED_GLOB 2>/dev/null || true && " from anywhere in the command
+  cmd=$(printf '%s' "$cmd" | sed 's/setopt NO_EXTENDED_GLOB [^&]*&& //')
+
   # 2) fish doesn't support bash's ">|" (noclobber override). Replace with ">"
   cmd=$(printf '%s' "$cmd" | sed 's/>|/>/g')
 
@@ -125,7 +123,6 @@ nix flake update
 
 ## Use this Shell as a dependency:
 ### Deprecated! Don't do this, just use direnv + whatever flake.nix you wnat to use
-### TODO: Write a guide on how to use direnv with nix flakes
 
 The correct pattern is, in another project, create a `flake.nix` that uses that projects dependencies (node, python, etc).
 To use this shell as the base, add the following:
@@ -178,7 +175,8 @@ To use this shell as the base, add the following:
 ## Debian:
 ### Install:
 
-Install nix, clone repo. (TODO: Add instructions for installing nix on Debian) 
+Install nix, clone repo. 
+https://lix.systems/install/
 
 ### Setup:
 ```sh

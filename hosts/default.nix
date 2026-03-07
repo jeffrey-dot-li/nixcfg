@@ -38,24 +38,6 @@
     inputs = inputs;
   };
 in {
-  # nixosConfigurations = {
-  #   # Raspberry Pi
-  #   appletun = nixpkgs.lib.nixosSystem {
-  #     # TODO: Put nixos stuff in its own file.
-  #     system = "aarch64-linux";
-  #     specialArgs = mkSpecialArgs "aarch64-linux";
-  #     modules =
-  #       [
-  #         {networking.hostName = "appletun";}
-  #         ./appletun
-  #         inputs.agenix.nixosModules.default
-  #         inputs.homix.nixosModules.default
-  #         # TODO: Integrate wayland
-  #       ]
-  #       ++ shared;
-  #   };
-  # };
-
   nixosConfigurations = nixosConfigurations;
   darwinConfigurations = darwinConfigurations;
 }
