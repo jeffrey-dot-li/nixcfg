@@ -11,5 +11,9 @@
     gamescopeSession.enable = true;
   };
   programs.gamemode.enable = true;
+  hardware.opengl = {
+    extraPackages = with pkgs; [mangohud];
+    extraPackages32 = with pkgs; [mangohud];
+  };
   environment.systemPackages = with pkgs; [mangohud protonup-qt lutris bottles heroic];
 }
