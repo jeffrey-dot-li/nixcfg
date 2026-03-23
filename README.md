@@ -224,9 +224,6 @@ TODO: Document how to clean nix garbage after rebuilds.
 nix-store --gc
 ```
 
-
-
-
 # COMMON ERRORS:
 
 ## Git: `No user exists for uid xxxx`

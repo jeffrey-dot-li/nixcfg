@@ -19,7 +19,7 @@
   magic-wormhole-rs,
   fd,
   libarchive,
-  dogdns,
+  # dogdns,
   # Use custom git - this is override
   git,
   difftastic,
