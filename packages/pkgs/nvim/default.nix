@@ -481,7 +481,8 @@
       };
       minimap = {
         minimap-vim.enable = false;
-        codewindow.enable = true; # lighter, faster, and uses lua for configuration
+        # Bug https://github.com/NotAShelf/nvf/issues/1426
+        codewindow.enable = false; # lighter, faster, and uses lua for configuration
       };
 
       autocomplete = {
