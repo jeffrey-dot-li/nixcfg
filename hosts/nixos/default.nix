@@ -16,6 +16,8 @@
           {nixpkgs.hostPlatform = system;}
           inputs.agenix.nixosModules.default
           module
+          # https://git.lix.systems/lix-project/nixos-module/pulls/105
+          inputs.lix-module.nixosModules.default
         ];
       specialArgs = mkSpecialArgs system;
     };

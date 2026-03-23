@@ -13,6 +13,7 @@
         ++ [
           (import ./darwin-defaults.nix)
           {nixpkgs.hostPlatform = system;}
+          inputs.lix-module.darwinModules.default
           module
         ];
       specialArgs = mkSpecialArgs system;
