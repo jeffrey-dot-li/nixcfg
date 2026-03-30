@@ -66,6 +66,7 @@
   lsof,
   lazygit,
   elan,
+  cachix,
   # tailscale,
 } @ args:
 symlinkJoin {
