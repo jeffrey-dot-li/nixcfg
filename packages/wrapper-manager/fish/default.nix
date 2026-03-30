@@ -105,7 +105,7 @@
           ${lib.getExe pkgs.starship} module character
         end
         ${lib.getExe pkgs.starship} init fish | source
-        ${lib.getExe pkgs.zoxide} init fish | source
+        ${lib.getExe pkgs.zoxide} init fish --cmd cd | source
         enable_transience
         set -gx DIRENV_LOG_FORMAT ""
         set -gx direnv_config_dir ${direnvConfig}
