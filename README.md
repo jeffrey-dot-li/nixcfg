@@ -126,6 +126,10 @@ cachix push jeffrey-dot-li ./result
 nix path-info --store https://jeffrey-dot-li.cachix.org "$(nix path-info ./result)"
 ```
 
+For CI on GitHub Actions, add a repository secret named `CACHIX_AUTH_TOKEN`.
+The workflow in `.github/workflows/ubuntu-cache.yml` builds `.#default` on `ubuntu-latest`,
+pulls from the `jeffrey-dot-li` cache, and pushes new artifacts on `main`.
+
 ## Updating
 ```sh
 nix flake update
