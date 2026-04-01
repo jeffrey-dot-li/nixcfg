@@ -116,6 +116,17 @@ Use `dscl . -read ~/ UserShell` to check the current shell.
 Note also that kitty for some reason doesn't always update to shell defined by `dscl . -read ~/ UserShell` immediately. I don't know why there is a desync against default terminal program on Mac. Always check default terminal program on Mac to see what shell is actually being used.
 
 # Cachix:
+
+## Pulling:
+```sh
+nix profile install nixpkgs#cachix
+cachix use jeffrey-dot-li
+
+nix profile install github:jeffrey-dot-li/nixcfg --priority 4
+# Update
+nix profile upgrade nixcfg
+```
+
 To login:
 ```sh
 cachix authtoken <TOKEN>
