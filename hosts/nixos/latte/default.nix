@@ -35,7 +35,7 @@ in {
     #   interfaces = ["wlp11s0"];
     # };
   };
-
+# timedatectl list-timezones | grep Paris
   # time.timeZone = "Asia/Tokyo";
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_US.UTF-8";
