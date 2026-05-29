@@ -18,7 +18,8 @@ nix profile remove
 Install Nix with https://nixcademy.com/posts/nix-on-macos/ guide: https://github.com/DeterminateSystems/nix-installer
 
 ```sh
-curl -sSf -L https://install.lix.systems/lix | sh -s -- install```
+curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+```
 
 ### Run configuration script:
 ```sh
