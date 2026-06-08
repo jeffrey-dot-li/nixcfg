@@ -2,6 +2,7 @@ let
   keys = {
     users = {
       jeffreyli = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGSYNjWv0dUHvpnYMcvJ4WGy1d54Z1tZV4PeA7luYU1 jeffrey.dot.li@gmail.com";
+      jeffrey_cohere = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfKUiW1/maVMMgaXmrV/Ahv+cTYo/ewnfp5NpApvJ8P jeffreyli@cohere.com";
       junli = " ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGSo04nMt2+4EWz+23p8YjOMaOAPZzdJzIuG+a2sVE8p jun_li71@hotmail.com";
     };
     systems = {

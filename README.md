@@ -95,6 +95,17 @@ Finally, in `~/.zprofile` just source the `~/.profile`:
 source ~/.profile
 ```
 
+For mac, add to `~/.config/fish/config.fish`:
+
+```sh
+echo "HI FROM FISH CONFIG"
+fish_add_path --move --prepend /run/current-system/sw/bin
+if status is-interactive
+# Commands to run in interactive sessions can go here
+end
+```
+
+
 Note that this relies on the default shell being loaded to be zsh.
 This is because if we set to bin/nucleus by default, it can't read system environment variables properly (So `nix` will not be defined).
 We set it to zsh, and then load the shellWrapper in the ~/.profile from the $SHELL_PATH environment variable.
