@@ -21,9 +21,10 @@ in {
     gcc
     pciutils
     (
-      if stdenv.isDarwin
-      then customVscode
-      else vscode
+      # if stdenv.isDarwin
+      # then customVscode
+      # else vscode
+      vscode
     )
   ];
 }
