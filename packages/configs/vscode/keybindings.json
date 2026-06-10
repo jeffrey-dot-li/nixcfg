@@ -942,7 +942,106 @@
     "when": "workbench.panel.chat.view.edits.active"
   },
   {
-    "key": "shift+cmd+i",
-    "command": "editor.action.addSymbolToChat"
+    "key": "cmd+i",
+    "command": "-glass.insertSelectionIntoGlassComposer",
+    "when": "isGlassAgentWorkspace && glassActiveTabKind == 'file' || isGlassAgentWorkspace && glassActiveTabKind == 'terminal' || glassDiffLineSelectionActive && isGlassAgentWorkspace && glassActiveTabKind == 'diff' || glassDiffLineSelectionActive && isGlassAgentWorkspace && glassActiveTabKind == 'pr'"
   },
+  {
+    "key": "cmd+i",
+    "command": "-glass.focusInput",
+    "when": "glassNoModalOpen && isGlassEmptyWorkspace"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat.holdForSpeech",
+    "when": "hasSpeechProvider && inlineChatVisible && textInputFocus"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-notebook.cell.chat.start",
+    "when": "config.notebook.experimental.cellChat && notebookChatAgentRegistered && notebookEditable && notebookEditorFocused && !inputFocus || config.notebook.experimental.generate && notebookChatAgentRegistered && notebookEditable && notebookEditorFocused && !inputFocus"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-toggleSuggestionDetails",
+    "when": "suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && !isGlass"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-workbench.action.chat.holdToVoiceChatInChatView",
+    "when": "chatIsEnabled && hasSpeechProvider && !chatSessionRequestInProgress && !editorFocus && !inChatInput && !inlineChatFocused && !notebookEditorFocused && !searchViewletFocus"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-workbench.action.terminal.suggestToggleDetails",
+    "when": "simpleSuggestWidgetHasFocusedSuggestion && terminalFocus && terminalHasBeenCreated && terminalIsOpen && terminalSuggestWidgetVisible || simpleSuggestWidgetHasFocusedSuggestion && terminalFocus && terminalIsOpen && terminalProcessSupported && terminalSuggestWidgetVisible"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat2.reveal",
+    "when": "inlineChatHasEditsAgent && !chatEdits.isGlobalEditingSession && chatEdits.requestCount >= 1"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat2.stop",
+    "when": "inlineChatHasEditsAgent && inlineChatVisible && chatEdits.requestCount == '0'"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-markdown.extension.editing.toggleItalic",
+    "when": "editorTextFocus && !editorReadonly && editorLangId =~ /^markdown$|^rmd$|^quarto$/"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-mdx.toggleEmphasis",
+    "when": "editorTextFocus && !editorReadonly && editorLangId == 'mdx'"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-search.action.searchWithAI",
+    "when": "hasAIResultProviderKey && searchViewletFocus"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-editor.action.triggerSuggest",
+    "when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !isGlass && !suggestWidgetVisible"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-focusSuggestion",
+    "when": "suggestWidgetVisible && textInputFocus && !isGlass && !suggestWidgetHasFocusedSuggestion"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-inlineChat2.stop"
+  },
+  {
+    "key": "shift+cmd+b",
+    "command": "-composer.openBrowserTab",
+    "when": "!isGlass"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-editor.action.goToImplementation",
+    "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-latex-workshop.build",
+    "when": "!config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^build$|^latex$|^latex-class$|^latex-package$|^context$|^latex-expl3$|^doctex$|^rsweave$|^jlweave$|^pweave$/"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-glass.togglePanel",
+    "when": "glassNoModalOpen && isGlassEmptyWorkspace"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-workbench.action.toggleAuxiliaryBar",
+    "when": "!isAuxiliaryWindowFocusedContext"
+  }
 ]

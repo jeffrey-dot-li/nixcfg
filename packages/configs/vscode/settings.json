@@ -1,6 +1,5 @@
 {
   "workbench.sideBar.location": "left",
-  "workbench.colorTheme": "Solarized Light+",
   "breadcrumbs.enabled": true,
   "editor.quickSuggestions": {
     "other": true,
@@ -431,7 +430,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 6/8/2026, 1:48:34 PM",
+    "//": "Last update at 6/8/2026, 2:03:08 PM",
     ".agent": ".agent, .claude, .cline, .codebuddy, .codex, .commandcode, .continue, .crush, .cursor, .factory, .gemini, .goose, .junie, .kilocode, .kiro, .kode, .mcpjam, .mux, .neovate, .opencode, .openhands, .pi, .pochi, .qoder, .qwen, .roo, .trae, .windsurf, .zencoder",
     ".clang-tidy": ".clang-format, .clangd, compile_commands.json",
     ".env": "*.env, .env.*, .envrc, env.d.ts",
@@ -615,11 +614,8 @@
   "remote.SSH.showLoginTerminal": true,
   "remote.SSH.enableAgentForwarding": true,
   "r.rmarkdown.knit.command": "Sys.setenv(PATH=paste(Sys.getenv(\\\"PATH\\\"), sep=\\\":\\\")); rmarkdown::render",
-  "r.rmarkdown.knit.useBackgroundProcess": false,
+  "r.rmarkdown.knit.useBackgroiundProcess": false,
   "python.terminal.activateEnvironment": false,
-  "terminal.integrated.commandsToSkipShell": [
-    "language-julia.interrupt"
-  ],
   "julia.symbolCacheDownload": true,
   "julia.enableTelemetry": false,
   "latex-workshop.formatting.latex": "latexindent",
@@ -744,7 +740,12 @@
     "nix",
     "mojo"
   ],
-  "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+  "python.defaultInterpreterPath": "/Users/jeffreyli/.local/bin/python3.14",
   "remote.autoForwardPortsSource": "hybrid",
-  "window.autoDetectColorScheme": false
+  "window.autoDetectColorScheme": false,
+  "workbench.colorTheme": "My Custom Theme",
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.toggleAuxiliaryBar",
+    "composer.startComposerPrompt"
+  ]
 }
