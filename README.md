@@ -236,7 +236,7 @@ nix profile install
 # Run:
 direnv allow
 # Upgrade:
-nix profile upgrade "nixcfg"
+nix profile upgrade '.*' --refresh
 ```
 
 This will install into `~/.nix-profile/bin`. Can list with `nix profile list` and remove with `nix profile remove`.

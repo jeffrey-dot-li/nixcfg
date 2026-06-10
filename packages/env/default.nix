@@ -59,6 +59,7 @@
   # On gpu, need to use system c++ otherwise transformer-engine[jax] won't build
   # gcc,
   # pipx,
+  krew,
   kubectl,
   kubernetes-helm,
   # awscli2,
@@ -89,5 +90,8 @@ symlinkJoin {
       # inputs'.nh.packages.default
       # inputs'.hover-rs.packages.default
       # inputs'.guix-search.packages.default
+      (pkgs.writeShellScriptBin "kubectl-krew" ''
+        exec ${krew}/bin/krew "$@"
+      '')
     ];
 }
