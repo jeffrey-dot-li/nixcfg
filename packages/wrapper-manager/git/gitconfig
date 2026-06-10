@@ -11,6 +11,7 @@
 [core]
   eol=lf
   autocrlf=input
+  sshCommand = /usr/bin/ssh
   untrackedcache = true
   fsmonitor = true
   # This is replaced by actual value in nix build
