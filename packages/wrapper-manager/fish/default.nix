@@ -50,7 +50,6 @@
       # set -q __fish_config_sourced; and exit
       # set -gx __fish_config_sourced 1
 
-      echo "HI FROM SYSTEM FISH CONFIG"
       set IS_DARWIN ${lib.boolToString isDarwin}
 
       if test $IS_DARWIN; and not set -q __NIX_DARWIN_PATH_SET
@@ -89,6 +88,8 @@
 
 
       if status is-interactive
+        echo "HI FROM SYSTEM FISH CONFIG"
+
         ${lib.fileContents ./echo_light.fish}
 
         # TODO: Fix for Linux Desktop as well use keychain
@@ -110,15 +111,15 @@
         set -gx DIRENV_LOG_FORMAT ""
         set -gx direnv_config_dir ${direnvConfig}
         ${lib.getExe pkgs.direnv} hook fish | source
-      end
 
-      # Source user defined `config.fish`
-      set config_path ~/.config/fish/config.fish
-      # Check if config.fish exists
-      if test -e $config_path
+        # Source user defined `config.fish`
+        set config_path ~/.config/fish/config.fish
+        # Check if config.fish exists
+        if test -e $config_path
           # Source the config file
           echo "Sourcing $config_path"
           source $config_path
+        end
       end
     '';
 in {
