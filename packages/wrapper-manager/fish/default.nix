@@ -92,7 +92,9 @@
 
         ${lib.fileContents ./echo_light.fish}
 
-        # TODO: Fix for Linux Desktop as well use keychain
+        # Note: this is deprecated - on mac use
+        # `ssh-add --apple-use-keychain ~/.ssh/id_ed25519`
+        # OLD: Fix for Linux Desktop as well use keychain
         # lib.fileContents ./ssh.fish
 
         ${lib.fileContents ./interactive.fish}
