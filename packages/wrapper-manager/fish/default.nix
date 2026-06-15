@@ -66,6 +66,8 @@
 
 
 
+
+
       ${
         lib.concatStringsSep "\n" (
           map
@@ -102,6 +104,7 @@
         ${lib.fileContents ./direnv.fish}
         ${lib.fileContents ./open.fish}
         set -gx EDITOR ${lib.getExe pkgs.nvim}
+        set -gx SYSTEMD_EDITOR ${lib.getExe pkgs.nvim}
 
         set -gx STARSHIP_CONFIG ${toml.generate "starship.toml" starship-settings}
         function starship_transient_prompt_func
@@ -122,6 +125,8 @@
           echo "Sourcing $config_path"
           source $config_path
         end
+
+        fish_add_path ~/.krew/bin
       end
     '';
 in {
