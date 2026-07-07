@@ -94,6 +94,7 @@ in {
     description = "Li";
     openssh.authorizedKeys.keys = [
       keys.users.jeffreyli
+      keys.users.jeffrey_cohere
       keys.users.junli
     ];
     extraGroups = ["networkmanager" "wheel" "docker"];
