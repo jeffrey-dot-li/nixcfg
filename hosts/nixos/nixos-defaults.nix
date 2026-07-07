@@ -9,6 +9,7 @@
   environment.systemPackages =
     # TODO: Add kitty configuration
     builtins.attrValues self'.packages ++ [pkgs.kitty pkgs.proton-pass];
+  fonts.packages = [pkgs.fira-code];
   programs.ccache.enable = true;
   programs.fish.enable = true;
   nix.settings.extra-sandbox-paths = [config.programs.ccache.cacheDir];

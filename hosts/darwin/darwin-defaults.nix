@@ -20,6 +20,7 @@
       )
       pkgs.cloudflared
     ];
+  fonts.packages = [pkgs.fira-code];
   environment.variables = {
     SHELL_PATH = "${self'.packages.fish}/bin/fish";
     EDITOR = "nvim";
