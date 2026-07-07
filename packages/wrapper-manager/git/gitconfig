@@ -11,7 +11,8 @@
 [core]
   eol=lf
   autocrlf=input
-  sshCommand = /usr/bin/ssh
+  # sshCommand is set to /usr/bin/ssh on macOS only (replaced by nix build); see default.nix
+  $SSH_COMMAND_LINE
   untrackedcache = true
   fsmonitor = true
   # This is replaced by actual value in nix build
