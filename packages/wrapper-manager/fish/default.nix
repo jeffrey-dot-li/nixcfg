@@ -106,6 +106,15 @@
         set -gx EDITOR ${lib.getExe pkgs.nvim}
         set -gx SYSTEMD_EDITOR ${lib.getExe pkgs.nvim}
 
+        # Terminfo entries (e.g. xterm-kitty) live under the Nix profile or
+        # system closure, not the OS's default terminfo dirs. ncurses tools
+        # (less, git pager, etc.) silently skip any dir here that doesn't
+        # exist, so this is safe across nix-darwin, NixOS, and remote
+        # `nix profile install` machines alike.
+        # (fish only colon-joins vars whose name ends in PATH on export, so
+        # join manually here rather than passing multiple args.)
+        set -gx TERMINFO_DIRS (string join : $HOME/.nix-profile/share/terminfo /run/current-system/sw/share/terminfo /etc/terminfo /lib/terminfo /usr/share/terminfo)
+
         set -gx STARSHIP_CONFIG ${toml.generate "starship.toml" starship-settings}
         function starship_transient_prompt_func
           ${lib.getExe pkgs.starship} module character
