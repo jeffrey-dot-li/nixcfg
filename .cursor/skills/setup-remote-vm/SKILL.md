@@ -94,6 +94,21 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 ```
 
+bash only auto-sources `~/.profile` for **login** shells. A plain
+`ssh host` (no command) starts a login shell, so the above works
+out of the box. But Cursor/VS Code Remote-SSH's integrated terminal panel
+spawns an **interactive, non-login** bash for the terminal, which only reads
+`~/.bashrc` — so without the below, that terminal stays in bash even though
+plain `ssh` correctly drops into fish. Append this to `~/.bashrc` too (safe
+to source unconditionally: `.profile` guards against double-sourcing and
+only execs into fish when a real tty is attached):
+
+```sh
+if [ -f "$HOME/.profile" ]; then
+	. "$HOME/.profile"
+fi
+```
+
 ## Step 3.5: Fish config.fish boilerplate
 
 The nix-managed fish wrapper (`packages/wrapper-manager/fish/default.nix`)
@@ -131,6 +146,9 @@ Reconnect via the SSH host alias and confirm:
   fish.
 - `nix profile list` shows `cachix` and `nixcfg`.
 - Non-interactive commands still work in plain bash: `ssh <host-alias> 'echo $-'` should not exec fish.
+- If accessed via Cursor/VS Code Remote-SSH, open a terminal panel there too
+  and confirm it drops into fish (not just plain `ssh` from a local terminal)
+  — this exercises the `.bashrc` path, not just `.profile`.
 
 ## Out of scope (handle separately per-VM)
 
