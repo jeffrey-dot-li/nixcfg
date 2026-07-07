@@ -145,7 +145,7 @@ cachix use jeffrey-dot-li
 
 nix profile install github:jeffrey-dot-li/nixcfg --priority 4
 # Update
-nix profile upgrade nixcfg
+nix profile upgrade --refresh nixcfg
 ```
 
 To login:
