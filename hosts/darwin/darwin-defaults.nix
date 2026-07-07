@@ -18,6 +18,7 @@
           pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
         ]
       )
+      pkgs.cloudflared
     ];
   environment.variables = {
     SHELL_PATH = "${self'.packages.fish}/bin/fish";
