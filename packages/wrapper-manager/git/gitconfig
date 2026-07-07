@@ -11,7 +11,8 @@
 [core]
   eol=lf
   autocrlf=input
-  # sshCommand is set to /usr/bin/ssh on macOS only (replaced by nix build); see default.nix
+  # sshCommand prefers /usr/bin/ssh at runtime, falling back to $PATH's ssh
+  # (e.g. on NixOS, which has no /usr/bin/ssh); replaced by nix build, see default.nix
   $SSH_COMMAND_LINE
   untrackedcache = true
   fsmonitor = true
