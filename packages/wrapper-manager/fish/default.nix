@@ -106,6 +106,14 @@
         set -gx EDITOR ${lib.getExe pkgs.nvim}
         set -gx SYSTEMD_EDITOR ${lib.getExe pkgs.nvim}
 
+        # Interpolated at build time to the actual git binary shipped in this
+        # closure, so it's a single Nix store path that's valid regardless of
+        # how this package ended up on the machine (nix-darwin system
+        # closure, NixOS, or a plain `nix profile install` on any Linux box).
+        # No need for per-machine `config.fish` overrides or runtime
+        # `command -v git` resolution.
+        set -gx HOMEBREW_GIT_PATH ${lib.getExe pkgs.gitFull}
+
         # Terminfo entries (e.g. xterm-kitty) live under the Nix profile or
         # system closure, not the OS's default terminfo dirs. ncurses tools
         # (less, git pager, etc.) silently skip any dir here that doesn't

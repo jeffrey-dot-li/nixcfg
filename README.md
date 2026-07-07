@@ -104,8 +104,6 @@ fish_add_path --move --prepend ~/.nix-profile/bin
 fish_add_path --move --prepend /nix/var/nix/profiles/default/bin
 fish_add_path --move --prepend /run/current-system/sw/bin
 
-set -gx HOMEBREW_GIT_PATH /run/current-system/sw/bin/git
-
 if status is-interactive
     # Commands to run in interactive sessions can go here
     echo "HI FROM FISH CONFIG"
