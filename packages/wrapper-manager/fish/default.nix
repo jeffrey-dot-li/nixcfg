@@ -52,7 +52,7 @@
 
       set IS_DARWIN ${lib.boolToString isDarwin}
 
-      if test $IS_DARWIN; and not set -q __NIX_DARWIN_PATH_SET
+      if test "$IS_DARWIN" = true; and not set -q __NIX_DARWIN_PATH_SET
         echo "Setting darwin path"
         set -gx __NIX_DARWIN_PATH_SET 1
         set -gx PATH /run/current-system/sw/bin (string match -v /run/current-system/sw/bin $PATH)
