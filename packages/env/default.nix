@@ -85,6 +85,8 @@ symlinkJoin {
       #   pkgs.azure-cli.extensions.aks-preview
       #   pkgs.azure-cli.extensions.k8s-extension
       # ])
+      # So no longer complains about terminal xterm-kitty not installed
+      pkgs.kitty.terminfo
 
       # inputs'.nil.packages.default
       # inputs'.nh.packages.default
