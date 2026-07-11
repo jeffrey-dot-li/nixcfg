@@ -35,7 +35,6 @@
   toml = formats.toml {};
   starship-settings = import ./starship.nix;
 
-  # TODO: Nixify kitty config
   # todo: fzf-fish is broken here on mac
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   fzf_plugin =

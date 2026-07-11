@@ -12,6 +12,7 @@
 lib.fix (
   self: let
     # packages in $FLAKE/packages, callPackage'd automatically
+    # TODO: nixify dynamic build cursor / vscode with settings.
     stage1 = lib.fix (
       self': let
         callPackage = lib.callPackageWith (pkgs // self');

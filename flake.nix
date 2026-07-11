@@ -24,7 +24,6 @@
         inputs',
         ...
       }: let
-        # TODO: Figure out how to configure nixpkgs globally.
         nixpkgsConfig = import ./nixpkgsConfig.nix {
           inherit lib inputs;
         };

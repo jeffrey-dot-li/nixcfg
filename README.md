@@ -224,8 +224,6 @@ https://lix.systems/install/
 
 ### Setup:
 ```sh
-#TODO: add documentation to make sure experimental features are enabled
-# experimental-features = nix-command flakes
 
 # Then install:
 pushd nixcfg
