@@ -1,0 +1,22 @@
+{
+  "name": "custom-theme",
+  "displayName": "My Custom Theme",
+  "description": "Repository-managed color theme for VS Code and Cursor.",
+  "publisher": "nixcfg",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "My Custom Theme",
+        "uiTheme": "vs",
+        "path": "./theme.json"
+      }
+    ]
+  }
+}

@@ -1,14 +1,9 @@
-{pkgs, ...}: let
-  # https://nixos.wiki/wiki/Visual_Studio_Code
-  # https://code.visualstudio.com/updates/v1_101
-  customVscode = (pkgs.vscode.override {}).overrideAttrs (oldAttrs: rec {
-    src = builtins.fetchTarball {
-      url = "https://update.code.visualstudio.com/1.101.2/darwin-universal/stable";
-      sha256 = "0iwxc11k77xkp1a722wpqkanbl68z7n6rwb67sr0lkr356laqyy1";
-    };
-    version = "1.101";
-  });
-in {
+{pkgs, ...}: {
+  # VS Code and Cursor are provided by this flake's `vscode` and `cursor`
+  # packages (see packages/wrapper-manager/editors), which are already
+  # installed via `self'.packages` on nix-darwin and NixOS. Installing the
+  # unconfigured upstream `pkgs.vscode` here would reintroduce the settings
+  # drift this repository packages the editors to avoid.
   environment.systemPackages = with pkgs; [
     alejandra
     # uv
@@ -20,11 +15,5 @@ in {
     rustup
     gcc
     pciutils
-    (
-      # if stdenv.isDarwin
-      # then customVscode
-      # else vscode
-      vscode
-    )
   ];
 }

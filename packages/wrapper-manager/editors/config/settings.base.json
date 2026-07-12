@@ -309,14 +309,6 @@
   "C_Cpp.vcFormat.indent.braces": true,
   "C_Cpp.vcFormat.indent.accessSpecifiers": true,
   "C_Cpp.vcFormat.indent.caseLabels": true,
-  "mssql.connections": [
-    {
-      "server": "{{put-server-name-here}}",
-      "database": "{{put-database-name-here}}",
-      "user": "{{put-username-here}}",
-      "password": "{{put-password-here}}"
-    }
-  ],
   "python.linting.pylintUseMinimalCheckers": false,
   "C_Cpp.formatting": "vcFormat",
   "C_Cpp.intelliSenseUpdateDelay": 500,
@@ -340,7 +332,6 @@
     "**/.metals": true,
     "**/api-explorer/**": true
   },
-  "metals.javaHome": "/Users/jeffrey/.jabba/jdk/openjdk@1.17.0/Contents/Home",
   "[scala]": {
     "editor.defaultFormatter": "scalameta.metals"
   },
@@ -381,16 +372,6 @@
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": true,
   "editor.guides.highlightActiveBracketPair": true,
-  "json.schemas": [
-    {
-      "name": "vscode-expo-manifest",
-      "url": "file:///Users/jeffrey/Library/Application%20Support/Code/User/globalStorage/bycedric.vscode-expo/manifest-44.0.0.json",
-      "fileMatch": [
-        "app.json",
-        "app.config.json"
-      ]
-    }
-  ],
   "editor.inlineSuggest.enabled": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "github.copilot.enable": {
@@ -648,7 +629,7 @@
   ],
   "vim.easymotion": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "/run/current-system/sw/bin/nvim",
+  "vim.neovimPath": "@NVIM_BIN@",
   "[cuda-cpp]": {
     "editor.wordBasedSuggestions": "off",
     "editor.semanticHighlighting.enabled": true,
@@ -656,11 +637,8 @@
     "editor.suggest.insertMode": "replace"
   },
   "window.zoomLevel": 0,
-  "vs-kubernetes": {
-    "vscode-kubernetes.minikube-path-linux": "/home/jeffreyli/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
-  },
   "redhat.telemetry.enabled": true,
-  "git.path": "/run/current-system/sw/bin/git",
+  "git.path": "@GIT_BIN@",
   "magit.git-path": "",
   "ruff.trace.server": "messages",
   "ruff.logLevel": "warning",
@@ -690,13 +668,16 @@
   },
   "codeium.disableSupercomplete": true,
   "lean4.alwaysAskBeforeInstallingLeanVersions": true,
-  "alejandra.program": "/run/current-system/sw/bin/alejandra",
+  "alejandra.program": "@ALEJANDRA_BIN@",
   "python.pyrefly.displayTypeErrors": "force-on",
-  "vscode-neovim.neovimExecutablePaths.darwin": "/run/current-system/sw/bin/vi",
-  "vscode-neovim.neovimExecutablePaths.linux": "/run/current-system/sw/bin/vi",
+  "vscode-neovim.neovimExecutablePaths.darwin": "@NVIM_BIN@",
+  "vscode-neovim.neovimExecutablePaths.linux": "@NVIM_BIN@",
+  "vscode-neovim.afterInitConfig": [
+    "lua vim.g.clipboard = vim.g.vscode_clipboard"
+  ],
   "vim.neovimUseConfigFile": true,
   "nix.enableLanguageServer": true,
-  "nix.serverPath": "/run/current-system/sw/bin/nil",
+  "nix.serverPath": "@NIL_BIN@",
   "vscode-neovim.ctrlKeysForNormalMode": [
     "a",
     "b",
@@ -730,26 +711,14 @@
     "n"
   ],
   "editor.minimap.enabled": false,
-  "julia.executablePath": "/nix/store/8iphgs64f8zmr5dhz3s3b7hri4ki4f1i-julia-bin-1.12.1/bin/julia",
-  "julia.languageServerExecutablePath": "/nix/store/8iphgs64f8zmr5dhz3s3b7hri4ki4f1i-julia-bin-1.12.1/bin/julia",
   "git.blame.editorDecoration.enabled": false,
   "python.experiments.enabled": false,
   "claudeCode.preferredLocation": "panel",
-  "cursor.cpp.disabledLanguages": [
-    "scminput",
-    "arm",
-    "scala",
-    "cuda-cpp",
-    "nix",
-    "mojo"
-  ],
-  "python.defaultInterpreterPath": "/Users/jeffreyli/.local/bin/python3.14",
   "remote.autoForwardPortsSource": "hybrid",
   "window.autoDetectColorScheme": false,
   "workbench.colorTheme": "My Custom Theme",
   "terminal.integrated.commandsToSkipShell": [
-    "workbench.action.toggleAuxiliaryBar",
-    "composer.startComposerPrompt"
+    "workbench.action.toggleAuxiliaryBar"
   ],
   "[toml]": {
     "editor.formatOnSave": false

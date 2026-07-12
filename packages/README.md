@@ -13,6 +13,7 @@ packages/
 ├── pkgs/                # Self-contained or self-configuring packages
 │   └── nvim/
 └── wrapper-manager/     # Packages configured through wrapper-manager
+    ├── editors/
     ├── fish/
     ├── git/
     └── kitty/
@@ -75,6 +76,48 @@ Kitty is managed here because its configuration is selected through the
 `KITTY_CONFIG_DIRECTORY` environment variable. Its module also wraps the
 executable inside `$out/Applications/kitty.app` on Darwin because launching the
 app through Finder does not invoke its `$out/bin` wrapper.
+
+### Editors (VS Code and Cursor)
+
+`wrapper-manager/editors` exports `vscode` and `cursor`, both built with
+`pkgs.vscode-with-extensions` (VS Code's `pkgs.vscode` and Cursor's
+`pkgs.code-cursor` respectively) plus a curated core extension set: VSCode
+Neovim, Nix IDE, GitLens, Error Lens, Material Icon Theme, Code Spell
+Checker, Prettier, and a locally packaged `My Custom Theme` extension. Build
+or install either directly with:
+
+```sh
+nix build .#vscode
+nix build .#cursor
+nix profile install .#vscode
+nix profile install .#cursor
+```
+
+Settings are **immutable and repository-authoritative**. `config/` holds the
+shared, sanitized `settings.base.json` and `keybindings.json`, plus a small
+`settings.cursor-overrides.json` for `cursor.*` and Composer-specific keys
+that get merged on top of the shared settings for Cursor only. Tool paths
+(Neovim, `nil`, Alejandra, Git) are substituted with the paths of packages in
+this flake's closure rather than hardcoded machine paths.
+
+On every launch, both wrappers run a script (via `wrapFlags = ["--run" ...]`,
+which requires `wrapperType = "shell"`) that symlinks the managed
+`settings.json` and `keybindings.json` into the platform-native `User`
+directory (e.g. `~/Library/Application Support/Code/User` on Darwin,
+`~/.config/Code/User` on Linux), backing up a pre-existing regular file once.
+Everything else under that directory - authentication, workspace history,
+caches, `globalStorage`, etc. - is left writable and unmanaged. Interactively
+installed extensions are ignored on the next rebuild because the curated Nix
+extension list is the sole source of truth for `--extensions-dir`.
+
+`config/extensions-full-reference.txt` keeps the previous, much larger
+extension list purely as reference for extensions that may be worth curating
+in the future; it is not installed by either wrapper.
+
+Both wrappers also wrap the Electron executable inside the Darwin `.app`
+bundle (`$out/Applications/<name>.app/Contents/MacOS/Electron`), mirroring
+Kitty's approach, since launching through Finder or Spotlight does not go
+through `$out/bin`.
 
 ## Default profile
 

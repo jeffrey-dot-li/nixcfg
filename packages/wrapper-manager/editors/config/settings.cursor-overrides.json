@@ -1,0 +1,14 @@
+{
+  "cursor.cpp.disabledLanguages": [
+    "scminput",
+    "arm",
+    "scala",
+    "cuda-cpp",
+    "nix",
+    "mojo"
+  ],
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.toggleAuxiliaryBar",
+    "composer.startComposerPrompt"
+  ]
+}
