@@ -11,11 +11,11 @@ packages/
 ├── default.nix          # Discovers and combines all package definitions
 ├── profile/             # Default package installed by `nix profile install .`
 ├── pkgs/                # Self-contained or self-configuring packages
-│   ├── kitty/
 │   └── nvim/
 └── wrapper-manager/     # Packages configured through wrapper-manager
     ├── fish/
-    └── git/
+    ├── git/
+    └── kitty/
 ```
 
 ## Package discovery
@@ -48,20 +48,16 @@ this directory. This allows one custom package to request another by function
 argument.
 
 Avoid requesting an upstream package with the same name as the directory being
-defined. For example, `pkgs/kitty/default.nix` should use `pkgs.kitty` rather
-than a function argument named `kitty`; the latter can recursively resolve to
-the custom Kitty package itself.
+defined. For example, a hypothetical `pkgs/ripgrep/default.nix` should use
+`pkgs.ripgrep` rather than a function argument named `ripgrep`; the latter can
+recursively resolve to the custom package itself.
 
 ## Self-configuring packages
 
 Packages under `pkgs/` should bundle their configuration when practical. For
-example, the Kitty package wraps the upstream executable and points
-`KITTY_CONFIG_DIRECTORY` at configuration stored in the Nix store. This keeps
-the package portable across nix-darwin, NixOS, and direct profile installation.
-
-Darwin GUI packages may also need their executable inside
-`$out/Applications/*.app` wrapped. Launching an app through Finder does not
-necessarily invoke its `$out/bin` wrapper.
+example, the Neovim package builds its nvf configuration into the resulting
+package. This keeps it portable across nix-darwin, NixOS, and direct profile
+installation.
 
 The Neovim definition is a special case because it returns both `nvim` and
 `nvim-min`. Those outputs are exported explicitly in `packages/default.nix`.
@@ -74,6 +70,11 @@ with the packages from `pkgs/`.
 
 Use this directory when configuration depends on `wrapper-manager`; otherwise,
 prefer a self-contained package under `pkgs/`.
+
+Kitty is managed here because its configuration is selected through the
+`KITTY_CONFIG_DIRECTORY` environment variable. Its module also wraps the
+executable inside `$out/Applications/kitty.app` on Darwin because launching the
+app through Finder does not invoke its `$out/bin` wrapper.
 
 ## Default profile
 

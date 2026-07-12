@@ -2,7 +2,6 @@
   pkgs,
   ...
 }: let
-  kitty = pkgs.kitty;
   openCommand =
     if pkgs.stdenv.hostPlatform.isDarwin
     then "/usr/bin/open"
@@ -36,26 +35,19 @@
       path = ./theme.conf;
     }
   ];
-in
-  pkgs.symlinkJoin {
-    name = "kitty-configured-${kitty.version}";
-    paths = [kitty];
-    nativeBuildInputs = [pkgs.makeWrapper];
+in {
+  wrappers.kitty = {
+    basePackage = pkgs.kitty;
+    env.KITTY_CONFIG_DIRECTORY.value = toString configDirectory;
 
+    # wrapper-manager handles executables in $out/bin. Finder launches the
+    # executable inside the app bundle directly, so wrap that one as well.
     postBuild = ''
-      wrapProgram "$out/bin/kitty" \
-        --set KITTY_CONFIG_DIRECTORY ${configDirectory}
-
       appExecutable="$out/Applications/kitty.app/Contents/MacOS/kitty"
       if [ -e "$appExecutable" ]; then
         wrapProgram "$appExecutable" \
           --set KITTY_CONFIG_DIRECTORY ${configDirectory}
       fi
     '';
-
-    passthru = {
-      inherit configDirectory;
-      unwrapped = kitty;
-    };
-    meta = kitty.meta;
-  }
+  };
+}
