@@ -72,7 +72,7 @@
   # tailscale,
 } @ args:
 symlinkJoin {
-  name = "env";
+  name = "profile";
   paths =
     (builtins.filter lib.isDerivation (builtins.attrValues args))
     ++ [

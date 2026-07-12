@@ -41,7 +41,7 @@
           packages
           // {
             # Export shell as default package.
-            default = packages.env;
+            default = packages.profile;
           };
         devShells.default = pkgs.mkShell {
           # This is for this project development. Don't depend on this devShell in another devShell,
