@@ -71,6 +71,7 @@
   codex,
   # tailscale,
   opentofu,
+  tflint,
 } @ args:
 symlinkJoin {
   name = "profile";
