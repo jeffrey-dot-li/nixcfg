@@ -70,7 +70,7 @@
   cachix,
   codex,
   # tailscale,
-  opentofu,
+  terraform,
   tflint,
 } @ args:
 symlinkJoin {
