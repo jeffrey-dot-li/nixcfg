@@ -70,6 +70,7 @@
   cachix,
   codex,
   # tailscale,
+  opentofu,
 } @ args:
 symlinkJoin {
   name = "profile";
