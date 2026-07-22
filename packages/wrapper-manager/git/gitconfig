@@ -70,6 +70,7 @@
   logs = log --pretty=format:\"%Cgreen%h%Creset - %Cblue%an%Creset @ %ar : %s\"
   logtags = log --tags --simplify-by-decoration --pretty=format:\"%Cgreen%h%Creset -%d - %Cblue%an%Creset @ %ar : %s\"
   logg = log --stat
+  reset-merge-base = "!f() { if [ \"$#\" -ne 2 ]; then echo \"usage: git reset-merge-base <base-branch> <pr-branch>\" >&2; echo \"The order does not affect the merge base; base branch first is the review convention.\" >&2; return 2; fi; base=$(git merge-base \"$1\" \"$2\") || return; git reset \"$base\"; }; f"
 [feature]
   manyFiles = true
 [submodule]
