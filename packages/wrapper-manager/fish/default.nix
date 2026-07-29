@@ -133,6 +133,12 @@
         set -gx direnv_config_dir ${direnvConfig}
         ${lib.getExe pkgs.direnv} hook fish | source
 
+        # Conda's Fish hook wraps fish_prompt without forwarding $argv. That
+        # drops Fish's --final-rendering argument and breaks transient prompts.
+        # Starship renders the active Conda environment itself, so leave prompt
+        # ownership with Starship while retaining Conda activation support.
+        set -gx CONDA_DISABLE_FISH_PROMPT 1
+
         # Source user defined `config.fish`
         set config_path ~/.config/fish/config.fish
         # Check if config.fish exists
