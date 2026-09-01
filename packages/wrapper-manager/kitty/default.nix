@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   openCommand =
     if pkgs.stdenv.hostPlatform.isDarwin
     then "/usr/bin/open"

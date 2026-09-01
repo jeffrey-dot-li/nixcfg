@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   inherit (pkgs) lib;
   version = "1.18.25";
 

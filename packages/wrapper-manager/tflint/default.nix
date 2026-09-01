@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   wrappers.tflint = {
     basePackage = pkgs.buildGo126Module {
       pname = "tflint";

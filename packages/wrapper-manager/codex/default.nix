@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   version = "0.145.0";
 
   rustTarget =

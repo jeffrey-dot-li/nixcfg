@@ -37,6 +37,16 @@
         };
       in {
         _module.args.pkgs = pkgs;
+
+        treefmt = {
+          programs.alejandra.enable = true;
+          # Don't touch encrypted secrets.
+          settings.excludes = [
+            "secrets/*.age"
+          ];
+        };
+        formatter = config.treefmt.build.wrapper;
+
         packages =
           packages
           // {

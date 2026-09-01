@@ -4,8 +4,7 @@
   fetchurl,
   fetchFromGitHub,
   dockerTools,
-}:
-{
+}: {
   everforest = {
     pname = "everforest";
     version = "b90025cc84dbb9c46df5a2ae540d3f01cf85af74";
