@@ -1,4 +1,4 @@
-name: ubuntu-cache
+name: build
 
 on:
   pull_request:
@@ -12,7 +12,22 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: x86_64-linux
+            runner: ubuntu-latest
+            extra_nix_config: ""
+          - system: aarch64-linux
+            runner: ubuntu-24.04-arm
+            extra_nix_config: ""
+          - system: aarch64-darwin
+            runner: macos-14
+            extra_nix_config: |
+              sandbox = relaxed
+              extra-sandbox-paths = /System/Library/Frameworks /System/Library/PrivateFrameworks /usr/lib
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,6 +35,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
+            ${{ matrix.extra_nix_config }}
 
       - uses: cachix/cachix-action@v14
         if: github.event_name == 'pull_request'

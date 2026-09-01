@@ -157,8 +157,9 @@ nix path-info --store https://jeffrey-dot-li.cachix.org "$(nix path-info ./resul
 ```
 
 For CI on GitHub Actions, add a repository secret named `CACHIX_AUTH_TOKEN`.
-The workflow in `.github/workflows/ubuntu-cache.yml` builds `.#default` on `ubuntu-latest`,
-pulls from the `jeffrey-dot-li` cache, and pushes new artifacts on `main`.
+The workflow in `.github/workflows/flake-build.yml` builds `.#default` across
+`x86_64-linux`, `aarch64-linux`, and `aarch64-darwin`, pulls from the `jeffrey-dot-li` cache,
+and pushes new artifacts on `main`.
 
 ## Updating
 ```sh
