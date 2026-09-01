@@ -2,8 +2,12 @@
   pkgs,
   ...
 }: let
+  inherit (pkgs) lib;
   version = "1.18.25";
 
+  # Linux uses the glibc builds so autoPatchelfHook can retarget the
+  # interpreter. The musl archives are still dynamically linked to
+  # /lib/ld-musl-*.so.1, which NixOS does not provide.
   archive =
     {
       aarch64-darwin = {
@@ -15,12 +19,12 @@
         hash = "sha256-bFxWn3ebGX4d9jkMYieLvfDnPnzCSKQpZIaAxjpvPxw=";
       };
       aarch64-linux = {
-        name = "opencode-linux-arm64-musl.tar.gz";
-        hash = "sha256-6RRNyghMLM6HoIaOEg5Xzc/8F70LaN9qkuGK8sL1LeA=";
+        name = "opencode-linux-arm64.tar.gz";
+        hash = "sha256-Ne93iXQl5BtRg6LCGsT7HU2UTYKpTjySD1e1SQrxGsU=";
       };
       x86_64-linux = {
-        name = "opencode-linux-x64-musl.tar.gz";
-        hash = "sha256-K8wczo75jmrD16S4cDQp+gcLm1lpskfaz6G+8fW27UQ=";
+        name = "opencode-linux-x64.tar.gz";
+        hash = "sha256-WKNymm80Mt1tKRf8xKlJeIiRoDWBhkatSA4SyUf1bng=";
       };
     }.${
       pkgs.stdenv.hostPlatform.system
@@ -38,7 +42,15 @@ in {
 
       sourceRoot = ".";
 
-      nativeBuildInputs = pkgs.lib.optional (pkgs.lib.hasSuffix ".zip" archive.name) pkgs.unzip;
+      nativeBuildInputs =
+        lib.optionals pkgs.stdenv.hostPlatform.isLinux [pkgs.autoPatchelfHook]
+        ++ lib.optional (lib.hasSuffix ".zip" archive.name) pkgs.unzip;
+
+      # Bun lists the dynamic linker as DT_NEEDED, which is not a library.
+      autoPatchelfIgnoreMissingDeps = [
+        "ld-linux-x86-64.so.2"
+        "ld-linux-aarch64.so.1"
+      ];
 
       dontConfigure = true;
       dontBuild = true;
@@ -54,7 +66,7 @@ in {
       meta = {
         description = "AI coding agent built for the terminal";
         homepage = "https://github.com/anomalyco/opencode";
-        license = pkgs.lib.licenses.mit;
+        license = lib.licenses.mit;
         mainProgram = "opencode";
         platforms = [
           "aarch64-darwin"
@@ -62,7 +74,7 @@ in {
           "aarch64-linux"
           "x86_64-linux"
         ];
-        sourceProvenance = [pkgs.lib.sourceTypes.binaryNativeCode];
+        sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     };
   };
