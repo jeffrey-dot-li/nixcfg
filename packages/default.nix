@@ -25,11 +25,6 @@ lib.fix (
         auto
         // {
           # nix = inputs'.in-nix.packages.default.patchNix pkgs.nixVersions.nix_2_24;
-          # manual overrides to auto callPackage
-          # nix-index = callPackage ./nix-index {
-          #   database = inputs'.nix-index-database.packages.nix-index-database;
-          #   databaseDate = config.flake.lib.mkDate inputs.nix-index-database.lastModifiedDate;
-          # };
           # preventing infrec
           nvim = nvims.nvim;
           nvim-min = nvims.nvim-min;

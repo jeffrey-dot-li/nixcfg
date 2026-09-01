@@ -9,7 +9,7 @@ Then we would do the following:
 
 1. Add to `secrets.nix`, with the ssh keys set up:
 Specifically, would look like: 
-`  "wifi/empress.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];` where need both *system* and *user* keys. The *system* key is what the system will use to decrypt the key, and it is stored in `/etc/ssh/ssh_host_ed25519_key`. The *user* key is what the user will use to edit the key, and it will generally be stored in `~/.ssh/id_ed25519`.
+`  "wifi/empress.age".publicKeys = [keys.systems.latte keys.users.jeffreyli];` where need both *system* and *user* keys. The *system* key is what the system will use to decrypt the key, and it is stored in `/etc/ssh/ssh_host_ed25519_key`. The *user* key is what the user will use to edit the key, and it will generally be stored in `~/.ssh/id_ed25519`.
 
 2. Create the file `wifi/network1.age`: 
 `agenix -e wifi/network1.age`

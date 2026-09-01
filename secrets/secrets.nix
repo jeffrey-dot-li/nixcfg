@@ -4,15 +4,10 @@
 # so adding system key lets a specific system read a secret.
 #
 # Basically use user keys (shared across devices) to edit secrets, use device specific system keys to read secrets.
-#
-# TODO: I forgot to key the raspberry pi keys with user key as well, so they are inaccessible except from the raspberry pi. Should rekey them.
-# Use `sudo -E agenix -r -i /etc/ssh/ssh_host_ed25519_key`
 let
   keys = import ./ssh_keys.nix;
 in {
-  "login-password.age".publicKeys = [keys.systems.appletun keys.users.jeffreyli];
-  "wifi-ssid.age".publicKeys = [keys.systems.appletun keys.users.jeffreyli];
-  "wifi/empress.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
-  "wifi/wabuwabu.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
-  "cloudflared-environment.age".publicKeys = [keys.systems.appletun keys.systems.latte keys.users.jeffreyli];
+  "wifi/empress.age".publicKeys = [keys.systems.latte keys.users.jeffreyli];
+  "wifi/wabuwabu.age".publicKeys = [keys.systems.latte keys.users.jeffreyli];
+  "cloudflared-environment.age".publicKeys = [keys.systems.latte keys.users.jeffreyli];
 }

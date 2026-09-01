@@ -6,7 +6,6 @@ let
       junli = " ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGSo04nMt2+4EWz+23p8YjOMaOAPZzdJzIuG+a2sVE8p jun_li71@hotmail.com";
     };
     systems = {
-      appletun = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBDiHx7QSETLcQckR+sYhtDwWIef/2EWsrjAOsHp9BfZ";
       latte = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBF4pDTAjghAlUlu2084XeJW+ILjaLcJk0gO1Pup5e45 root@latte";
     };
   };

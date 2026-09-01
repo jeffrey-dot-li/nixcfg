@@ -80,9 +80,6 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-index-database = {
-      url = "github:Mic92/nix-index-database";
-    };
     in-nix = {
       url = "github:viperML/in-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -105,8 +102,6 @@
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     agenix.url = "github:ryantm/agenix";
     nixos-hardware.url = "github:nixos/nixos-hardware";
-    impermanence.url = "github:nix-community/impermanence";
-    nix-colors.url = "github:Misterio77/nix-colors";
     rust-overlay.url = "github:oxalica/rust-overlay";
 
     wrapper-manager = {
@@ -120,20 +115,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    homix = {
-      url = "github:sioodmy/homix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    mkalias = {
-      url = "github:reckenrode/mkalias";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils = {
       url = "github:numtide/flake-utils";
