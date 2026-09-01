@@ -11,7 +11,7 @@
     gamescopeSession.enable = true;
   };
   programs.gamemode.enable = true;
-  hardware.opengl = {
+  hardware.graphics = {
     extraPackages = with pkgs; [mangohud];
     extraPackages32 = with pkgs; [mangohud];
   };

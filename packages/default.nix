@@ -24,7 +24,6 @@ lib.fix (
       in
         auto
         // {
-          # nix = inputs'.in-nix.packages.default.patchNix pkgs.nixVersions.nix_2_24;
           # preventing infrec
           nvim = nvims.nvim;
           nvim-min = nvims.nvim-min;

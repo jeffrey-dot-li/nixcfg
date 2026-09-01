@@ -89,10 +89,6 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    in-nix = {
-      url = "github:viperML/in-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nvim-osc52 = {
       url = "github:ojroques/nvim-osc52/main";
       flake = false;
