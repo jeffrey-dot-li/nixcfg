@@ -12,7 +12,6 @@
       ];
 
       imports = [
-        inputs.flake-parts.flakeModules.easyOverlay
         inputs.treefmt-nix.flakeModule
       ];
 
