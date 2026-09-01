@@ -91,5 +91,11 @@ in {
         sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     };
+
+    # The built-in `websearch` tool only loads on the OpenCode/Go provider
+    # or when an enable flag is set. Pin the Exa backend so it is always
+    # available - Exa also honors the tool's depth/result-count/live-crawl
+    # parameters, which the Parallel backend ignores.
+    env.OPENCODE_ENABLE_EXA.value = "1";
   };
 }
