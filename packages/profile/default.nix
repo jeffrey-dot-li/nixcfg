@@ -69,6 +69,7 @@
   elan,
   cachix,
   codex,
+  opencode,
   # tailscale,
   terraform,
   tflint,
