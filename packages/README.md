@@ -77,6 +77,34 @@ Kitty is managed here because its configuration is selected through the
 executable inside `$out/Applications/kitty.app` on Darwin because launching the
 app through Finder does not invoke its `$out/bin` wrapper.
 
+### Prebuilt binaries
+
+Some packages (e.g. `opencode`, `codex`) do not build from source; they fetch
+a prebuilt release binary and install it. Unpacking and installing such a
+binary can succeed even when it cannot run on the target platform (wrong
+dynamic loader, wrong libc - such as a dynamically linked musl artifact on
+NixOS - or wrong architecture). Because the build still succeeds, the
+breakage only shows up at first interactive use, often on an OS other than
+the one you built on.
+
+**Convention:** every derivation that installs a prebuilt binary must
+verify it runs, as part of the build. Set `doInstallCheck = true` and add an
+`installCheckPhase` with a trivial smoke command:
+
+```nix
+doInstallCheck = true;
+
+installCheckPhase = ''
+  $out/bin/opencode --version
+'';
+```
+
+Pick a cheap command that exits 0 without network, TTY, or configuration -
+usually `--version`, or `--help` (or the equivalent) if the tool has no
+version flag. A binary that cannot load (missing interpreter, missing
+shared library, wrong architecture) then fails the build loudly on the
+platform being built instead of failing silently at runtime.
+
 ### Editors (VS Code and Cursor)
 
 `wrapper-manager/editors` exports `vscode` and `cursor`, both built with

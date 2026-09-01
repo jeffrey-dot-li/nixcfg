@@ -56,6 +56,20 @@ in {
       dontBuild = true;
       dontStrip = true;
 
+      doInstallCheck = true;
+
+      # Bun needs a writable home and tmp dir (without a home it falls back
+      # to mkdir /homeless-shelter). On Darwin $TMPDIR is the build
+      # directory, which contains the unpacked source binary `opencode`, so
+      # Bun's state directory mkdir would collide with it - use a unique
+      # temp dir for both.
+      installCheckPhase = ''
+        checkDir=$(mktemp -d)
+        export HOME=$checkDir
+        export TMPDIR=$checkDir
+        $out/bin/opencode --version
+      '';
+
       installPhase = ''
         runHook preInstall
         mkdir -p $out/bin

@@ -40,6 +40,12 @@ in {
       dontBuild = true;
       dontStrip = true;
 
+      doInstallCheck = true;
+
+      installCheckPhase = ''
+        $out/bin/codex --version
+      '';
+
       installPhase = ''
         runHook preInstall
         mkdir -p $out/bin
