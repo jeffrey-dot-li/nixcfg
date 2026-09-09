@@ -23,11 +23,25 @@
         rustTarget
       };
   };
+
+  codeModeHostSrc = pkgs.fetchurl {
+    url = "https://github.com/openai/codex/releases/download/rust-v${version}/codex-code-mode-host-${rustTarget}.tar.gz";
+    hash =
+      {
+        aarch64-apple-darwin = "sha256-Ramw/fU7mLhaa7keF13ZDpYTKKehT7UKQJAiBRmd8d8=";
+        x86_64-apple-darwin = "sha256-L/rr0BA9l2Iyw1hBmlCIWdqGLhKPPKC7BxVBNG++O/c=";
+        aarch64-unknown-linux-musl = "sha256-2AR7jTM3DWCQ5ynSfrdt5gomhrqhwUPBOMmwXccNgTs=";
+        x86_64-unknown-linux-musl = "sha256-+VgwqGlZCVdmS7/Ge8ywh3OAa2k2cLrxWQgXb4m0zTE=";
+      }.${
+        rustTarget
+      };
+  };
 in {
   wrappers.codex = {
     basePackage = pkgs.stdenv.mkDerivation {
       pname = "codex";
-      inherit version src;
+      inherit version;
+      srcs = [src codeModeHostSrc];
 
       sourceRoot = ".";
 
@@ -47,6 +61,7 @@ in {
         runHook preInstall
         mkdir -p $out/bin
         install -m755 codex-${rustTarget} $out/bin/codex
+        install -m755 codex-code-mode-host-${rustTarget} $out/bin/codex-code-mode-host
         runHook postInstall
       '';
 

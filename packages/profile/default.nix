@@ -69,6 +69,7 @@
   elan,
   cachix,
   codex,
+  bubblewrap,
   opencode,
   # tailscale,
   terraform,
