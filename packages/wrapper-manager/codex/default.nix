@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  version = "0.145.0";
+  version = "0.153.4";
 
   rustTarget =
     {
@@ -15,10 +15,10 @@
     url = "https://github.com/openai/codex/releases/download/rust-v${version}/codex-${rustTarget}.tar.gz";
     hash =
       {
-        aarch64-apple-darwin = "sha256-Byowpl8FZmc1iJ7w9gtW2xhq293p1cXMGmS+C1mFMP4=";
-        x86_64-apple-darwin = "sha256-QhbXpAqknXS2X6uT0qhtLiWpAkgrgn29s/NXd3sJ+t8=";
-        aarch64-unknown-linux-musl = "sha256-04T5C8hCRQtCvWdf7vBqEqRqOxypfvyyJWaycOShEic=";
-        x86_64-unknown-linux-musl = "sha256-v68Tybo08q12TkqRbEnPcXeuujKc8PcZ4iJ1ZvyNZio=";
+        aarch64-apple-darwin = "sha256-jPkR6mdlI7+yEh7FYYSNKrpWSJCtU2202KM1PyuYULE=";
+        x86_64-apple-darwin = "sha256-1pIA8L+EGx0aB/gLgM90Ki5Pwrq5GuikSxBC+OjKn6Q=";
+        aarch64-unknown-linux-musl = "sha256-XNphgr2Uw6MPLrY6SVSJ6/f2kf3bFNcPSMbBpQcbbN4=";
+        x86_64-unknown-linux-musl = "sha256-9HlCTsoJJITcQNh64oxE9MxAI0pgBF1hMeSTgA2BSjA=";
       }.${
         rustTarget
       };
