@@ -9,7 +9,7 @@ only their runtime dependencies. Dependency lifecycle scripts are disabled.
 
 The current Nix-managed Pi packages are:
 
-- local `pi-managed-agents` definitions
+- local `pi-managed-resources` agents and extensions
 - `pi-subagents`
 - `pi-web-access`
 - `pi-mcp-adapter`
@@ -39,6 +39,13 @@ The wrapper similarly merges the following queue controls into writable
 
 `Ctrl+Q` is provided because integrated terminals may intercept or incorrectly
 encode `Option+Up` before Pi receives it.
+
+The managed `guard-invalid-slash.ts` input extension prevents accidental
+submission of mistyped slash commands. In the interactive editor, input that
+starts with `/` is submitted normally only when Pi recognizes the command. An
+unknown command is not added to the conversation or queue, and its text stays
+in the editor for correction. Normal prompts and non-interactive RPC, print,
+and JSON input retain Pi's standard behavior.
 
 ## Subagent model tiers
 

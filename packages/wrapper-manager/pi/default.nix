@@ -115,14 +115,16 @@
       '';
     };
 
-  managedAgentPackage = pkgs.runCommand "pi-managed-agents-1.0.0" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.0" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
+    cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
-      "name": "pi-managed-agents",
+      "name": "pi-managed-resources",
       "version": "1.0.0",
       "pi": {
+        "extensions": ["./extensions/guard-invalid-slash.ts"],
         "subagents": {
           "agents": ["./agents"]
         }
@@ -132,7 +134,7 @@
   '';
 
   piPackages = [
-    managedAgentPackage
+    managedResourcePackage
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.69.0";
@@ -274,7 +276,7 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|managed-agents|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
