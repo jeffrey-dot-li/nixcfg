@@ -70,6 +70,7 @@
   cachix,
   codex,
   opencode,
+  pi,
   # tailscale,
   terraform,
   tflint,
