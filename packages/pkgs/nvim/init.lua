@@ -5,11 +5,37 @@ else
   -- Regular Neovim config
 end
 
-vim.api.nvim_create_augroup("fish_fmt", { clear = true })
-
+local create_parent_dirs = vim.api.nvim_create_augroup("create_parent_dirs", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
-  group = "fish_fmt",
+  group = create_parent_dirs,
+  callback = function(event)
+    -- Requiring a bang keeps ordinary :w and :x failures visible. Use :w! or
+    -- :x! when a new file's parent directories should be created recursively.
+    if vim.v.cmdbang ~= 1 then
+      return
+    end
+
+    local path = vim.api.nvim_buf_get_name(event.buf)
+    if path == "" or vim.bo[event.buf].buftype ~= "" then
+      return
+    end
+
+    local parent = vim.fn.fnamemodify(path, ":p:h")
+    if vim.fn.isdirectory(parent) == 0 then
+      vim.fn.mkdir(parent, "p")
+      if vim.fn.isdirectory(parent) == 0 then
+        error("Could not create parent directory: " .. parent)
+      end
+    end
+  end,
+  desc = "Create missing parent directories for forced writes",
+})
+
+local fish_fmt = vim.api.nvim_create_augroup("fish_fmt", { clear = true })
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = fish_fmt,
   pattern = "*.fish",
   command = "silent! %!fish_indent",
 })
