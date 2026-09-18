@@ -69,7 +69,6 @@
   elan,
   cachix,
   codex,
-  bubblewrap,
   opencode,
   # tailscale,
   terraform,
@@ -99,5 +98,8 @@ symlinkJoin {
       (pkgs.writeShellScriptBin "kubectl-krew" ''
         exec ${krew}/bin/krew "$@"
       '')
+    ]
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      pkgs.bubblewrap
     ];
 }
