@@ -115,7 +115,24 @@
       '';
     };
 
+  managedAgentPackage = pkgs.runCommand "pi-managed-agents-1.0.0" {} ''
+    mkdir -p "$out"
+    cp -R ${./agents} "$out/agents"
+    cat > "$out/package.json" <<'JSON'
+    {
+      "name": "pi-managed-agents",
+      "version": "1.0.0",
+      "pi": {
+        "subagents": {
+          "agents": ["./agents"]
+        }
+      }
+    }
+    JSON
+  '';
+
   piPackages = [
+    managedAgentPackage
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.69.0";
@@ -171,12 +188,50 @@
   ];
 
   managedPackages = builtins.toJSON (map toString piPackages);
+  managedSubagents = builtins.toJSON {
+    agentOverrides = {
+      monitor = {
+        model = "agent-control-plane/north-mini-code-1-0";
+        thinking = "low";
+      };
+      scout = {
+        model = "agent-control-plane/gpt-5.6-luna";
+        thinking = "low";
+      };
+      delegate = {
+        model = "agent-control-plane/gpt-5.6-luna";
+        thinking = "medium";
+      };
+      worker = {
+        model = "agent-control-plane/gpt-5.6-sol";
+        thinking = "medium";
+      };
+      reviewer = {
+        model = "agent-control-plane/gpt-5.6-sol";
+        thinking = "medium";
+      };
+      researcher = {
+        model = "agent-control-plane/gpt-5.6-sol";
+        thinking = "medium";
+      };
+      evidence-auditor = {
+        model = "agent-control-plane/gpt-5.6-sol";
+        thinking = "medium";
+      };
+      oracle = {
+        model = "agent-gateway-dev/us.openai.gpt-6-astra";
+        thinking = "off";
+      };
+    };
+  };
   managedKeybindings = builtins.toJSON {
     "app.message.followUp" = "enter";
-    "tui.input.submit" = [
+    "tui.input.newLine" = [
       "ctrl+enter"
-      "alt+enter"
+      "shift+enter"
+      "ctrl+j"
     ];
+    "tui.input.submit" = "alt+enter";
     "app.message.dequeue" = [
       "ctrl+q"
       "alt+up"
@@ -197,7 +252,9 @@
       input="$tmp.input"
     fi
 
-    ${pkgs.jq}/bin/jq --argjson managed '${managedPackages}' '
+    ${pkgs.jq}/bin/jq \
+      --argjson managed '${managedPackages}' \
+      --argjson managedSubagents '${managedSubagents}' '
       def source:
         if type == "string" then .
         elif type == "object" then (.source // "")
@@ -217,7 +274,7 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|managed-agents|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
@@ -225,6 +282,10 @@
           | map(select(managed_by_nix | not)))
         + $managed
       )
+      | .subagents = (
+          ((.subagents // {}) | if type == "object" then . else {} end)
+          * $managedSubagents
+        )
     ' "$input" > "$tmp"
 
     rm -f "$tmp.input"
