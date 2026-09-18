@@ -6,11 +6,11 @@ bind \e\[3\;5~ kill-word
 
 
 # EXA
-alias ls="eza --icons"
-alias la="eza --icons --all"
-alias ll="eza --icons --long --header --group"
-alias lla="eza --icons --all --long --header --group"
-alias lal="eza --icons --all --long --header --group"
+alias ls="eza --icons=always"
+alias la="eza --icons=always --all"
+alias ll="eza --icons=always --long --header --group"
+alias lla="eza --icons=always --all --long --header --group"
+alias lal="eza --icons=always --all --long --header --group"
 alias lt="eza --sort modified -1"
 
 abbr -a -g e eza
