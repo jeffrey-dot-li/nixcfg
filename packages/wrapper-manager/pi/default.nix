@@ -50,6 +50,71 @@
       '';
     };
 
+  mkRpivPackage = {
+    pname,
+    workspace,
+    version,
+    rev,
+    hash,
+    npmDepsHash,
+  }:
+    pkgs.buildNpmPackage {
+      inherit pname version npmDepsHash;
+
+      src = pkgs.fetchFromGitHub {
+        owner = "juicesharp";
+        repo = "rpiv-mono";
+        inherit rev hash;
+      };
+
+      dontNpmBuild = true;
+      postPatch = ''
+        ${pkgs.jq}/bin/jq \
+          'del(.devDependencies, .peerDependencies, .peerDependenciesMeta)' \
+          packages/${workspace}/package.json > package.json.tmp
+        mv package.json.tmp packages/${workspace}/package.json
+
+        ${pkgs.jq}/bin/jq \
+          '{name, version, private: true, workspaces: ["packages/${workspace}", "packages/rpiv-config"]}' \
+          package.json > package.json.tmp
+        mv package.json.tmp package.json
+
+        ${pkgs.jq}/bin/jq --arg workspace '${workspace}' '
+          .packages[""] = {
+            "name": "rpiv-mono",
+            "version": "0.0.0",
+            "workspaces": ["packages/" + $workspace, "packages/rpiv-config"]
+          }
+          | .packages["packages/" + $workspace]
+              |= del(.devDependencies, .peerDependencies, .peerDependenciesMeta)
+          | [
+              "",
+              "packages/" + $workspace,
+              "packages/rpiv-config",
+              "node_modules/@juicesharp/" + $workspace,
+              "node_modules/@juicesharp/rpiv-config",
+              "node_modules/typebox"
+            ] as $keep
+          | .packages |= with_entries(select(.key as $key | $keep | index($key)))
+        ' package-lock.json > package-lock.json.tmp
+        mv package-lock.json.tmp package-lock.json
+      '';
+      npmFlags = [
+        "--ignore-scripts"
+        "--omit=dev"
+        "--omit=peer"
+      ];
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out/node_modules/@juicesharp
+        cp -R packages/${workspace}/. $out/
+        cp -RL node_modules/typebox $out/node_modules/
+        cp -RL node_modules/@juicesharp/rpiv-config $out/node_modules/@juicesharp/
+        runHook postInstall
+      '';
+    };
+
   piPackages = [
     (mkPiPackage {
       pname = "pi-subagents";
@@ -69,9 +134,54 @@
       hash = "sha256-5YMwE44pyMmCapGt9kFLxT61Qg3OCzuJCIATRhMBv6M=";
       npmDepsHash = "sha256-NcJX+r/aaLSkBXq1N8mpZAzL0fCJC9pE4f+alHHxyAI=";
     })
+    (mkPiPackage {
+      pname = "pi-mcp-adapter";
+      version = "2.34.0";
+      owner = "nicobailon";
+      repo = "pi-mcp-adapter";
+      rev = "74c5233c63ad0096077df925fd6135c3bf6b8c6b";
+      hash = "sha256-YpiJROIG0/U81wAoImjktbg/d5wGnc6o130IlOrTyEE=";
+      npmDepsHash = "sha256-4TmYcom+la6ZQN9RuFWpq6hzByJEcKe4gRnCu27gU84=";
+    })
+    (mkPiPackage {
+      pname = "pi-cc-extensions";
+      version = "0.8.71";
+      owner = "minuque";
+      repo = "pi-cc-extensions";
+      rev = "e43e0041b59f5d7f03be9b9d103a5f9e954e4c11";
+      hash = "sha256-P2aoupVV8TBOSilqGplRukbdktpTJ09YC0sPkcvMKEM=";
+      npmDepsHash = "sha256-lf7AcK6bTbKh3rjbdJSozfFBBK1fUo1omFB4Efhsvms=";
+    })
+    (mkRpivPackage {
+      pname = "rpiv-ask-user-question";
+      workspace = "rpiv-ask-user-question";
+      version = "2.10.1";
+      rev = "42a272eb3363f18e072d71deccdbc27452bb0c45";
+      hash = "sha256-kgULSuw55OIqoF36kPyl69PCoDyajducrq3jeENnVKM=";
+      npmDepsHash = "sha256-9PR2jnPqSfHI/wIiAC9aFGiBXL+yw/qPPtIg++eJmOQ=";
+    })
+    (mkRpivPackage {
+      pname = "rpiv-todo";
+      workspace = "rpiv-todo";
+      version = "2.10.1";
+      rev = "42a272eb3363f18e072d71deccdbc27452bb0c45";
+      hash = "sha256-kgULSuw55OIqoF36kPyl69PCoDyajducrq3jeENnVKM=";
+      npmDepsHash = "sha256-aIZ0vSkcfi5zUSt91nFTaNeJ0leehvTxxhzEHgZM9yg=";
+    })
   ];
 
   managedPackages = builtins.toJSON (map toString piPackages);
+  managedKeybindings = builtins.toJSON {
+    "app.message.followUp" = "enter";
+    "tui.input.submit" = [
+      "ctrl+enter"
+      "alt+enter"
+    ];
+    "app.message.dequeue" = [
+      "ctrl+q"
+      "alt+up"
+    ];
+  };
   configurePackages = pkgs.writeShellScript "configure-pi-packages" ''
     config_dir="''${PI_CODING_AGENT_DIR:-"$HOME/.pi/agent"}"
     settings="$config_dir/settings.json"
@@ -99,7 +209,15 @@
           or ($source | startswith("npm:pi-subagents@"))
           or ($source == "npm:pi-web-access")
           or ($source | startswith("npm:pi-web-access@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-pi-(subagents|web-access)-[0-9]"));
+          or ($source == "npm:pi-mcp-adapter")
+          or ($source | startswith("npm:pi-mcp-adapter@"))
+          or ($source == "npm:pi-cc-extensions")
+          or ($source | startswith("npm:pi-cc-extensions@"))
+          or ($source == "npm:@juicesharp/rpiv-ask-user-question")
+          or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
+          or ($source == "npm:@juicesharp/rpiv-todo")
+          or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
@@ -115,6 +233,29 @@
       rm -f "$tmp"
     else
       mv "$tmp" "$settings"
+    fi
+    trap - EXIT
+
+    keybindings="$config_dir/keybindings.json"
+    keybindings_tmp=$(mktemp "$config_dir/.keybindings.json.XXXXXX")
+    trap 'rm -f "$keybindings_tmp" "$keybindings_tmp.input"' EXIT
+
+    if [ -f "$keybindings" ]; then
+      keybindings_input="$keybindings"
+    else
+      printf '{}\n' > "$keybindings_tmp.input"
+      keybindings_input="$keybindings_tmp.input"
+    fi
+
+    ${pkgs.jq}/bin/jq --argjson managed '${managedKeybindings}' \
+      '. * $managed' "$keybindings_input" > "$keybindings_tmp"
+
+    rm -f "$keybindings_tmp.input"
+    chmod 600 "$keybindings_tmp"
+    if [ -f "$keybindings" ] && cmp -s "$keybindings_tmp" "$keybindings"; then
+      rm -f "$keybindings_tmp"
+    else
+      mv "$keybindings_tmp" "$keybindings"
     fi
     trap - EXIT
   '';
