@@ -24,6 +24,10 @@ and `task_kill`; `/bg-tasks` opens the live task dashboard. Output is captured
 to durable, byte-pageable logs, completion notifications wake Pi by default,
 and task visibility follows the current session tree across reload, resume,
 and fork operations. A real Pi quit cancels jobs owned by that runtime.
+Runtime files are kept outside project trees under
+`${XDG_STATE_HOME:-~/.local/state}/pi/background-tasks/projects/<cwd-hash>/`,
+so repositories do not need package-specific ignore rules. Set
+`PI_BACKGROUND_TASK_STATE_DIR` to override the global state root.
 
 The Nix package carries a small UX patch. Agent-launched jobs require a short
 human-readable `name` in addition to the command. Dashboard rows display

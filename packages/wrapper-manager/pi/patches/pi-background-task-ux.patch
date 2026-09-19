@@ -1,3 +1,33 @@
+--- a/dist/persistence.js
++++ b/dist/persistence.js
+@@ -1,6 +1,8 @@
++import { createHash } from "node:crypto";
+ import { existsSync, linkSync, unlinkSync } from "node:fs";
+ import { chmod, mkdir, open, readFile, readdir, rename, rm, rmdir, writeFile } from "node:fs/promises";
+-import { dirname, join } from "node:path";
++import { homedir } from "node:os";
++import { dirname, join, resolve } from "node:path";
+ export class TaskStore {
+     instanceId;
+     root;
+@@ -8,11 +10,16 @@
+     instanceRoot;
+     constructor(projectCwd, instanceId) {
+         this.instanceId = instanceId;
+-        this.root = join(projectCwd, ".pi", "background-tasks");
++        const defaultStateRoot = join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "pi", "background-tasks");
++        const stateRoot = process.env.PI_BACKGROUND_TASK_STATE_DIR || defaultStateRoot;
++        const projectId = createHash("sha256").update(resolve(projectCwd)).digest("hex").slice(0, 24);
++        this.root = join(stateRoot, "projects", projectId);
+         this.instancesRoot = join(this.root, "instances");
+         this.instanceRoot = join(this.instancesRoot, instanceId);
+     }
+     async initialize() {
++        await mkdir(this.root, { recursive: true, mode: 0o700 });
++        await chmod(this.root, 0o700).catch(() => undefined);
+         await mkdir(this.instancesRoot, { recursive: true, mode: 0o700 });
+         await chmod(this.instancesRoot, 0o700).catch(() => undefined);
+     }
 diff --git a/dist/tmux.js b/dist/tmux.js
 index fc11293..28c8a4b 100644
 --- a/dist/tmux.js
