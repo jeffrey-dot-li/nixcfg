@@ -1,7 +1,16 @@
 diff --git a/src/bg.ts b/src/bg.ts
-index c214f8c..9b68738 100644
+index c214f8c..1aba6a7 100644
 --- a/src/bg.ts
 +++ b/src/bg.ts
+@@ -48,7 +48,7 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
+     command: string,
+     timeoutSec: number,
+     ctx: ExtensionContext,
+-    completion: "queue" | "continue" = "queue",
++    completion: "queue" | "continue" = "continue",
+   ) {
+     const expectedGeneration = manager.generation;
+     const originLeafId = ctx.sessionManager.getLeafId();
 @@ -101,6 +101,8 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
        expectedGeneration,
        originSessionFile: ctx.sessionManager.getSessionFile() ?? "",
@@ -20,6 +29,15 @@ index c214f8c..9b68738 100644
            },
          })
          .then(({ exitCode }) => finish(exitCode))
+@@ -282,7 +286,7 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
+       } else {
+         manager.deliverCompletion(
+           compact,
+-          job.stoppedManually ? "queue" : (job.completion ?? "queue"),
++          job.stoppedManually ? "queue" : (job.completion ?? "continue"),
+           expectedGeneration,
+           originLeafId,
+           !job.stoppedManually,
 @@ -327,11 +331,18 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
            label: "kill all",
            description: "Stop all background jobs",
@@ -86,11 +104,14 @@ index c214f8c..9b68738 100644
            description: "Action (default: spawn)",
          }),
        ),
-@@ -399,7 +415,16 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
-             "queue stores the result without waking an idle parent (default); continue wakes it",
-         }),
-       ),
--      pid: Type.Optional(Type.Number({ description: "Job ID for stop" })),
+@@ -396,10 +412,19 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
+       completion: Type.Optional(
+         StringEnum(["queue", "continue"] as const, {
+           description:
+-            "queue stores the result without waking an idle parent (default); continue wakes it",
++            "continue wakes an idle parent (default); queue stores the result without waking it",
++        }),
++      ),
 +      pid: Type.Optional(
 +        Type.Number({ description: "Job ID for logs or stop" }),
 +      ),
@@ -99,14 +120,18 @@ index c214f8c..9b68738 100644
 +          minimum: 1,
 +          maximum: 400,
 +          description: "Lines returned by logs (default: 100)",
-+        }),
-+      ),
+         }),
+       ),
+-      pid: Type.Optional(Type.Number({ description: "Job ID for stop" })),
        timeoutSec: Type.Optional(
          Type.Number({
            minimum: 1,
-@@ -415,6 +440,7 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
+@@ -413,8 +438,9 @@ export function registerBgModule(pi: ExtensionAPI, manager: BgManager) {
+       {
+         action = "spawn",
          command,
-         completion = "queue",
+-        completion = "queue",
++        completion = "continue",
          pid,
 +        lines = 100,
          timeoutSec = 600,
@@ -172,7 +197,7 @@ index c214f8c..9b68738 100644
          return new Text(
            theme.fg(
 diff --git a/src/manager.ts b/src/manager.ts
-index 398d293..1baa320 100644
+index 398d293..e1c804d 100644
 --- a/src/manager.ts
 +++ b/src/manager.ts
 @@ -3,7 +3,7 @@ import {
@@ -192,7 +217,12 @@ index 398d293..1baa320 100644
    result?: {
      message: string;
      displayMessage?: string;
-@@ -297,6 +298,7 @@ export class BgManager {
+@@ -293,10 +294,11 @@ export class BgManager {
+         parentSessionId: job.originSessionId,
+         originLeafId: job.originLeafId,
+         startedAt: job.startedAt,
+-        completion: job.completion ?? "queue",
++        completion: job.completion ?? "continue",
          completionId: job.completionId,
          expectedGeneration: job.expectedGeneration,
          command: job.command,
@@ -360,7 +390,7 @@ index 5ac0559..bcb5036 100644
 
  export function retainLog(content: string) {
 diff --git a/test/integration.test.ts b/test/integration.test.ts
-index e345cb9..42e77ae 100644
+index e345cb9..edad2ca 100644
 --- a/test/integration.test.ts
 +++ b/test/integration.test.ts
 @@ -20,6 +20,9 @@ function setup() {
@@ -373,7 +403,12 @@ index e345cb9..42e77ae 100644
      track(promise: Promise<void>) {
        pending.push(promise);
        return promise;
-@@ -80,6 +83,32 @@ test("runs a shell job and delivers output with Pi session environment", async (
+@@ -76,10 +79,36 @@ test("runs a shell job and delivers output with Pi session environment", async (
+   const result = JSON.parse(completions[0][0]);
+   assert.equal(result.state, "finished");
+   assert.equal(result.output, "integration-model");
+-  assert.equal(completions[0][1], "queue");
++  assert.equal(completions[0][1], "continue");
    assert.match(completions[0][6], /Background task finished/);
  });
 

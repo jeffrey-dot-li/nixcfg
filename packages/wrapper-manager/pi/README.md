@@ -25,8 +25,10 @@ under the Pi agent directory. The Nix package carries a local live-logs patch:
 `/bg` shows one row per job (Enter inspects and `x` stops the selected job),
 `/bg logs <pid>` opens an auto-refreshing viewer, and the model can call `bg`
 with `action: "logs"`. The viewer shows the latest 100 lines and refreshes every
-500 ms until Escape or `q`. The package is pinned and installed by Nix like the
-other managed packages.
+500 ms until Escape or `q`. Completed jobs default to `continue`, waking an idle
+agent immediately; callers can explicitly select `queue` to record a result
+without starting a model turn, and manually stopped jobs always remain queued.
+The package is pinned and installed by Nix like the other managed packages.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The
