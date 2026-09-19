@@ -115,18 +115,29 @@
       '';
     };
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.1" {} ''
+  piBg = pkgs.runCommand "pi-bg-0.4.11" {} ''
+    mkdir -p "$out"
+    cp -R ${pkgs.fetchFromGitHub {
+      owner = "Bukutsu";
+      repo = "pi-bg";
+      rev = "705866fe5dd575de447ea23dc5ab6863bc90ca64";
+      hash = "sha256-QUd+rcBQJzGp3iMvBZuy5bR185PtWnBsoa7bj8dh5xk=";
+    }}/. "$out/"
+  '';
+
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.2" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
-          "./extensions/expand-bash-command.ts"
+          "./extensions/expand-bash-command.ts",
+          "./extensions/queue-skills-follow-up.ts"
         ],
         "subagents": {
           "agents": ["./agents"]
@@ -138,6 +149,7 @@
 
   piPackages = [
     managedResourcePackage
+    piBg
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.69.0";
@@ -230,13 +242,13 @@
     };
   };
   managedKeybindings = builtins.toJSON {
-    "app.message.followUp" = "enter";
+    "app.message.followUp" = "alt+enter";
     "tui.input.newLine" = [
       "ctrl+enter"
       "shift+enter"
       "ctrl+j"
     ];
-    "tui.input.submit" = "alt+enter";
+    "tui.input.submit" = "enter";
     "app.message.dequeue" = [
       "ctrl+q"
       "alt+up"
@@ -267,7 +279,11 @@
         end;
       def managed_by_nix:
         source as $source
-        | ($source == "npm:pi-subagents")
+        | ($source == "npm:pi-bg")
+          or ($source | startswith("npm:pi-bg@"))
+          or ($source == "git:github.com/Bukutsu/pi-bg")
+          or ($source | startswith("git:github.com/Bukutsu/pi-bg@"))
+          or ($source == "npm:pi-subagents")
           or ($source | startswith("npm:pi-subagents@"))
           or ($source == "npm:pi-web-access")
           or ($source | startswith("npm:pi-web-access@"))
@@ -279,7 +295,7 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])

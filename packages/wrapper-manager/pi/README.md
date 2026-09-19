@@ -10,12 +10,19 @@ only their runtime dependencies. Dependency lifecycle scripts are disabled.
 The current Nix-managed Pi packages are:
 
 - local `pi-managed-resources` agents and extensions
+- `pi-bg`
 - `pi-subagents`
 - `pi-web-access`
 - `pi-mcp-adapter`
 - `pi-cc-extensions`
 - `@juicesharp/rpiv-ask-user-question`
 - `@juicesharp/rpiv-todo`
+
+`pi-bg` adds a non-blocking `bg` tool and `/bg` command for spawning,
+inspecting, and stopping arbitrary background shell jobs. Jobs can queue their
+result or wake the parent session on completion, and retained logs are stored
+under the Pi agent directory. It is pinned and installed by Nix like the other
+managed packages.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The
@@ -29,16 +36,24 @@ default configuration directory.
 The wrapper similarly merges the following queue controls into writable
 `keybindings.json`, preserving unrelated custom bindings:
 
-- `Enter`: submit normally when idle; queue a follow-up while the agent is busy
+- `Enter`: submit normally; while the agent is busy, ordinary prompts steer the
+  current run, recognized commands execute immediately, and skill commands are
+  rerouted by the managed extension to the follow-up queue
 - `Ctrl+Enter`, `Shift+Enter`, or `Ctrl+J`: insert a newline
-- `Option+Enter`: submit normally when idle; steer the current run while the
-  agent is busy
+- `Option+Enter`: queue a follow-up while the agent is busy
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
 - `Escape`: Pi's existing immediate interrupt binding; it also restores queued
   messages to the editor
 
 `Ctrl+Q` is provided because integrated terminals may intercept or incorrectly
 encode `Option+Up` before Pi receives it.
+
+The managed `queue-skills-follow-up.ts` input extension recognizes commands
+whose Pi command source is `skill`. When a skill is submitted interactively
+while an agent is busy, it resubmits the unexpanded skill invocation as a
+follow-up and lets Pi perform normal skill expansion there. Built-in and
+extension commands continue through Pi's immediate command dispatch, while
+ordinary prompts retain normal steering behavior.
 
 The managed `guard-invalid-slash.ts` input extension prevents accidental
 submission of mistyped slash commands. In the interactive editor, input that
