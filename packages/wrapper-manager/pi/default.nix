@@ -223,8 +223,8 @@
         thinking = "low";
       };
       delegate = {
-        model = "agent-control-plane/gpt-5.6-luna";
-        thinking = "medium";
+        model = "cohere-oss-v2/deepseek-v4-1-flash";
+        thinking = "high";
       };
       worker = {
         model = "agent-control-plane/gpt-5.6-sol";
