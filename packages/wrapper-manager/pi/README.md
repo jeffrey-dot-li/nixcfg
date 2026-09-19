@@ -67,6 +67,13 @@ follow-up. Built-in and extension commands are dispatched before the input
 event, so they remain immediate; ordinary prompts, skills, and prompt templates
 wait until the active task settles.
 
+The managed `static-working-indicator.ts` extension replaces Pi's animated
+working spinner with a static dot. Cursor invalidates integrated-terminal link
+decorations on each redraw, causing hovered file references and URLs to flicker
+and become difficult to click while Pi is busy. Streaming text can still cause
+necessary redraws, but idle thinking and tool execution no longer repaint just
+to animate the spinner.
+
 The managed `guard-invalid-slash.ts` input extension prevents accidental
 submission of mistyped slash commands. In the interactive editor, input that
 starts with `/` is submitted normally only when Pi recognizes the command. An

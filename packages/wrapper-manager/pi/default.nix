@@ -127,19 +127,20 @@
     ${pkgs.patch}/bin/patch -d "$out" -p1 < ${./patches/pi-bg-live-logs.patch}
   '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.4" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.5" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
           "./extensions/expand-bash-command.ts",
-          "./extensions/queue-input-follow-up.ts"
+          "./extensions/queue-input-follow-up.ts",
+          "./extensions/static-working-indicator.ts"
         ],
         "subagents": {
           "agents": ["./agents"]
