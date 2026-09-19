@@ -123,21 +123,23 @@
       rev = "705866fe5dd575de447ea23dc5ab6863bc90ca64";
       hash = "sha256-QUd+rcBQJzGp3iMvBZuy5bR185PtWnBsoa7bj8dh5xk=";
     }}/. "$out/"
+    chmod -R u+w "$out"
+    ${pkgs.patch}/bin/patch -d "$out" -p1 < ${./patches/pi-bg-live-logs.patch}
   '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.3" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.4" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
           "./extensions/expand-bash-command.ts",
-          "./extensions/queue-skills-follow-up.ts"
+          "./extensions/queue-input-follow-up.ts"
         ],
         "subagents": {
           "agents": ["./agents"]

@@ -21,8 +21,11 @@ The current Nix-managed Pi packages are:
 `pi-bg` adds a non-blocking `bg` tool and `/bg` command for spawning,
 inspecting, and stopping arbitrary background shell jobs. Jobs can queue their
 result or wake the parent session on completion, and retained logs are stored
-under the Pi agent directory. It is pinned and installed by Nix like the other
-managed packages.
+under the Pi agent directory. The Nix package carries a local live-logs patch:
+`/bg` offers View and Stop actions, `/bg logs <pid>` opens an auto-refreshing
+viewer, and the model can call `bg` with `action: "logs"`. The viewer shows the
+latest 100 lines and refreshes every 500 ms until Escape or `q`. The package is
+pinned and installed by Nix like the other managed packages.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The
@@ -36,9 +39,9 @@ default configuration directory.
 The wrapper similarly merges the following queue controls into writable
 `keybindings.json`, preserving unrelated custom bindings:
 
-- `Enter`: submit normally; while the agent is busy, ordinary prompts steer the
-  current run, recognized commands execute immediately, and skill commands are
-  rerouted by the managed extension to the follow-up queue
+- `Enter`: submit normally while idle; while the agent is busy, recognized
+  commands execute immediately and all model-bound input (ordinary prompts,
+  skills, and prompt templates) is rerouted to the follow-up queue
 - `Ctrl+Enter`, `Shift+Enter`, or `Ctrl+J`: insert a newline
 - `Option+Enter`: queue a follow-up while the agent is busy
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
@@ -55,12 +58,11 @@ command display. A single `Ctrl+O` then expands the full command and output
 instead of opening pi-cc's separately truncated Input/Output preview, whose
 second-level expansion is mouse-only in fullscreen mode.
 
-The managed `queue-skills-follow-up.ts` input extension recognizes commands
-whose Pi command source is `skill`. When a skill is submitted interactively
-while an agent is busy, it resubmits the unexpanded skill invocation as a
-follow-up and lets Pi perform normal skill expansion there. Built-in and
-extension commands continue through Pi's immediate command dispatch, while
-ordinary prompts retain normal steering behavior.
+The managed `queue-input-follow-up.ts` extension intercepts interactive input
+that Pi would otherwise use to steer a busy agent and resubmits it as a
+follow-up. Built-in and extension commands are dispatched before the input
+event, so they remain immediate; ordinary prompts, skills, and prompt templates
+wait until the active task settles.
 
 The managed `guard-invalid-slash.ts` input extension prevents accidental
 submission of mistyped slash commands. In the interactive editor, input that
