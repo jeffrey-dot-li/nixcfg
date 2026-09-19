@@ -22,10 +22,11 @@ The current Nix-managed Pi packages are:
 inspecting, and stopping arbitrary background shell jobs. Jobs can queue their
 result or wake the parent session on completion, and retained logs are stored
 under the Pi agent directory. The Nix package carries a local live-logs patch:
-`/bg` offers View and Stop actions, `/bg logs <pid>` opens an auto-refreshing
-viewer, and the model can call `bg` with `action: "logs"`. The viewer shows the
-latest 100 lines and refreshes every 500 ms until Escape or `q`. The package is
-pinned and installed by Nix like the other managed packages.
+`/bg` shows one row per job (Enter inspects and `x` stops the selected job),
+`/bg logs <pid>` opens an auto-refreshing viewer, and the model can call `bg`
+with `action: "logs"`. The viewer shows the latest 100 lines and refreshes every
+500 ms until Escape or `q`. The package is pinned and installed by Nix like the
+other managed packages.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The

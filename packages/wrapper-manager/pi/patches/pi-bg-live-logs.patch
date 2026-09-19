@@ -172,7 +172,7 @@ index c214f8c..9b68738 100644
          return new Text(
            theme.fg(
 diff --git a/src/manager.ts b/src/manager.ts
-index 398d293..cbb74ba 100644
+index 398d293..1baa320 100644
 --- a/src/manager.ts
 +++ b/src/manager.ts
 @@ -3,7 +3,7 @@ import {
@@ -208,7 +208,7 @@ index 398d293..cbb74ba 100644
          };
          this.jobs.set(entry.pid, job);
          restored++;
-@@ -691,17 +694,77 @@ export class BgManager {
+@@ -691,30 +694,115 @@ export class BgManager {
      return stopped;
    }
 
@@ -276,39 +276,75 @@ index 398d293..cbb74ba 100644
      if (this.jobs.size === 0)
        return ctx.ui.notify("No background jobs running", "info");
 -    const choice = await ctx.ui.select("Select background job to stop:", [
-+    const choices = Array.from(this.jobs.values()).flatMap((job) => {
-+      const label = `[${job.pid}] ${job.command} (${Math.round((Date.now() - job.startedAt) / 1000)}s)`;
-+      return [`View ${label}`, `Stop ${label}`];
-+    });
-+    const choice = await ctx.ui.select("Manage background jobs:", [
-       "Cancel",
-       "Stop all",
+-      "Cancel",
+-      "Stop all",
 -      ...Array.from(
 -        this.jobs.values(),
 -        (job) =>
 -          `[${job.pid}] ${job.command} (${Math.round((Date.now() - job.startedAt) / 1000)}s)`,
 -      ),
-+      ...choices,
-     ]);
-     if (choice === "Stop all") {
-       const stopped = this.killAllJobs();
-@@ -713,7 +776,15 @@ export class BgManager {
-       return;
-     }
-     const pid = Number(choice?.match(/\[(-?\d+)\]/)?.[1]);
+-    ]);
+-    if (choice === "Stop all") {
+-      const stopped = this.killAllJobs();
+-      ctx.ui.notify(
+-        `Stopped ${stopped} background job${stopped === 1 ? "" : "s"}`,
+-        "info",
+-      );
+-      this.syncStatus(ctx);
+-      return;
+-    }
+-    const pid = Number(choice?.match(/\[(-?\d+)\]/)?.[1]);
 -    if (choice !== "Cancel" && Number.isInteger(pid) && this.killJob(pid)) {
-+    if (choice?.startsWith("View ") && Number.isInteger(pid)) {
-+      await this.showLogs(ctx, pid);
-+      return;
-+    }
-+    if (
-+      choice?.startsWith("Stop ") &&
-+      Number.isInteger(pid) &&
-+      this.killJob(pid)
-+    ) {
-       ctx.ui.notify(`Stopped background job ${pid}`, "info");
+-      ctx.ui.notify(`Stopped background job ${pid}`, "info");
++
++    const jobs = Array.from(this.jobs.values());
++    const choice = await ctx.ui.custom<
++      { action: "view" | "stop"; pid: number } | undefined
++    >((tui, theme, _keybindings, done) => {
++      let selected = 0;
++      return {
++        render: (width: number) => {
++          const safeWidth = Math.max(1, width);
++          const lines = [theme.fg("accent", theme.bold("Background jobs")), ""];
++          for (let index = 0; index < jobs.length; index++) {
++            const job = jobs[index];
++            const label = `[${job.pid}] ${job.command} (${Math.round((Date.now() - job.startedAt) / 1000)}s)`;
++            const marker = index === selected ? "> " : "  ";
++            const row =
++              index === selected
++                ? theme.fg("accent", marker + label)
++                : marker + label;
++            lines.push(row);
++          }
++          lines.push("", theme.fg("dim", "Enter inspect · x stop · Esc close"));
++          return lines.map((line) => truncateToWidth(line, safeWidth, ""));
++        },
++        handleInput: (data: string) => {
++          if (matchesKey(data, "escape") || data === "q") {
++            done(undefined);
++          } else if (matchesKey(data, "up") || data === "k") {
++            selected = (selected - 1 + jobs.length) % jobs.length;
++            tui.requestRender();
++          } else if (matchesKey(data, "down") || data === "j") {
++            selected = (selected + 1) % jobs.length;
++            tui.requestRender();
++          } else if (matchesKey(data, "return")) {
++            done({ action: "view", pid: jobs[selected].pid });
++          } else if (data === "x") {
++            done({ action: "stop", pid: jobs[selected].pid });
++          }
++        },
++        invalidate() {},
++      };
++    });
++
++    if (choice?.action === "view") {
++      await this.showLogs(ctx, choice.pid);
++    } else if (choice?.action === "stop" && this.killJob(choice.pid)) {
++      ctx.ui.notify(`Stopped background job ${choice.pid}`, "info");
        this.syncStatus(ctx);
      }
+   }
 diff --git a/src/types.ts b/src/types.ts
 index 5ac0559..bcb5036 100644
 --- a/src/types.ts
@@ -371,10 +407,10 @@ index e345cb9..42e77ae 100644
    const timeout = setup();
    await timeout.bg.execute(
 diff --git a/test/manager.test.ts b/test/manager.test.ts
-index a0972c5..1b8f95d 100644
+index a0972c5..5bab2e5 100644
 --- a/test/manager.test.ts
 +++ b/test/manager.test.ts
-@@ -195,6 +195,52 @@ test("killAllJobs aborts active background jobs", () => {
+@@ -195,6 +195,134 @@ test("killAllJobs aborts active background jobs", () => {
    assert.equal(manager.killAllJobs(), 0);
  });
 
@@ -422,6 +458,88 @@ index a0972c5..1b8f95d 100644
 +
 +  await manager.showLogs(ctx, 1);
 +  assert.match(rendered.join("\n"), /first\nsecond/);
++});
++
++test("job menu uses one row and Enter opens logs", async () => {
++  const manager = new BgManager({} as any);
++  manager.jobs.set(1, {
++    pid: 1,
++    command: "test command",
++    startedAt: Date.now(),
++    controller: new AbortController(),
++    liveOutput: "live output",
++  } as any);
++  let menu = "";
++  let logs = "";
++  let customCalls = 0;
++  const ctx: any = {
++    ui: {
++      custom: async (factory: any) => {
++        customCalls++;
++        let resolve!: (value?: any) => void;
++        const finished = new Promise<any>((done) => (resolve = done));
++        const component = factory(
++          { requestRender() {} },
++          {
++            fg: (_color: string, text: string) => text,
++            bold: (text: string) => text,
++          },
++          {},
++          resolve,
++        );
++        const rendered = component.render(80).join("\n");
++        if (customCalls === 1) {
++          menu = rendered;
++          component.handleInput("\r");
++        } else {
++          logs = rendered;
++          component.handleInput("\u001b");
++        }
++        return finished;
++      },
++    },
++  };
++
++  await manager.manageJobs(ctx);
++  assert.equal(menu.match(/test command/g)?.length, 1);
++  assert.match(logs, /live output/);
++});
++
++test("x stops the selected job from the menu", async () => {
++  const manager = new BgManager({} as any);
++  const controller = new AbortController();
++  manager.jobs.set(1, {
++    pid: 1,
++    command: "test command",
++    startedAt: Date.now(),
++    controller,
++  } as any);
++  const notifications: string[] = [];
++  const ctx: any = {
++    ui: {
++      custom: async (factory: any) => {
++        let resolve!: (value?: any) => void;
++        const finished = new Promise<any>((done) => (resolve = done));
++        const component = factory(
++          { requestRender() {} },
++          {
++            fg: (_color: string, text: string) => text,
++            bold: (text: string) => text,
++          },
++          {},
++          resolve,
++        );
++        component.handleInput("x");
++        return finished;
++      },
++      notify: (message: string) => notifications.push(message),
++      setStatus() {},
++    },
++  };
++
++  await manager.manageJobs(ctx);
++  assert.equal(controller.signal.aborted, true);
++  assert.deepEqual(notifications, ["Stopped background job 1"]);
 +});
 +
  test("syncStatus uses the native footer status", () => {
