@@ -115,16 +115,19 @@
       '';
     };
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.0" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.1" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "pi": {
-        "extensions": ["./extensions/guard-invalid-slash.ts"],
+        "extensions": [
+          "./extensions/guard-invalid-slash.ts",
+          "./extensions/expand-bash-command.ts"
+        ],
         "subagents": {
           "agents": ["./agents"]
         }
