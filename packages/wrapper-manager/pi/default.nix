@@ -215,7 +215,7 @@
   managedSubagents = builtins.toJSON {
     agentOverrides = {
       monitor = {
-        model = "agent-control-plane/north-mini-code-1-0";
+        model = "agent-control-plane/gpt-5.6-luna";
         thinking = "low";
       };
       scout = {

@@ -84,6 +84,39 @@ unknown command is not added to the conversation or queue, and its text stays
 in the editor for correction. Normal prompts and non-interactive RPC, print,
 and JSON input retain Pi's standard behavior.
 
+## Validating Pi toolchain changes
+
+A Nix build proves packaging, but it does not prove that a changed tool chain
+works in a live Pi runtime. `/reload` is also insufficient when the change
+affects wrapper environment variables, executable lookup, startup hooks, or
+extension module state. The current parent process may retain stale state.
+
+This project authorizes a bounded Playbook-tier subagent for runtime validation
+when Pi tools, extensions, package wiring, or tool schemas change. After
+`nix build .#pi`, use one fresh-context `delegate` child as the test operator.
+The child must launch the newly built `./result/bin/pi` as a separate process,
+exercise exactly one named capability, and report the result to the parent. Use
+a disposable/no-session runtime where practical, and do not let the validation
+child edit the implementation under test.
+
+Give the child a narrow acceptance contract containing:
+
+- the single behavior to test and its expected observable result;
+- the exact new Pi executable/package path to exercise;
+- required setup and cleanup, including terminating spawned processes;
+- bounded evidence to return: tool result, completion event, relevant log tail,
+  and exit/status information;
+- a requirement to report failure honestly rather than infer success from
+  registration, type checking, or a successful Nix build.
+
+For asynchronous tools, validate the complete lifecycle: start, live
+inspection when relevant, terminal completion, automatic wake-up/delivery, and
+cleanup. Use native completion notifications or bounded wait primitives rather
+than sleep-and-poll loops. The parent retains acceptance authority, applies any
+fixes, and reruns the focused validation in another fresh Pi process. Keep this
+test to one child and one capability unless the operator explicitly requests a
+broader delegated test matrix.
+
 ## Subagent model tiers
 
 The wrapper merges a managed `subagents.agentOverrides` block into writable
@@ -94,7 +127,7 @@ model arguments still take precedence; this configuration does not impose a
 
 | Class | Roles | Model | Thinking |
 | --- | --- | --- | --- |
-| Monitor | `monitor` | `agent-control-plane/north-mini-code-1-0` | `low` |
+| Monitor | `monitor` | `agent-control-plane/gpt-5.6-luna` | `low` |
 | Playbook | `scout` | `agent-control-plane/gpt-5.6-luna` | `low` |
 | Playbook | `delegate` | `agent-control-plane/gpt-5.6-luna` | `medium` |
 | Working | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-5.6-sol` | `medium` |
