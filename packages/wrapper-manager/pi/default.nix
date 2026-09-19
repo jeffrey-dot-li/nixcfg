@@ -115,17 +115,21 @@
       '';
     };
 
-  piBg = pkgs.runCommand "pi-bg-0.4.11" {} ''
-    mkdir -p "$out"
-    cp -R ${pkgs.fetchFromGitHub {
-      owner = "Bukutsu";
-      repo = "pi-bg";
-      rev = "705866fe5dd575de447ea23dc5ab6863bc90ca64";
-      hash = "sha256-QUd+rcBQJzGp3iMvBZuy5bR185PtWnBsoa7bj8dh5xk=";
-    }}/. "$out/"
-    chmod -R u+w "$out"
-    ${pkgs.patch}/bin/patch -d "$out" -p1 < ${./patches/pi-bg-live-logs.patch}
-  '';
+  piBackgroundTask =
+    pkgs.runCommand "pi-background-task-0.1.1" {
+      nativeBuildInputs = [pkgs.gnutar pkgs.gzip pkgs.patch];
+    } ''
+      mkdir -p source "$out"
+      tar -xzf ${pkgs.fetchurl {
+        url = "https://registry.npmjs.org/pi-background-task/-/pi-background-task-0.1.1.tgz";
+        hash = "sha256-bilQUdku/nsReCn9d9ykeU/wFj3fLJZohDwR1JRmIZM=";
+      }} -C source --strip-components=1
+      cp -R source/. "$out/"
+      chmod -R u+w "$out"
+      patch -d "$out" -p1 < ${./patches/pi-background-task-ux.patch}
+      substituteInPlace "$out/dist/tmux.js" \
+        --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
+    '';
 
   managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.5" {} ''
     mkdir -p "$out"
@@ -152,7 +156,7 @@
 
   piPackages = [
     managedResourcePackage
-    piBg
+    piBackgroundTask
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.69.0";
@@ -286,6 +290,10 @@
           or ($source | startswith("npm:pi-bg@"))
           or ($source == "git:github.com/Bukutsu/pi-bg")
           or ($source | startswith("git:github.com/Bukutsu/pi-bg@"))
+          or ($source == "npm:pi-background-task")
+          or ($source | startswith("npm:pi-background-task@"))
+          or ($source == "git:github.com/ZKiteLM/pi-background-task")
+          or ($source | startswith("git:github.com/ZKiteLM/pi-background-task@"))
           or ($source == "npm:pi-subagents")
           or ($source | startswith("npm:pi-subagents@"))
           or ($source == "npm:pi-web-access")
@@ -298,7 +306,7 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|background-task|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
@@ -447,6 +455,16 @@ in {
     basePackage = pi-unwrapped;
     wrapperType = "shell";
     wrapFlags = [
+      "--prefix"
+      "PATH"
+      ":"
+      (lib.makeBinPath [
+        pkgs.tmux
+        pkgs.nodejs
+      ])
+      "--set-default"
+      "PI_BACKGROUND_TASK_NODE"
+      "${pkgs.nodejs}/bin/node"
       "--run"
       configurePackages
     ];

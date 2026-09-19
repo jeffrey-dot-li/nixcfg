@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "taskId": "bg_7bf44d5195844c9a80ee1549b0d6760b",
+  "ownerInstanceId": "run_20260919T145211027_p12011_11c73c",
+  "visibilityScope": "session-tree",
+  "sessionName": "pi-bg_7bf44d5195844c9a80ee1549b0d6760b",
+  "socketName": "pi-bg-run_20260919T145211027_p12011_11c73c",
+  "name": "Verify absolute Node runner",
+  "command": "printf 'TASK_STARTED\\n'; sleep 2; printf 'TASK_FINISHED\\n'",
+  "cwd": "/Users/jeffreyli/Documents/nixcfg",
+  "shell": "/nix/store/fbqd2sxclqx38z86qca9avcdis8z5lcv-fish-4.7.1/bin/fish",
+  "status": "running",
+  "createdAt": "2026-09-19T15:01:49.489Z",
+  "timeoutSeconds": 30,
+  "notifyOnCompletion": true,
+  "startedAt": "2026-09-19T15:01:49.576Z",
+  "notifiedAt": "2026-09-19T15:01:52.963Z"
+}

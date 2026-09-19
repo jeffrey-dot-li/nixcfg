@@ -1,16 +1,16 @@
 # Pi
 
 `default.nix` packages the upstream standalone Pi release and the default
-third-party Pi packages. Pi packages are pinned Git revisions built with
-`buildNpmPackage`; Pi supplies their SDK peer dependencies, while Nix installs
-only their runtime dependencies. Dependency lifecycle scripts are disabled.
+third-party Pi packages. Packages are pinned to immutable Git revisions or npm
+release archives. Pi supplies their SDK peer dependencies, while Nix installs
+only required runtime files. Dependency lifecycle scripts are disabled.
 
 ## Managed packages
 
 The current Nix-managed Pi packages are:
 
 - local `pi-managed-resources` agents and extensions
-- `pi-bg`
+- `pi-background-task`
 - `pi-subagents`
 - `pi-web-access`
 - `pi-mcp-adapter`
@@ -18,17 +18,20 @@ The current Nix-managed Pi packages are:
 - `@juicesharp/rpiv-ask-user-question`
 - `@juicesharp/rpiv-todo`
 
-`pi-bg` adds a non-blocking `bg` tool and `/bg` command for spawning,
-inspecting, and stopping arbitrary background shell jobs. Jobs can queue their
-result or wake the parent session on completion, and retained logs are stored
-under the Pi agent directory. The Nix package carries a local live-logs patch:
-`/bg` shows one row per job (Enter inspects and `x` stops the selected job),
-`/bg logs <pid>` opens an auto-refreshing viewer, and the model can call `bg`
-with `action: "logs"`. The viewer shows the latest 100 lines and refreshes every
-500 ms until Escape or `q`. Completed jobs default to `continue`, waking an idle
-agent immediately; callers can explicitly select `queue` to record a result
-without starting a model turn, and manually stopped jobs always remain queued.
-The package is pinned and installed by Nix like the other managed packages.
+`pi-background-task` provides tmux-backed, non-blocking background terminals.
+Agents use `task_start`, `task_status`, `task_logs`, `task_send`, `task_wait`,
+and `task_kill`; `/bg-tasks` opens the live task dashboard. Output is captured
+to durable, byte-pageable logs, completion notifications wake Pi by default,
+and task visibility follows the current session tree across reload, resume,
+and fork operations. A real Pi quit cancels jobs owned by that runtime.
+
+The Nix package carries a small UX patch. Agent-launched jobs require a short
+human-readable `name` in addition to the command. Dashboard rows display
+`name — command`, and `x` stops the selected running task. Enter expands live
+output, `r` refreshes, and Escape or `q` closes the dashboard. The wrapper adds
+`tmux` and Node to Pi's `PATH` and directs the detached runner to Nix's Node
+binary (the standalone Pi executable cannot act as a Node interpreter). Users
+do not need to manage tmux sessions manually.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The

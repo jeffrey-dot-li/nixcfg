@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "taskId": "bg_760a8298ceac49b0ac788291e51200c3",
+  "ownerInstanceId": "run_20260919T145211027_p12011_11c73c",
+  "visibilityScope": "session-tree",
+  "sessionName": "pi-bg_760a8298ceac49b0ac788291e51200c3",
+  "socketName": "pi-bg-run_20260919T145211027_p12011_11c73c",
+  "name": "Verify background tasks",
+  "command": "printf 'TASK_STARTED\\n'; sleep 2; printf 'TASK_FINISHED\\n'",
+  "cwd": "/Users/jeffreyli/Documents/nixcfg",
+  "shell": "/nix/store/fbqd2sxclqx38z86qca9avcdis8z5lcv-fish-4.7.1/bin/fish",
+  "status": "running",
+  "createdAt": "2026-09-19T14:52:21.968Z",
+  "timeoutSeconds": 30,
+  "notifyOnCompletion": true,
+  "startedAt": "2026-09-19T14:52:22.050Z",
+  "notifiedAt": "2026-09-19T14:52:53.878Z"
+}

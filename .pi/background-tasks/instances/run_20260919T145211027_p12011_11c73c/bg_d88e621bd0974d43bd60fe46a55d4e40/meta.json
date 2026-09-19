@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "taskId": "bg_d88e621bd0974d43bd60fe46a55d4e40",
+  "ownerInstanceId": "run_20260919T145211027_p12011_11c73c",
+  "visibilityScope": "session-tree",
+  "sessionName": "pi-bg_d88e621bd0974d43bd60fe46a55d4e40",
+  "socketName": "pi-bg-run_20260919T145211027_p12011_11c73c",
+  "name": "Verify patched runner",
+  "command": "printf 'TASK_STARTED\\n'; sleep 2; printf 'TASK_FINISHED\\n'",
+  "cwd": "/Users/jeffreyli/Documents/nixcfg",
+  "shell": "/nix/store/fbqd2sxclqx38z86qca9avcdis8z5lcv-fish-4.7.1/bin/fish",
+  "status": "running",
+  "createdAt": "2026-09-19T14:58:55.756Z",
+  "timeoutSeconds": 30,
+  "notifyOnCompletion": true,
+  "startedAt": "2026-09-19T14:58:55.845Z",
+  "notifiedAt": "2026-09-19T14:58:57.418Z"
+}

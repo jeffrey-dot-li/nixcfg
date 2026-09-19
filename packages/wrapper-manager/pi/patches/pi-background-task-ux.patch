@@ -1,0 +1,84 @@
+diff --git a/dist/tmux.js b/dist/tmux.js
+index fc11293..28c8a4b 100644
+--- a/dist/tmux.js
++++ b/dist/tmux.js
+@@ -21,7 +21,8 @@ export class TmuxBackend {
+         }
+     }
+     async start(meta, paths) {
+-        const runnerCommand = `${shellQuote(process.execPath)} ${shellQuote(this.runnerPath)} ${shellQuote(paths.dir)}`;
++        const runnerExecutable = process.env.PI_BACKGROUND_TASK_NODE || "@node@";
++        const runnerCommand = `${shellQuote(runnerExecutable)} ${shellQuote(this.runnerPath)} ${shellQuote(paths.dir)}`;
+         await this.run([
+             "new-session",
+             "-d",
+diff --git a/dist/tools.js b/dist/tools.js
+index a05146d..d0136c2 100644
+--- a/dist/tools.js
++++ b/dist/tools.js
+@@ -9,10 +9,17 @@ export function registerTools(pi, registry) {
+         label: "Background Task",
+         description: "Start a shell command in a persistent tmux-backed background terminal and return immediately with its task ID.",
+         promptSnippet: "Start a command in a persistent tmux-backed background terminal",
+-        promptGuidelines: ["Use task_logs with bounded offsets instead of repeatedly requesting full task output."],
++        promptGuidelines: [
++            "Always provide a short, human-readable name that describes the purpose of each background task.",
++            "Use task_logs with bounded offsets instead of repeatedly requesting full task output.",
++        ],
+         parameters: Type.Object({
+             command: Type.String({ minLength: 1, maxLength: 32_768, description: "Shell command to run" }),
+-            name: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
++            name: Type.String({
++                minLength: 1,
++                maxLength: 80,
++                description: "Short human-readable task purpose (required; do not repeat the raw command)",
++            }),
+             cwd: Type.Optional(Type.String({ description: "Absolute path or path relative to Pi's cwd" })),
+             timeoutSeconds: Type.Optional(Type.Integer({ minimum: 1, maximum: 604_800 })),
+             notifyOnCompletion: Type.Optional(Type.Boolean({ default: true })),
+@@ -22,7 +29,7 @@ export function registerTools(pi, registry) {
+             const task = await registry().start({
+                 command: params.command,
+                 cwd,
+-                ...(params.name ? { name: params.name } : {}),
++                name: params.name,
+                 ...(params.timeoutSeconds !== undefined ? { timeoutSeconds: params.timeoutSeconds } : {}),
+                 ...(params.notifyOnCompletion !== undefined ? { notifyOnCompletion: params.notifyOnCompletion } : {}),
+             });
+diff --git a/dist/tui.js b/dist/tui.js
+index ccac8a8..e65047f 100644
+--- a/dist/tui.js
++++ b/dist/tui.js
+@@ -65,6 +65,13 @@ export class TaskDashboard {
+             void this.updateDetails();
+             return;
+         }
++        if (matchesKey(data, "x")) {
++            const task = this.tasks[this.selected];
++            if (task && task.ownedByCurrentInstance && (task.status === "starting" || task.status === "running")) {
++                void this.registry.terminate(task.taskId, "cancelled", false).then(() => this.refresh());
++            }
++            return;
++        }
+         if (matchesKey(data, "r"))
+             void this.refresh();
+     }
+@@ -85,7 +92,8 @@ export class TaskDashboard {
+             for (const [index, task] of this.tasks.entries()) {
+                 const cursor = index === this.selected ? th.fg("accent", ">") : " ";
+                 const state = colorStatus(th, task.status, statusGlyph(task.status));
+-                const name = truncatePlain(task.name, Math.max(8, usable - 48)).padEnd(Math.max(8, usable - 48));
++                const summary = `${task.name} — ${task.command}`;
++                const name = truncatePlain(summary, Math.max(8, usable - 48)).padEnd(Math.max(8, usable - 48));
+                 const ownership = task.ownedByCurrentInstance ? "" : th.fg("dim", " history");
+                 const line = ` ${cursor} ${state} ${th.fg("text", name)} ${th.fg("dim", formatDuration(currentDurationMs(task)).padStart(8))} ${th.fg("muted", task.taskId.slice(0, 11))}${ownership}`;
+                 lines.push(truncateToWidth(line, usable));
+@@ -104,7 +112,7 @@ export class TaskDashboard {
+             }
+         }
+         lines.push("");
+-        lines.push(truncateToWidth(`  ${th.fg("dim", "↑↓ select  Enter details  r refresh  q close")}  ${th.fg("success", "● live")}`, usable));
++        lines.push(truncateToWidth(`  ${th.fg("dim", "↑↓ select  Enter details  x stop  r refresh  q close")}  ${th.fg("success", "● live")}`, usable));
+         lines.push("");
+         this.cachedWidth = width;
+         this.cachedLines = lines;
