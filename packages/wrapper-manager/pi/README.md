@@ -48,6 +48,13 @@ The wrapper similarly merges the following queue controls into writable
 `Ctrl+Q` is provided because integrated terminals may intercept or incorrectly
 encode `Option+Up` before Pi receives it.
 
+The wrapper also merges `bash` into `excludeRenderers` in writable
+`claude-code-style.json`. This keeps `pi-cc-extensions` from replacing Bash's
+renderer, so the managed `expand-bash-command.ts` renderer owns the complete
+command display. A single `Ctrl+O` then expands the full command and output
+instead of opening pi-cc's separately truncated Input/Output preview, whose
+second-level expansion is mouse-only in fullscreen mode.
+
 The managed `queue-skills-follow-up.ts` input extension recognizes commands
 whose Pi command source is `skill`. When a skill is submitted interactively
 while an agent is busy, it resubmits the unexpanded skill invocation as a

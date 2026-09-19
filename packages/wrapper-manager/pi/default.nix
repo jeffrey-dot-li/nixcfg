@@ -125,14 +125,14 @@
     }}/. "$out/"
   '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.2" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.3" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
@@ -338,6 +338,36 @@
       rm -f "$keybindings_tmp"
     else
       mv "$keybindings_tmp" "$keybindings"
+    fi
+    trap - EXIT
+
+    ccstyle="$config_dir/claude-code-style.json"
+    ccstyle_tmp=$(mktemp "$config_dir/.claude-code-style.json.XXXXXX")
+    trap 'rm -f "$ccstyle_tmp" "$ccstyle_tmp.input"' EXIT
+
+    if [ -f "$ccstyle" ]; then
+      ccstyle_input="$ccstyle"
+    else
+      printf '{}\n' > "$ccstyle_tmp.input"
+      ccstyle_input="$ccstyle_tmp.input"
+    fi
+
+    ${pkgs.jq}/bin/jq '
+      .excludeRenderers = (
+        ((.excludeRenderers // [])
+          | if type == "array" then . else [] end
+          | map(select(type == "string")))
+        + ["bash"]
+        | unique
+      )
+    ' "$ccstyle_input" > "$ccstyle_tmp"
+
+    rm -f "$ccstyle_tmp.input"
+    chmod 600 "$ccstyle_tmp"
+    if [ -f "$ccstyle" ] && cmp -s "$ccstyle_tmp" "$ccstyle"; then
+      rm -f "$ccstyle_tmp"
+    else
+      mv "$ccstyle_tmp" "$ccstyle"
     fi
     trap - EXIT
   '';

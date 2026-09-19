@@ -1,7 +1,39 @@
 import { createBashTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { Text } from "@earendil-works/pi-tui";
+import {
+	type Component,
+	truncateToWidth,
+	wrapTextWithAnsi,
+} from "@earendil-works/pi-tui";
 
 const PREVIEW_LENGTH = 160;
+
+class ResponsiveText implements Component {
+	private content = "";
+	private cachedWidth: number | undefined;
+	private cachedLines: string[] | undefined;
+
+	setText(content: string): void {
+		if (this.content === content) return;
+		this.content = content;
+		this.invalidate();
+	}
+
+	render(width: number): string[] {
+		const safeWidth = Math.max(1, width);
+		if (this.cachedLines && this.cachedWidth === safeWidth) return this.cachedLines;
+
+		this.cachedWidth = safeWidth;
+		this.cachedLines = wrapTextWithAnsi(this.content, safeWidth).map((line) =>
+			truncateToWidth(line, safeWidth, ""),
+		);
+		return this.cachedLines;
+	}
+
+	invalidate(): void {
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
+	}
+}
 
 function previewCommand(command: string): string {
 	const oneLine = command.replace(/\s+/g, " ").trim();
@@ -25,10 +57,11 @@ export default function expandBashCommand(pi: ExtensionAPI) {
 			const timeout =
 				typeof args?.timeout === "number" ? theme.fg("muted", ` (timeout ${args.timeout}s)`) : "";
 			const displayedCommand = context.expanded ? command : previewCommand(command);
-			const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
+			const component =
+				(context.lastComponent as ResponsiveText | undefined) ?? new ResponsiveText();
 
-			text.setText(theme.fg("toolTitle", theme.bold(`$ ${displayedCommand}`)) + timeout);
-			return text;
+			component.setText(theme.fg("toolTitle", theme.bold(`$ ${displayedCommand}`)) + timeout);
+			return component;
 		},
 	});
 }
