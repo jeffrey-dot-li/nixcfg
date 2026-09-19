@@ -54,3 +54,41 @@ jobs:
 
       - name: Build default package
         run: nix build .#default --print-build-logs
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - uses: cachix/cachix-action@v14
+        with:
+          name: jeffrey-dot-li
+          skipPush: true
+
+      - name: Check formatting
+        run: nix build .#checks.x86_64-linux.treefmt --print-build-logs
+
+      # Evaluation is platform-independent and `--dry-run` never builds, so a
+      # single x86_64-linux runner can validate every host, including the
+      # aarch64-darwin ones. This forces the full module graph to evaluate via
+      # each system's toplevel derivation and surfaces eval errors, renamed
+      # options, and unresolvable build plans without paying for real builds.
+      - name: Dry-run every system configuration
+        run: |
+          set -u
+          fail=0
+          for attr in \
+            nixosConfigurations.latte.config.system.build.toplevel \
+            darwinConfigurations.applin.system \
+            darwinConfigurations.co-applin.system
+          do
+            echo "::group::dry-run $attr"
+            nix build --dry-run --no-link ".#$attr" || fail=1
+            echo "::endgroup::"
+          done
+          exit "$fail"
