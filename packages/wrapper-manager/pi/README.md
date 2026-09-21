@@ -53,7 +53,8 @@ The wrapper similarly merges the following queue controls into writable
   commands execute immediately and all model-bound input (ordinary prompts,
   skills, and prompt templates) is rerouted to the follow-up queue
 - `Ctrl+Enter`, `Shift+Enter`, or `Ctrl+J`: insert a newline
-- `Option+Enter`: queue a follow-up while the agent is busy
+- `Option+Enter`: queue a steering message while the agent is busy, delivered
+  after the current assistant turn finishes its tool calls
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
 - `Escape`: Pi's existing immediate interrupt binding; it also restores queued
   messages to the editor
@@ -68,11 +69,12 @@ command display. A single `Ctrl+O` then expands the full command and output
 instead of opening pi-cc's separately truncated Input/Output preview, whose
 second-level expansion is mouse-only in fullscreen mode.
 
-The managed `queue-input-follow-up.ts` extension intercepts interactive input
-that Pi would otherwise use to steer a busy agent and resubmits it as a
-follow-up. Built-in and extension commands are dispatched before the input
-event, so they remain immediate; ordinary prompts, skills, and prompt templates
-wait until the active task settles.
+The managed `queue-input-follow-up.ts` extension swaps Pi's two busy-input
+routes: ordinary Enter submissions become follow-ups, while the explicit
+Option+Enter action becomes steering. Built-in and extension commands are
+dispatched before the input event, so they remain immediate; ordinary prompts,
+skills, and prompt templates wait until the active task settles unless sent
+with Option+Enter.
 
 The managed `static-working-indicator.ts` extension replaces Pi's animated
 working spinner with a static dot. Cursor invalidates integrated-terminal link
