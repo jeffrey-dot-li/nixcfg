@@ -76,6 +76,13 @@ dispatched before the input event, so they remain immediate; ordinary prompts,
 skills, and prompt templates wait until the active task settles unless sent
 with Option+Enter.
 
+The managed `load-local-agents.ts` extension searches upward from Pi's working
+directory for the Git root and appends a non-empty root `agents.local.md` or
+`AGENTS.local.md` to the system prompt on every agent turn. These private local
+instructions layer after Pi's standard `AGENTS.md` context, work when Pi starts
+from a repository subdirectory, and are globally ignored by the managed Git
+configuration.
+
 The managed `static-working-indicator.ts` extension replaces Pi's animated
 working spinner with a static dot. Cursor invalidates integrated-terminal link
 decorations on each redraw, causing hovered file references and URLs to flicker

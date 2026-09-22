@@ -131,17 +131,18 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.5" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.6" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
+          "./extensions/load-local-agents.ts",
           "./extensions/expand-bash-command.ts",
           "./extensions/queue-input-follow-up.ts",
           "./extensions/static-working-indicator.ts"

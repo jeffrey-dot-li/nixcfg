@@ -6,3 +6,7 @@ test.test
 .code-workspace
 
 .direnv
+
+# Private repository-local Pi instructions
+agents.local.md
+AGENTS.local.md
