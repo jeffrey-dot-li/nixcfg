@@ -140,10 +140,10 @@ model arguments still take precedence; this configuration does not impose a
 
 | Class | Roles | Model | Thinking |
 | --- | --- | --- | --- |
-| Monitor | `monitor` | `agent-control-plane/gpt-5.6-luna` | `low` |
-| Playbook | `scout` | `agent-control-plane/gpt-5.6-luna` | `low` |
+| Monitor | `monitor` | `agent-control-plane/gpt-6-luna` | `low` |
+| Playbook | `scout` | `agent-control-plane/gpt-6-luna` | `low` |
 | Playbook | `delegate` | `cohere-oss-v2/deepseek-v4-1-flash` | `high` |
-| Working | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-5.6-sol` | `medium` |
+| Working | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-6-sol` | `medium` |
 | Highest | `oracle` | `agent-gateway-dev/us.openai.gpt-6-astra` | disabled |
 
 Astra is registered without Pi reasoning-level support, so the `oracle`

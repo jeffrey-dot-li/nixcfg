@@ -216,11 +216,11 @@
   managedSubagents = builtins.toJSON {
     agentOverrides = {
       monitor = {
-        model = "agent-control-plane/gpt-5.6-luna";
+        model = "agent-control-plane/gpt-6-luna";
         thinking = "low";
       };
       scout = {
-        model = "agent-control-plane/gpt-5.6-luna";
+        model = "agent-control-plane/gpt-6-luna";
         thinking = "low";
       };
       delegate = {
@@ -228,19 +228,19 @@
         thinking = "high";
       };
       worker = {
-        model = "agent-control-plane/gpt-5.6-sol";
+        model = "agent-control-plane/gpt-6-sol";
         thinking = "medium";
       };
       reviewer = {
-        model = "agent-control-plane/gpt-5.6-sol";
+        model = "agent-control-plane/gpt-6-sol";
         thinking = "medium";
       };
       researcher = {
-        model = "agent-control-plane/gpt-5.6-sol";
+        model = "agent-control-plane/gpt-6-sol";
         thinking = "medium";
       };
       evidence-auditor = {
-        model = "agent-control-plane/gpt-5.6-sol";
+        model = "agent-control-plane/gpt-6-sol";
         thinking = "medium";
       };
       oracle = {
