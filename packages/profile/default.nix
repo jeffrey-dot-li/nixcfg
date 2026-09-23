@@ -67,6 +67,7 @@
   lsof,
   lazygit,
   elan,
+  deno,
   cachix,
   codex,
   opencode,

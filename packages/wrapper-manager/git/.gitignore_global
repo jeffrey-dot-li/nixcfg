@@ -10,3 +10,6 @@ test.test
 # Private repository-local Pi instructions
 agents.local.md
 AGENTS.local.md
+
+# Scratch Deno/TypeScript command script (matklad's make.ts pattern)
+make.local.ts

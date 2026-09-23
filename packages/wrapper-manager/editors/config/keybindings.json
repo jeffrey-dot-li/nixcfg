@@ -1043,5 +1043,10 @@
     "key": "alt+cmd+b",
     "command": "-workbench.action.toggleAuxiliaryBar",
     "when": "!isAuxiliaryWindowFocusedContext"
+  },
+  {
+    // Always copy the active editor's absolute path, regardless of focus.
+    "key": "alt+cmd+c",
+    "command": "workbench.action.files.copyPathOfActiveFile"
   }
 ]
