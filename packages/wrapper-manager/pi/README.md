@@ -46,7 +46,7 @@ settings and packages, and replaces stale Nix paths or `npm:` entries for the
 packages managed here. `PI_CODING_AGENT_DIR` is respected when it overrides the
 default configuration directory.
 
-The wrapper similarly merges the following queue controls into writable
+The wrapper similarly merges the following shortcuts into writable
 `keybindings.json`, preserving unrelated custom bindings:
 
 - `Enter`: submit normally while idle; while the agent is busy, recognized
@@ -58,6 +58,8 @@ The wrapper similarly merges the following queue controls into writable
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
 - `Escape`: Pi's existing immediate interrupt binding; it also restores queued
   messages to the editor
+- `Option+Shift+K` / `Option+Shift+J`: jump to the previous / next marked
+  message in fullscreen transcript mode (replacing Pi's Ctrl+arrow defaults)
 
 `Ctrl+Q` is provided because integrated terminals may intercept or incorrectly
 encode `Option+Up` before Pi receives it.
@@ -82,6 +84,16 @@ directory for the Git root and appends a non-empty root `agents.local.md` or
 instructions layer after Pi's standard `AGENTS.md` context, work when Pi starts
 from a repository subdirectory, and are globally ignored by the managed Git
 configuration.
+
+The Nix-pinned `@smoose/pi-footer` replaces Pi's compressed footer with a
+responsive segment-based status line. The wrapper sets a default `footer`
+configuration only when none exists, showing model, project and Git, current
+context usage, latest cache-hit rate, uncached input/output token totals, and
+extension statuses. It omits large cumulative cache-read/write totals. Use
+`/footer` to try temporary presets; set `footer` in writable
+`~/.pi/agent/settings.json` to customize the persistent layout. This package
+also replaces Pi's input editor with its prompted editor; if input behavior
+regresses, remove the package before changing other input extensions.
 
 The managed `static-working-indicator.ts` extension replaces Pi's animated
 working spinner with a static dot. Cursor invalidates integrated-terminal link

@@ -131,6 +131,19 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
+  piFooter = pkgs.runCommand "pi-footer-0.1.4" {nativeBuildInputs = [pkgs.gnutar pkgs.gzip];} ''
+    mkdir -p source "$out"
+    tar -xzf ${pkgs.fetchurl {
+      url = "https://registry.npmjs.org/@smoose/pi-footer/-/pi-footer-0.1.4.tgz";
+      hash = "sha256-jEbDfdZxT9vokgY+EkQyuH+uL6jkBKXDqPT1J+kghQA=";
+    }} -C source --strip-components=1
+    cp -R source/. "$out/"
+    chmod u+w "$out/index.ts"
+    substituteInPlace "$out/index.ts" \
+      --replace-fail 'return join(homeDir, ".pi", "agent", "settings.json");' \
+                     'return join(process.env.PI_CODING_AGENT_DIR || join(homeDir, ".pi", "agent"), "settings.json");'
+  '';
+
   managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.6" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
@@ -158,6 +171,7 @@
   piPackages = [
     managedResourcePackage
     piBackgroundTask
+    piFooter
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.69.0";
@@ -213,6 +227,19 @@
   ];
 
   managedPackages = builtins.toJSON (map toString piPackages);
+  defaultFooter = builtins.toJSON {
+    preset = "compact";
+    segments = [
+      "model"
+      "path"
+      "git"
+      "context_pct"
+      "cache_hit"
+      "token_in"
+      "token_out"
+      "extension_statuses"
+    ];
+  };
   managedSubagents = builtins.toJSON {
     agentOverrides = {
       monitor = {
@@ -250,6 +277,8 @@
     };
   };
   managedKeybindings = builtins.toJSON {
+    "tui.altScreen.previousPrompt" = "alt+shift+k";
+    "tui.altScreen.nextPrompt" = "alt+shift+j";
     "app.message.followUp" = "alt+enter";
     "tui.input.newLine" = [
       "ctrl+enter"
@@ -279,7 +308,8 @@
 
     ${pkgs.jq}/bin/jq \
       --argjson managed '${managedPackages}' \
-      --argjson managedSubagents '${managedSubagents}' '
+      --argjson managedSubagents '${managedSubagents}' \
+      --argjson defaultFooter '${defaultFooter}' '
       def source:
         if type == "string" then .
         elif type == "object" then (.source // "")
@@ -295,6 +325,10 @@
           or ($source | startswith("npm:pi-background-task@"))
           or ($source == "git:github.com/ZKiteLM/pi-background-task")
           or ($source | startswith("git:github.com/ZKiteLM/pi-background-task@"))
+          or ($source == "npm:@smoose/pi-footer")
+          or ($source | startswith("npm:@smoose/pi-footer@"))
+          or ($source == "git:github.com/smoosex/pi-footer")
+          or ($source | startswith("git:github.com/smoosex/pi-footer@"))
           or ($source == "npm:pi-subagents")
           or ($source | startswith("npm:pi-subagents@"))
           or ($source == "npm:pi-web-access")
@@ -307,7 +341,7 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|background-task|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|background-task|footer|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
@@ -315,6 +349,7 @@
           | map(select(managed_by_nix | not)))
         + $managed
       )
+      | .footer //= $defaultFooter
       | .subagents = (
           ((.subagents // {}) | if type == "object" then . else {} end)
           * $managedSubagents
