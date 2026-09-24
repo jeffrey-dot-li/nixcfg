@@ -138,13 +138,13 @@ while Nix owns the model and thinking fields listed below. Explicit per-run
 model arguments still take precedence; this configuration does not impose a
 `modelScope` restriction.
 
-| Class | Roles | Model | Thinking |
-| --- | --- | --- | --- |
-| Monitor | `monitor` | `agent-control-plane/gpt-6-luna` | `low` |
-| Playbook | `scout` | `agent-control-plane/gpt-6-luna` | `low` |
-| Playbook | `delegate` | `cohere-oss-v2/deepseek-v4-1-flash` | `high` |
-| Working | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-6-sol` | `medium` |
-| Highest | `oracle` | `agent-gateway-dev/us.openai.gpt-6-astra` | disabled |
+| Class    | Roles                                                  | Model                                     | Thinking |
+| -------- | ------------------------------------------------------ | ----------------------------------------- | -------- |
+| Monitor  | `monitor`                                              | `agent-control-plane/gpt-6-luna`          | `low`    |
+| Playbook | `scout`                                                | `agent-control-plane/gpt-6-luna`          | `high`   |
+| Playbook | `delegate`                                             | `cohere-oss-v2/deepseek-v4-1-flash`       | `high`   |
+| Working  | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-6-sol`           | `medium` |
+| Highest  | `oracle`                                               | `agent-gateway-dev/us.openai.gpt-6-astra` | disabled |
 
 Astra is registered without Pi reasoning-level support, so the `oracle`
 override explicitly disables `thinking` instead of inheriting the builtin

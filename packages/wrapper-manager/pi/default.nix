@@ -221,7 +221,7 @@
       };
       scout = {
         model = "agent-control-plane/gpt-6-luna";
-        thinking = "low";
+        thinking = "high";
       };
       delegate = {
         model = "cohere-oss-v2/deepseek-v4-1-flash";
@@ -318,6 +318,11 @@
       | .subagents = (
           ((.subagents // {}) | if type == "object" then . else {} end)
           * $managedSubagents
+          | .agentOverrides.scout = (
+              (.agentOverrides.scout // {})
+              | del(.model, .thinking)
+              | .disabled = true
+            )
         )
     ' "$input" > "$tmp"
 
