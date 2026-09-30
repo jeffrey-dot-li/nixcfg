@@ -102,6 +102,24 @@ and become difficult to click while Pi is busy. Streaming text can still cause
 necessary redraws, but idle thinking and tool execution no longer repaint just
 to animate the spinner.
 
+The managed `token-rate-status.ts` extension adds a generation-throughput
+status (shown by the footer's `extension_statuses` segment), e.g.
+`⚡ 48 tok/s · avg 52 · ttft 1.3s`. The first figure is the last response's
+provider-reported output tokens divided by the time from its first streamed
+delta to message end (a `~` character estimate while streaming). `avg` is a
+token-weighted average over the last 10 responses of at least 20 tokens, and
+resets on model change. `ttft` is request-to-first-delta latency; hidden
+reasoning counts here rather than in the rate. A sustained drop in `avg` or a
+jump in `ttft` suggests provider throttling. It redraws only on stream events,
+throttled to once per second, keeping the static-indicator behavior above.
+
+The managed `undo-last-message.ts` extension adds `/undo`. It is equivalent to
+selecting the most recent user message in `/fork`: the conversation rewinds to
+just before that message and its text is restored to the editor. Unlike
+`/fork`, the previous session file is then deleted, so only one conversation
+remains in `/resume`. Any other `/tree` branches in that file are deleted with
+it. Repeat `/undo` to go back further. A running response is aborted first.
+
 The managed `guard-invalid-slash.ts` input extension prevents accidental
 submission of mistyped slash commands. In the interactive editor, input that
 starts with `/` is submitted normally only when Pi recognizes the command. An

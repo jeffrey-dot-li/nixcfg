@@ -144,21 +144,23 @@
                      'return join(process.env.PI_CODING_AGENT_DIR || join(homeDir, ".pi", "agent"), "settings.json");'
   '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.6" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.8" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.6",
+      "version": "1.0.8",
       "pi": {
         "extensions": [
           "./extensions/guard-invalid-slash.ts",
           "./extensions/load-local-agents.ts",
           "./extensions/expand-bash-command.ts",
           "./extensions/queue-input-follow-up.ts",
-          "./extensions/static-working-indicator.ts"
+          "./extensions/static-working-indicator.ts",
+          "./extensions/token-rate-status.ts",
+          "./extensions/undo-last-message.ts"
         ],
         "subagents": {
           "agents": ["./agents"]
