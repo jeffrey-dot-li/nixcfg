@@ -2,15 +2,17 @@
 name: setup-remote-vm
 description: >-
   Bootstrap Nix and this repo's fish shell environment on a fresh remote Linux
-  VM (primarily Debian-based GCP Compute Engine instances) that is already
-  reachable via an entry in ~/.ssh/config. Use when the user wants to set up,
-  provision, or migrate to a new remote VM/dev box whose SSH access is
-  already configured.
+  VM (primarily Debian-based GCP instances) or a root-run Coder workspace.
+  Use when the user wants to set up, provision, or migrate to a remote dev box
+  whose SSH access is already configured. Coder needs a different Nix installer
+  and build-user setup because its container has no systemd or mount namespaces.
 ---
 
 # Setting Up a Remote VM
 
-Bootstraps a fresh Linux VM with Nix + this repo's shell (fish). This is
+Bootstraps a fresh Linux VM or Coder workspace with Nix + this repo's shell
+(fish). For root-run Coder containers, use the **Coder-specific path below**
+instead of VM Steps 1–2; do not run the Lix daemon installer there. This is
 bootstrap-only: it does not migrate project data, cloud credentials
 (gcloud/gh/kube/docker auth), or copy files from an old VM — that's handled
 separately (e.g. `scp`, `gcloud auth login`, `gh auth login`, regenerating
@@ -18,17 +20,100 @@ kube contexts).
 
 ## Precondition: SSH access must already be configured
 
-This skill requires a working `Host` entry for the VM already present in
-`~/.ssh/config` — it does not create or modify SSH config. If there's no
-entry yet, set one up first (e.g. following the pattern of other GCP VMs in
-`~/.ssh/config` using `gcloud compute start-iap-tunnel`), then verify it
-works before continuing:
+This skill requires a working SSH alias already configured in `~/.ssh/config`
+(or a Coder extension-managed `Include` file and matching wildcard `Host`).
+It does not create or modify SSH config. If there's no entry yet, set one up
+first (e.g. following the pattern of other GCP VMs in `~/.ssh/config` using
+`gcloud compute start-iap-tunnel`), then verify it works before continuing:
 
 ```bash
 ssh -o BatchMode=yes -o ConnectTimeout=20 <host-alias> 'echo CONNECTED && cat /etc/os-release'
 ```
 
-## Step 1: Install Nix
+## Coder-specific path: root-run workspace without systemd
+
+Use this only after confirming the exact SSH alias for the active workspace,
+`id -u` is `0`, `/etc/os-release` identifies Linux, and PID 1 is `coder` (or
+the workspace's container entrypoint). The Coder extension may add SSH aliases
+through an `Include` file; do not guess a workspace name or connect to a
+different Coder instance. Inspect first: `~/.nix-profile/bin/nix --version`,
+`/nix`, `~/.config/nix/nix.conf`, `nix profile list`, and `df -h /nix /root`.
+If Nix is already healthy, do not reinstall it.
+
+Coder's root container has no systemd and disallows mount namespaces (`unshare
+--mount` fails). The Lix daemon installer used on GCP VMs does **not** work
+here. Install upstream Nix in single-user mode instead. This installer warns
+that root is unsupported and requires an empty build-user group **during
+installation**; don't copy this exception to the final build configuration:
+
+```sh
+curl -fsSL https://nixos.org/nix/install -o /tmp/nix-install-coder.sh
+NIX_CONFIG='build-users-group =' bash /tmp/nix-install-coder.sh \
+  --no-daemon --yes --no-channel-add
+```
+
+The installer may be rerun after a partial `/nix` installation. For later
+commands in the current shell, use `~/.nix-profile/bin/nix` explicitly or
+source `~/.nix-profile/etc/profile.d/nix.sh`. Keep `NIX_REMOTE=local` if an
+older Coder shell profile still points at an unavailable Lix daemon.
+
+**Before building the profile**, create unprivileged builder accounts and
+configure the root-local Nix store. Only add settings that are absent; preserve
+other `nix.conf` settings. On a new workspace:
+
+```sh
+getent group nixbld >/dev/null || groupadd -r nixbld
+mkdir -p /var/empty
+for i in 1 2 3 4; do
+  getent passwd "nixbld$i" >/dev/null || \
+    useradd -r -M -g nixbld -G nixbld -d /var/empty \
+      -s /usr/sbin/nologin "nixbld$i"
+done
+```
+
+Set these in `~/.config/nix/nix.conf` (replacing any temporary empty
+`build-users-group =` line from installation):
+
+```ini
+experimental-features = nix-command flakes
+build-users-group = nixbld
+sandbox = false
+sandbox-fallback = false
+max-jobs = 2
+```
+
+Check only these settings with
+`~/.nix-profile/bin/nix config show | grep -E '^(build-users-group|sandbox|sandbox-fallback|max-jobs|experimental-features) ='`
+and verify `getent group nixbld`; do not dump other config (it may contain
+credentials).
+Because Coder blocks mount namespaces, **sandboxing is unavailable**; builders
+run as unprivileged `nixbld` users, but builds are not isolated from the
+container. Build only trusted flakes. If a previous unsandboxed root build
+created `/homeless-shelter`, inspect it and move it to a private backup under
+`/root/.cache/` with mode `0700` before retrying; don't blindly delete
+unknown contents. A
+non-root builder then cannot recreate it at the filesystem root.
+
+Install the flake's default profile from GitHub (this uses the committed
+revision, not uncommitted changes in a local checkout):
+
+```sh
+~/.nix-profile/bin/nix profile add github:jeffrey-dot-li/nixcfg#default --priority 4
+~/.nix-profile/bin/nix profile list
+~/.nix-profile/bin/pi --version
+~/.nix-profile/bin/deno --version
+```
+
+The existing Coder `.profile` may already initialize a shell, and the Nix
+installer appends its own shell hooks. Inspect before editing `.profile`,
+`.bashrc`, or `~/.config/fish/config.fish`; do not overwrite Cursor/Coder
+bootstrap or credential sourcing. Check plain SSH *and* Cursor's integrated
+terminal separately. `/root` may be on a persistent PVC while `/nix` lives on
+the container overlay: a **recreated** workspace can lose the store and need
+bootstrap again. Do not symlink or bind-mount `/nix` to the PVC without an
+explicit persistence design.
+
+## Step 1: Install Nix (ordinary GCP/Debian VM)
 
 On the remote VM:
 
@@ -55,7 +140,7 @@ VM for this step. Update later with:
 nix profile upgrade nixcfg --refresh
 ```
 
-## Step 3: Make fish the interactive shell
+## Step 3: Make fish the interactive shell (ordinary VM; inspect first on Coder)
 
 `chsh` to a Nix-store path is unreliable on GCP images (PAM/`/etc/shells`
 issues), so don't rely on it. Instead, `~/.profile` execs into fish only for
@@ -144,7 +229,7 @@ Reconnect via the SSH host alias and confirm:
 
 - `echo $SHELL` reports the fish path and an interactive session drops into
   fish.
-- `nix profile list` shows `cachix` and `nixcfg`.
+- `nix profile list` shows `nixcfg` (and `cachix` on the ordinary VM path).
 - Non-interactive commands still work in plain bash: `ssh <host-alias> 'echo $-'` should not exec fish.
 - If accessed via Cursor/VS Code Remote-SSH, open a terminal panel there too
   and confirm it drops into fish (not just plain `ssh` from a local terminal)
