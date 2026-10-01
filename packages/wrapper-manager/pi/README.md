@@ -58,8 +58,11 @@ The wrapper similarly merges the following shortcuts into writable
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
 - `Escape`: Pi's existing immediate interrupt binding; it also restores queued
   messages to the editor
-- `Option+Shift+K` / `Option+Shift+J`: jump to the previous / next marked
-  message in fullscreen transcript mode (replacing Pi's Ctrl+arrow defaults)
+- `Ctrl+Shift+Up` / `Ctrl+Shift+Down`: jump to the previous / next marked
+  message in fullscreen transcript mode. Pi's plain `Ctrl+Up`/`Ctrl+Down`
+  defaults are dropped because macOS reserves them for Mission Control. Arrow
+  keys arrive as standard escape sequences, so unlike Option+letter chords
+  (which macOS turns into symbols such as `Ô`) they need no terminal remapping
 
 `Ctrl+Q` is provided because integrated terminals may intercept or incorrectly
 encode `Option+Up` before Pi receives it.

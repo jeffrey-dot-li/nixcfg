@@ -279,8 +279,8 @@
     };
   };
   managedKeybindings = builtins.toJSON {
-    "tui.altScreen.previousPrompt" = "alt+shift+k";
-    "tui.altScreen.nextPrompt" = "alt+shift+j";
+    "tui.altScreen.previousPrompt" = "ctrl+shift+up";
+    "tui.altScreen.nextPrompt" = "ctrl+shift+down";
     "app.message.followUp" = "alt+enter";
     "tui.input.newLine" = [
       "ctrl+enter"

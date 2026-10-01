@@ -1048,19 +1048,5 @@
     // Always copy the active editor's absolute path, regardless of focus.
     "key": "alt+cmd+c",
     "command": "workbench.action.files.copyPathOfActiveFile"
-  },
-  {
-    // macOS normally turns Option+Shift+J/K into symbols. Send the actual
-    // Alt+Shift key events to Pi instead when an integrated terminal has focus.
-    "key": "alt+shift+k",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "\u001b[107;4u" },
-    "when": "terminalFocus"
-  },
-  {
-    "key": "alt+shift+j",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "\u001b[106;4u" },
-    "when": "terminalFocus"
   }
 ]
