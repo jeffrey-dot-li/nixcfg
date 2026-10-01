@@ -257,19 +257,19 @@
         thinking = "high";
       };
       worker = {
-        model = "agent-control-plane/gpt-6-sol";
+        model = "agent-control-plane/gpt-6.1-sol";
         thinking = "medium";
       };
       reviewer = {
-        model = "agent-control-plane/gpt-6-sol";
+        model = "agent-control-plane/gpt-6.1-sol";
         thinking = "medium";
       };
       researcher = {
-        model = "agent-control-plane/gpt-6-sol";
+        model = "agent-control-plane/gpt-6.1-sol";
         thinking = "medium";
       };
       evidence-auditor = {
-        model = "agent-control-plane/gpt-6-sol";
+        model = "agent-control-plane/gpt-6.1-sol";
         thinking = "medium";
       };
       oracle = {
