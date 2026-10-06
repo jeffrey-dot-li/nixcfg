@@ -57,6 +57,7 @@
     rev,
     hash,
     npmDepsHash,
+    patches ? [],
   }:
     pkgs.buildNpmPackage {
       inherit pname version npmDepsHash;
@@ -69,6 +70,8 @@
 
       dontNpmBuild = true;
       postPatch = ''
+        ${lib.concatMapStringsSep "\n" (p: "patch -d packages/${workspace} -p1 < ${p}") patches}
+
         ${pkgs.jq}/bin/jq \
           'del(.devDependencies, .peerDependencies, .peerDependenciesMeta)' \
           packages/${workspace}/package.json > package.json.tmp
@@ -225,6 +228,7 @@
       rev = "42a272eb3363f18e072d71deccdbc27452bb0c45";
       hash = "sha256-kgULSuw55OIqoF36kPyl69PCoDyajducrq3jeENnVKM=";
       npmDepsHash = "sha256-aIZ0vSkcfi5zUSt91nFTaNeJ0leehvTxxhzEHgZM9yg=";
+      patches = [./patches/rpiv-todo-reset.patch];
     })
   ];
 

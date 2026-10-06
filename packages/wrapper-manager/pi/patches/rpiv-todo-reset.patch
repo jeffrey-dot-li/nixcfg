@@ -1,0 +1,83 @@
+diff -ru a/index.ts b/index.ts
+--- a/index.ts
++++ b/index.ts
+@@ -23,12 +23,13 @@
+ import type { KeyId } from "@earendil-works/pi-tui";
+ import { COLLAPSE_KEY_OFF, resolveCollapseKey } from "./config.js";
+ import { I18N_NAMESPACE } from "./state/i18n-bridge.js";
+-import { replayFromBranch } from "./state/replay.js";
++import { replayFromBranch, TODO_RESET_ENTRY_TYPE } from "./state/replay.js";
+ import {
+ 	clearActiveRenderSession,
+ 	evictSession,
+ 	getActiveRenderSession,
+ 	getRenderState,
++	getState,
+ 	replaceState,
+ 	setActiveRenderSession,
+ 	sid,
+@@ -149,6 +150,33 @@
+ 
+ 	registerTodoTool(pi);
+ 	registerTodosCommand(pi);
++
++	pi.registerCommand("reset-todo", {
++		description: "Clear the todo list for the current branch",
++		handler: async (_args, ctx) => {
++			const id = sid(ctx);
++			const count = getState(id).tasks.filter((task) => task.status !== "deleted").length;
++			if (count === 0) {
++				if (ctx.hasUI) ctx.ui.notify("Todo list is already empty", "info");
++				return;
++			}
++			// Persist a branch-scoped reset marker so replay (restart, /tree,
++			// compaction) agrees with the in-memory state.
++			pi.appendEntry(TODO_RESET_ENTRY_TYPE, { count });
++			replaceState(id, { tasks: [], nextId: 1 });
++			// The model still has the old list in context; tell it on the next turn.
++			pi.sendMessage(
++				{
++					customType: TODO_RESET_ENTRY_TYPE,
++					content: "The user cleared the todo list with /reset-todo. All previous todo items and ids are gone; create new todos as needed.",
++					display: false,
++				},
++				{ deliverAs: "nextTurn" },
++			);
++			if (id === getActiveRenderSession()) await updateTodoOverlay(true);
++			if (ctx.hasUI) ctx.ui.notify(`Cleared ${count} todo${count === 1 ? "" : "s"}`, "info");
++		},
++	});
+ 
+ 	// Collapse/expand hotkey for the todo overlay. The key is resolved once at
+ 	// factory scope from config (register-once contract: a config change needs
+diff -ru a/state/replay.ts b/state/replay.ts
+--- a/state/replay.ts
++++ b/state/replay.ts
+@@ -1,6 +1,9 @@
+ import type { TaskDetails } from "../tool/types.js";
+ import { EMPTY_STATE, type TaskState } from "./state.js";
+ 
++/** Custom session entry written by `/reset-todo`. */
++export const TODO_RESET_ENTRY_TYPE = "rpiv-todo-reset";
++
+ /**
+  * Discriminator for `details` envelopes that match the persisted `TaskDetails`
+  * shape. Defensive — branch entries from older or corrupt sessions are
+@@ -24,7 +27,16 @@
+ export function replayFromBranch(ctx: { sessionManager: { getBranch(): Iterable<unknown> } }): TaskState {
+ 	let result: TaskState = { tasks: [...EMPTY_STATE.tasks], nextId: EMPTY_STATE.nextId };
+ 	for (const entry of ctx.sessionManager.getBranch()) {
+-		const e = entry as { type?: string; message?: { role?: string; toolName?: string; details?: unknown } };
++		const e = entry as {
++			type?: string;
++			customType?: string;
++			message?: { role?: string; toolName?: string; details?: unknown };
++		};
++		// `/reset-todo` persists a reset marker; later todo results still win.
++		if (e.type === "custom" && e.customType === TODO_RESET_ENTRY_TYPE) {
++			result = { tasks: [...EMPTY_STATE.tasks], nextId: EMPTY_STATE.nextId };
++			continue;
++		}
+ 		if (e.type !== "message") continue;
+ 		const msg = e.message;
+ 		if (msg?.role !== "toolResult" || msg.toolName !== "todo") continue;

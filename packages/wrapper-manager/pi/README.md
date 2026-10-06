@@ -16,7 +16,7 @@ The current Nix-managed Pi packages are:
 - `pi-mcp-adapter`
 - `pi-cc-extensions`
 - `@juicesharp/rpiv-ask-user-question`
-- `@juicesharp/rpiv-todo`
+- `@juicesharp/rpiv-todo` (patched; adds `/reset-todo`, see below)
 
 `pi-background-task` provides tmux-backed, non-blocking background terminals.
 Agents use `task_start`, `task_status`, `task_logs`, `task_send`, `task_wait`,
@@ -118,6 +118,16 @@ just before that message and its text is restored to the editor. Unlike
 `/fork`, the previous session file is then deleted, so only one conversation
 remains in `/resume`. Any other `/tree` branches in that file are deleted with
 it. Repeat `/undo` to go back further. A running response is aborted first.
+
+`rpiv-todo` is patched (`patches/rpiv-todo-reset.patch`) to add `/reset-todo`,
+which clears every todo on the current branch — useful after a long session
+leaves the list cluttered with stale items. It persists a reset marker as a
+custom session entry, so replay (restart, `/tree`, resume) agrees with the
+cleared list instead of resurrecting the old todos from the last `todo` tool
+result. It also tells the model, on its next turn, that the list and ids were
+cleared, since the old list otherwise stays in the model's context until then.
+IDs restart at 1 after a reset. The patch only touches `index.ts` and
+`state/replay.ts`; it does not change the `todo` tool or `/todos` output.
 
 The managed `guard-invalid-slash.ts` input extension prevents accidental
 submission of mistyped slash commands. In the interactive editor, input that
