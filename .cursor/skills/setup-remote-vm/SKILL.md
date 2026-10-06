@@ -94,6 +94,33 @@ created `/homeless-shelter`, inspect it and move it to a private backup under
 unknown contents. A
 non-root builder then cannot recreate it at the filesystem root.
 
+### Add the Cachix binary cache before installing the profile
+
+Coder's overlay discards `/etc` and `/nix` on every workspace restart, so this
+substituter must be re-added on each bootstrap. Do it **before** installing the
+profile, and write it directly rather than with `cachix use`: the `cachix`
+binary only arrives with the profile you are about to install. The public key
+below is public data, not a credential.
+
+```sh
+if ! grep -q 'jeffrey-dot-li.cachix.org' /etc/nix/nix.conf 2>/dev/null; then
+  mkdir -p /etc/nix
+  cat >> /etc/nix/nix.conf <<'NIXEOF'
+substituters = https://cache.nixos.org https://jeffrey-dot-li.cachix.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= jeffrey-dot-li.cachix.org-1:51yl0v8t0p7246iaELLSQ4m1Lq2iYWANpyewFgrqJhM=
+NIXEOF
+fi
+
+~/.nix-profile/bin/nix config show | grep -E '^(substituters|trusted-public-keys) ='
+```
+
+Without this, the profile install compiles `tflint`'s Go modules locally and
+fails intermittently on `proxy.golang.org` stream errors (observed on a fresh
+container: 129 of 133 locally-built outputs were already in the cache, so the
+retry succeeds only because of what the cache already held). Pulling needs no
+auth token; the cache is public and GitHub Actions pushes `.#default` for
+`x86_64-linux`, `aarch64-linux`, and `aarch64-darwin` to it on `main`.
+
 Install the flake's default profile from GitHub (this uses the committed
 revision, not uncommitted changes in a local checkout):
 
