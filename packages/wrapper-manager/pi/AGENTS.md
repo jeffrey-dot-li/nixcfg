@@ -9,12 +9,27 @@ out of this file.
 
 - Foreground Bash commands have an enforced maximum timeout of 60 seconds.
 - Run commands that might take longer through `task_start` (background tasks).
+- Never launch background or detached processes through foreground Bash.
+  Do not use trailing `&`, `nohup`, `disown`, `setsid`, ad-hoc tmux/screen
+  sessions, or daemon/detach flags to leave a process running after the tool
+  returns. This applies even when the launch command itself takes under a
+  minute. Use `task_start` for dev servers, port-forwards, tunnels, watchers,
+  and other persistent processes so the session can track their resources.
 - A foreground timeout interrupts execution and may leave partial effects.
   Inspect those effects before retrying; never automatically restart a
   side-effecting command in the background.
 
 ## Background tasks: launch, then yield
 
+- Run the actual service in the foreground inside `task_start`; do not use
+  it merely to launch a detached daemon and exit. Give each service a clear
+  name, retain its task ID, and use `task_logs`/`task_send`/`task_kill` to manage
+  it instead of creating untracked processes or using broad process-name kills.
+- Stop services with `task_kill` when they are no longer needed, and check their
+  terminal status. Do not leave temporary servers or port-forwards running
+  after finishing the work unless the user requested that they remain running.
+  Reloads and session switches do not automatically stop background tasks;
+  do not rely on switching sessions as cleanup.
 - Keep `notifyOnCompletion: true` when launching background tasks. Completion
   notifications return to the conversation and let you continue the work.
 - Do not follow `task_start` with `task_wait`. Do not use sleep commands,

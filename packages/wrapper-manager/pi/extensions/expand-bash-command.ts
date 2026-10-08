@@ -59,6 +59,7 @@ export default function expandBashCommand(pi: ExtensionAPI) {
 		promptGuidelines: [
 			...(bash.promptGuidelines ?? []),
 			"Bash commands have an enforced 60-second timeout. Use task_start for work that might exceed one minute, then inspect its exit status and logs. A timeout interrupts the command and may leave partial effects; inspect before retrying. Do not automatically rerun side-effecting commands.",
+			"Never launch background or detached processes through Bash: no trailing &, nohup, disown, setsid, ad-hoc tmux/screen sessions, or daemon/detach flags. Start dev servers, port-forwards, tunnels and watchers with task_start, running the actual service in the foreground inside that task. Track its task ID and stop it with task_kill when no longer needed.",
 			"For background tasks, keep notifyOnCompletion enabled and do not immediately call task_wait or poll. Do independent work, or finish the turn and resume on the completion notification. Only use blocking waits when the user explicitly requests them.",
 		],
 		async execute(id, params, signal, onUpdate, ctx) {

@@ -147,6 +147,17 @@ independent work remains. The completion notification resumes the conversation.
 Blocking waits are reserved for explicit user requests. This interaction policy
 is instructional; `task_wait` remains available.
 
+Shared rules and tool guidance also prohibit starting background/detached
+processes via foreground Bash, even if the launch takes less than a minute:
+no trailing `&`, `nohup`, `disown`, `setsid`, ad-hoc tmux/screen sessions, or
+daemon/detach flags. Dev servers, port-forwards, tunnels, and watchers belong
+in named `task_start` jobs. Run the actual service in the foreground inside
+the job (e.g. `npm run dev`, not `nohup npm run dev &`), so its lifetime remains
+tracked. Retain its task ID, stop it with `task_kill` when no longer needed,
+and confirm terminal status. Session switches/reloads do not stop these jobs.
+This is instruction-level policy, not shell syntax filtering or a guarantee
+against programs that daemonize or otherwise escape process tracking.
+
 This cap applies to the model-facing `bash` tool while the managed extension is
 loaded, not user `!`/`!!` commands, other tools, or background tasks. Disabling
 or replacing the extension bypasses it; this is a harness policy, not a security
