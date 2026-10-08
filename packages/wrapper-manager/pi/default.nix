@@ -10,9 +10,10 @@
     rev,
     hash,
     npmDepsHash,
+    patches ? [],
   }:
     pkgs.buildNpmPackage {
-      inherit pname version npmDepsHash;
+      inherit pname version npmDepsHash patches;
 
       src = pkgs.fetchFromGitHub {
         inherit owner repo rev hash;
@@ -130,6 +131,8 @@
       cp -R source/. "$out/"
       chmod -R u+w "$out"
       patch -d "$out" -p1 < ${./patches/pi-background-task-ux.patch}
+      patch -d "$out" -p1 < ${./patches/pi-background-task-reminders.patch}
+      cp ${./background-task/reminders.js} "$out/dist/reminders.js"
       substituteInPlace "$out/dist/tmux.js" \
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
@@ -147,16 +150,18 @@
                      'return join(process.env.PI_CODING_AGENT_DIR || join(homeDir, ".pi", "agent"), "settings.json");'
   '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.9" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.11" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
+    cp ${./AGENTS.md} "$out/AGENTS.md"
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.9",
+      "version": "1.0.11",
       "pi": {
         "extensions": [
+          "./extensions/load-universal-agents.ts",
           "./extensions/guard-invalid-slash.ts",
           "./extensions/load-local-agents.ts",
           "./extensions/expand-bash-command.ts",
@@ -198,6 +203,7 @@
     (mkPiPackage {
       pname = "pi-mcp-adapter";
       version = "2.34.0";
+      patches = [./patches/pi-mcp-google-duration.patch];
       owner = "nicobailon";
       repo = "pi-mcp-adapter";
       rev = "74c5233c63ad0096077df925fd6135c3bf6b8c6b";

@@ -1,0 +1,22 @@
+--- a/json-schema-validator.ts	2026-10-07 11:16:10
++++ b/json-schema-validator.ts	2026-10-07 11:16:24
+@@ -13,0 +14,15 @@
++function addGoogleFormats(ajv: Ajv): void {
++  // Google API schemas use protobuf Duration strings, e.g. "1.250s".
++  // Register the format instead of ignoring unknown-format warnings globally.
++  ajv.addFormat("google-duration", {
++    type: "string",
++    validate: (value: string) => {
++      const match = /^-?(\d{1,12})(?:\.(\d{1,9}))?s$/.exec(value);
++      if (!match) return false;
++      const seconds = Number(match[1]);
++      return seconds < 315576000000 ||
++        (seconds === 315576000000 && !/[1-9]/.test(match[2] ?? ""));
++    },
++  });
++}
++
+@@ -47,0 +63 @@
++          addGoogleFormats(ajv);
+@@ -63,0 +80 @@
++        addGoogleFormats(ajv);

@@ -5,6 +5,15 @@ third-party Pi packages. Packages are pinned to immutable Git revisions or npm
 release archives. Pi supplies their SDK peer dependencies, while Nix installs
 only required runtime files. Dependency lifecycle scripts are disabled.
 
+## MCP schema compatibility
+
+The Nix build patches `pi-mcp-adapter` to register Google's `google-duration`
+format (protobuf duration strings such as `1.250s`) in both its draft-07 and
+2020-12 validators. This removes the repeated unknown-format warning from
+`agent-fabric`'s Google Cloud Logging tool without disabling format validation.
+The patch is `patches/pi-mcp-google-duration.patch`; regression tests run with
+Node 24 using `node tests/google-duration.mjs <patched-adapter-store-path>`.
+
 ## Managed packages
 
 The current Nix-managed Pi packages are:
@@ -36,6 +45,56 @@ output, `r` refreshes, and Escape or `q` closes the dashboard. The wrapper adds
 `tmux` and Node to Pi's `PATH` and directs the detached runner to Nix's Node
 binary (the standalone Pi executable cannot act as a Node interpreter). Users
 do not need to manage tmux sessions manually.
+
+### Background task reminders
+
+The additional `pi-background-task-reminders.patch` and
+`background-task/reminders.js` add a `task_reminder` tool. Schedule a one-shot
+check-in without a blocking tool call:
+
+```json
+{
+  "taskId": "bg_...",
+  "afterSeconds": 300,
+  "message": "Expected to finish in five minutes; check progress and inspect logs",
+  "cancelOnCompletion": true
+}
+```
+
+For example, start a task with `timeoutSeconds: 600`, schedule this reminder,
+then yield. Five minutes later it sends a visible follow-up message that
+triggers an agent turn when idle, or queues after the active turn. It does not
+modify, kill, restart, send input to, or change the task's timeout. The agent
+receiving it retains its usual autonomy and tools.
+
+`action` defaults to `schedule`; `action: "list"` lists pending reminders and
+`action: "cancel", reminderId: "rem_..."` cancels only an alarm. `/bg-reminders`
+shows pending reminders. Delays are integer seconds (1 through 604800), with
+at most 100 pending reminders on the active branch. Scheduling checks that the
+task is visible on the current branch and owned by the current Pi instance.
+
+The default `cancelOnCompletion: true` cancels an alarm for any terminal task
+status, including failure/cancellation/timeout. Set it to false to request a
+check-in even if the task has finished. Normal completion notifications are
+independent; keep them enabled.
+
+Reminder state is stored as custom entries in the Pi session, not in task
+metadata. Reload/resume preserves deadlines; timers are disposed on session
+shutdown and replayed on startup and tree navigation. Reminders on inactive
+branches/sessions are deferred until that same branch/session is active again;
+overdue reminders then fire (or cancel if the task finished). Forks/new sessions
+do not inherit the original session's alarms. Pi must be running to deliver
+notifications: this is not a system scheduler or a guarantee that the model
+will respond at the exact deadline. No per-reminder polling loop is used.
+
+Tests: `node tests/task-reminders.mjs [background-task-store-path]` exercises
+one-shot delivery, completion/manual cancellation, persistence/replay, session
+and branch isolation, stale callbacks, validation, and notification retries.
+`python3 tests/task-reminders-runtime.py <background-task-store-path> <pi-binary>`
+checks the installed tool with real tmux jobs, responsive RPC requests, reload,
+and persisted session entries. It captures notifications instead of making
+model requests. The patch also guards existing status/completion callbacks
+against using a stale extension context after reload.
 
 The Pi configuration directory must remain writable because it also contains
 authentication, sessions, model configuration, and user preferences. The
@@ -74,12 +133,54 @@ command display. A single `Ctrl+O` then expands the full command and output
 instead of opening pi-cc's separately truncated Input/Output preview, whose
 second-level expansion is mouse-only in fullscreen mode.
 
+The same Bash override enforces a **60-second maximum execution timeout**.
+Missing, non-finite, or non-positive timeouts become 60 seconds; longer requests
+are clamped, and shorter positive timeouts are honored. The built-in backend
+terminates the process tree on timeout and retains output/error handling. The
+renderer shows the effective timeout. A timeout reports potential partial
+changes and directs the agent to inspect before retrying; nothing is restarted
+automatically. Tool guidance and shared rules direct potentially long-running
+commands to `task_start`, followed by checking task status/logs after completion.
+Shared rules specify a launch-then-yield workflow: keep completion notifications
+on, do not immediately call `task_wait` or poll, and finish the turn when no
+independent work remains. The completion notification resumes the conversation.
+Blocking waits are reserved for explicit user requests. This interaction policy
+is instructional; `task_wait` remains available.
+
+This cap applies to the model-facing `bash` tool while the managed extension is
+loaded, not user `!`/`!!` commands, other tools, or background tasks. Disabling
+or replacing the extension bypasses it; this is a harness policy, not a security
+sandbox. Process termination is initiated at the timeout; OS scheduling and
+cleanup can make the tool's final result arrive slightly later.
+
+Tests: `node tests/bash-timeout.mjs` checks clamping and delegation. For a
+real process-termination check, load `tests/bash-timeout-runtime.ts` explicitly
+using `pi --no-extensions -e <absolute-fixture-path>`, then run
+`/test-bash-timeout`. It takes about one minute and makes no model requests.
+
 The managed `queue-input-follow-up.ts` extension swaps Pi's two busy-input
 routes: ordinary Enter submissions become follow-ups, while the explicit
 Option+Enter action becomes steering. Built-in and extension commands are
 dispatched before the input event, so they remain immediate; ordinary prompts,
 skills, and prompt templates wait until the active task settles unless sent
 with Option+Enter.
+
+## Layered instructions
+
+Edit `packages/wrapper-manager/pi/AGENTS.md` in nixcfg for defaults shared by
+all Nix-managed Pi installations. The managed `load-universal-agents.ts`
+extension reads the packaged file at session startup (including reload and
+resume) and prepends it to the existing system prompt before each agent run.
+It resolves the file relative to the installed extension, not the cwd or home
+directory. Empty files contribute nothing, and no model call is triggered.
+
+Pi still loads the machine's writable `~/.pi/agent/AGENTS.md` (or the equivalent
+under `PI_CODING_AGENT_DIR`) and project context files normally. Neither is
+replaced or symlinked. The universal rules explicitly allow machine/project
+rules to specialize or override them. Put only shared defaults in the packaged
+file; machine-specific settings and secrets belong outside nixcfg/the store.
+After editing the shared file, rebuild and launch the updated Pi wrapper; an
+already-running process needs `/reload` to pick up the updated package paths.
 
 The managed `load-local-agents.ts` extension searches upward from Pi's working
 directory for the Git root and appends a non-empty root `agents.local.md` or

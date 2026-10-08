@@ -1,0 +1,90 @@
+--- a/dist/index.js	2026-10-08 10:33:56
++++ b/dist/index.js	2026-10-08 10:38:44
+@@ -3,0 +4 @@
++import { TaskReminders } from "./reminders.js";
+@@ -34,0 +36 @@
++    let reminders;
+@@ -41 +43,12 @@
+-    registerTools(pi, requireRegistry);
++    const requireReminders = () => {
++        if (!reminders) throw new Error("Background task reminder runtime is not initialized");
++        return reminders;
++    };
++    registerTools(pi, requireRegistry, requireReminders);
++    pi.registerCommand("bg-reminders", {
++        description: "Show pending background task reminders for this branch",
++        handler: async (_args, ctx) => {
++            const pending = await requireReminders().list();
++            ctx.ui.notify(pending.length ? pending.map((r) => `${r.reminderId}: ${r.taskId} at ${new Date(r.dueAt).toISOString()} — ${r.message.replace(/\s+/g, " ").slice(0, 160)}${r.message.length > 160 ? "…" : ""}`).join("\n") : "No pending background task reminders", "info");
++        },
++    });
+@@ -122,0 +136 @@
++        reminders?.dispose();
+@@ -126,0 +141 @@
++        reminders = new TaskReminders(pi, registry, ctx.sessionManager);
+@@ -128,0 +144 @@
++            await reminders.refresh();
+@@ -131,0 +148,2 @@
++            reminders.dispose();
++            reminders = undefined;
+@@ -140 +158,6 @@
+-                const count = (await registry?.list("session") ?? []).filter((task) => task.status === "running" || task.status === "starting").length;
++                const current = registry;
++                if (!current || current.disposed) return;
++                const count = (await current.list("session")).filter((task) => task.status === "running" || task.status === "starting").length;
++                // A completion can overlap reload/session replacement. Never
++                // use the old ctx after awaiting a registry that was disposed.
++                if (registry !== current || current.disposed) return;
+@@ -146,0 +170,3 @@
++    pi.on("session_compact", async () => {
++        await reminders?.refresh();
++    });
+@@ -148,0 +175 @@
++        await reminders?.refresh();
+@@ -155,0 +183,2 @@
++        reminders?.dispose();
++        reminders = undefined;
+--- a/dist/tools.js	2026-10-08 10:33:56
++++ b/dist/tools.js	2026-10-08 10:38:40
+@@ -6 +6 @@
+-export function registerTools(pi, registry) {
++export function registerTools(pi, registry, reminders) {
+@@ -7,0 +8,32 @@
++        name: "task_reminder",
++        label: "Task Reminder",
++        description: "Schedule a one-shot follow-up reminder to inspect a background task, list pending reminders, or cancel a reminder. Returns immediately; the reminder itself never changes the task. Bound to the current session/branch and cancelled when the task finishes by default. Time is in seconds; scheduling is limited to tasks owned by this Pi instance. A due reminder waits until this branch is active. Schedule is the default action.",
++        promptSnippet: "Schedule a future background-task check-in without blocking",
++        promptGuidelines: [
++            "If a task's execution timeout exceeds its expected duration, use task_reminder to schedule an inspection at the expected duration, then yield. Keep task completion notifications enabled. Do not wait or poll just to reach the check-in.",
++            "Reminders are one-shot notifications, not stall detectors. On a reminder, inspect status and logs before deciding what to do; schedule another check-in if appropriate.",
++        ],
++        parameters: Type.Object({
++            action: Type.Optional(StringEnum(["schedule", "list", "cancel"], { default: "schedule" })),
++            taskId: Type.Optional(Type.String({ description: "Required for schedule; task to check" })),
++            afterSeconds: Type.Optional(Type.Integer({ minimum: 1, maximum: 604800, description: "Required for schedule; reminder delay (not execution timeout)" })),
++            message: Type.Optional(Type.String({ minLength: 1, maxLength: 4000, description: "Required for schedule; what to inspect" })),
++            cancelOnCompletion: Type.Optional(Type.Boolean({ default: true })),
++            reminderId: Type.Optional(Type.String({ description: "Required for cancel; id returned by schedule" })),
++        }),
++        async execute(_id, params, _signal, _update, ctx) {
++            const service = reminders();
++            const action = params.action ?? "schedule";
++            if (action === "list") {
++                const pending = await service.list();
++                const text = pending.length ? pending.map((r) => `${r.reminderId}: ${r.taskId} at ${new Date(r.dueAt).toISOString()} — ${r.message.replace(/\s+/g, " ").slice(0, 160)}${r.message.length > 160 ? "…" : ""}`).join("\n") : "No pending background task reminders.";
++                return { content: [{ type: "text", text }], details: { reminders: pending } };
++            }
++            const reminder = action === "cancel" ? await service.cancel(params.reminderId) : await service.schedule(params, ctx);
++            const text = reminder.state === "pending"
++                ? `Scheduled ${reminder.reminderId} for ${reminder.taskId} at ${new Date(reminder.dueAt).toISOString()}. Continue independent work or yield; a follow-up notification will prompt inspection.`
++                : `Cancelled ${reminder.reminderId}: ${reminder.reason}. The background task was not changed.`;
++            return { content: [{ type: "text", text }], details: reminder };
++        },
++    });
++    pi.registerTool({
+--- a/dist/notifier.js	2026-10-08 10:38:25
++++ b/dist/notifier.js	2026-10-08 10:38:30
+@@ -35 +35,2 @@
+-        if (tasks.length === 0)
++        // Disposal may have happened while checking task notification state.
++        if (this.disposed || tasks.length === 0)
