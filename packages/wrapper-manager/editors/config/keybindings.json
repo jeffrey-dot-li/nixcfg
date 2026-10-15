@@ -1045,8 +1045,15 @@
     "when": "!isAuxiliaryWindowFocusedContext"
   },
   {
-    // Always copy the active editor's absolute path, regardless of focus.
+    // Copy the active editor's absolute path from anywhere...
     "key": "alt+cmd+c",
     "command": "workbench.action.files.copyPathOfActiveFile"
+  },
+  {
+    // ...except in the Explorer, where it restores VS Code's default Copy Path
+    // of the selected file(s). Later entries win, so this must stay below.
+    "key": "alt+cmd+c",
+    "command": "copyFilePath",
+    "when": "filesExplorerFocus && !inputFocus"
   }
 ]

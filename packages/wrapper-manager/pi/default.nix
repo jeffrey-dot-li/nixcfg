@@ -132,6 +132,7 @@
       chmod -R u+w "$out"
       patch -d "$out" -p1 < ${./patches/pi-background-task-ux.patch}
       patch -d "$out" -p1 < ${./patches/pi-background-task-reminders.patch}
+      patch -d "$out" -p1 < ${./patches/pi-background-task-inherit-path.patch}
       cp ${./background-task/reminders.js} "$out/dist/reminders.js"
       substituteInPlace "$out/dist/tmux.js" \
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'

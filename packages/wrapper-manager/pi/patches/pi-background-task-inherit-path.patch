@@ -1,0 +1,24 @@
+--- a/dist/registry.js	2026-10-13 17:44:35
++++ b/dist/registry.js	2026-10-13 17:44:53
+@@ -60,0 +61,2 @@
++            // Pi's PATH, so the runner can restore its order after the login shell's profile runs.
++            ...(process.env.PATH ? { inheritedPath: process.env.PATH } : {}),
+--- a/dist/runner.js	2026-10-13 17:44:35
++++ b/dist/runner.js	2026-10-13 17:44:53
+@@ -74 +74 @@
+-    child = spawn(meta.shell, ["-lc", meta.command], {
++    child = spawn(meta.shell, ["-lc", commandWithInheritedPath(meta)], {
+@@ -91,0 +92,13 @@
++// A login shell rebuilds PATH from the user's profile, which can bury entries
++// that were first in the terminal Pi started from (venv, direnv, nix shell).
++// Put Pi's PATH back in front, keeping anything the profile added after it.
++function commandWithInheritedPath(meta) {
++    const inherited = meta.inheritedPath;
++    if (typeof inherited !== "string" || inherited === "")
++        return meta.command;
++    const fish = /(^|\/)fish$/.test(meta.shell);
++    const prelude = fish
++        ? `set -gx PATH (string split : -- '${inherited.replaceAll("\\", "\\\\").replaceAll("'", "\\'")}') $PATH`
++        : `PATH='${inherited.replaceAll("'", "'\\''")}':"$PATH"; export PATH`;
++    return `${prelude}\n${meta.command}`;
++}

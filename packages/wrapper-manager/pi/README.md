@@ -46,6 +46,34 @@ output, `r` refreshes, and Escape or `q` closes the dashboard. The wrapper adds
 binary (the standalone Pi executable cannot act as a Node interpreter). Users
 do not need to manage tmux sessions manually.
 
+### Terminal inheritance
+
+Background tasks start from the terminal Pi was launched in:
+
+- **Working directory.** `task_start` runs in Pi's current directory unless
+  `cwd` is given; a relative `cwd` is resolved against Pi's directory. A missing
+  or unreadable directory is rejected before anything starts.
+- **Environment.** Tasks receive Pi's full environment (`PROBE=1 pi` is visible
+  as `$PROBE` in every task).
+- **`PATH` order.** `pi-background-task` runs the command through the user's
+  login shell (`$SHELL -lc`), and a login shell rebuilds `PATH` from the profile.
+  That can bury entries that were first in the launching terminal, such as an
+  activated virtualenv, a direnv or `nix shell` environment, or a version-manager
+  shim, so a task could resolve `python` or `node` differently than Pi's shell.
+  `patches/pi-background-task-inherit-path.patch` records Pi's `PATH` at task
+  start and puts it back in front once the profile has run. Entries the profile
+  adds after Pi's own stay available. This works for fish, bash and zsh, and
+  for paths containing spaces or quotes.
+
+Tasks also see `PATH` as of the moment they start, not as of Pi's launch, so a
+later `cd`/`direnv` change in the launching terminal does not apply to a running
+Pi. Restart Pi from the environment you want. Tasks started by an older Pi build
+keep the `PATH` they were started with.
+
+`node tests/task-inherit-path.py <patched-package> <pi-binary>` starts real tasks
+under fish, bash and zsh and checks `PATH` order and working directory; it makes
+no model calls.
+
 ### Background task reminders
 
 The additional `pi-background-task-reminders.patch` and

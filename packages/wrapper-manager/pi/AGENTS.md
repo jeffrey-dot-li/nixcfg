@@ -25,6 +25,10 @@ out of this file.
   it merely to launch a detached daemon and exit. Give each service a clear
   name, retain its task ID, and use `task_logs`/`task_send`/`task_kill` to manage
   it instead of creating untracked processes or using broad process-name kills.
+- Background tasks inherit Pi's working directory, environment and `PATH` order,
+  so omit `cwd` when the task belongs in the current directory and pass it only
+  to run elsewhere. Do not prefix commands with `cd` to the current directory or
+  re-export `PATH` to reproduce the active environment.
 - Stop services with `task_kill` when they are no longer needed, and check their
   terminal status. Do not leave temporary servers or port-forwards running
   after finishing the work unless the user requested that they remain running.
