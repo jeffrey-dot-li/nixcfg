@@ -7,6 +7,16 @@ out of this file.
 
 ## Shell execution
 
+- Tool calls issued together in one message run concurrently, in no
+  particular order, and can finish in any order. A sibling call cannot rely
+  on another's effects: `bash` running alongside a `write`/`edit` may not see
+  the file, and a `read` may see the old contents. Only `write`/`edit` calls to
+  the *same* file are serialized with each other. When one step depends on
+  another, wait for its result and make the dependent call in a later
+  message, or combine both into one `bash` command. Use parallel calls only
+  for independent work. If a sibling reports a missing file or stale state,
+  suspect ordering before concluding the earlier step failed; re-check in a
+  later message rather than redoing the work.
 - Foreground Bash commands have an enforced maximum timeout of 60 seconds.
 - Run commands that might take longer through `task_start` (background tasks).
 - Never launch background or detached processes through foreground Bash.

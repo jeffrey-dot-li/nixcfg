@@ -204,6 +204,23 @@ dispatched before the input event, so they remain immediate; ordinary prompts,
 skills, and prompt templates wait until the active task settles unless sent
 with Option+Enter.
 
+## Parallel tool calls
+
+Pi runs sibling tool calls from one assistant message concurrently by default
+(see "tool_call" in Pi's `docs/extensions.md`). Calls start in message order but
+finish in any order, so a `bash` call issued alongside a `write` or `edit` can run
+before the file exists. The only built-in ordering is a per-file queue: `write`
+and `edit` calls to the *same* path are serialized with each other. `read`,
+`bash`, and other tools do not wait on that queue. Results are still shown and
+returned to the model in message order, which can make it look as though calls
+ran sequentially.
+
+The shared `AGENTS.md` and the managed Bash tool guidance tell agents to make
+dependent calls in a later message (or combine them into one `bash` command),
+use parallel calls only for independent work, and treat a missing file or stale
+read from a sibling call as a likely ordering artifact. This is instruction-level
+guidance; Pi's parallel execution is unchanged.
+
 ## Layered instructions
 
 Edit `packages/wrapper-manager/pi/AGENTS.md` in nixcfg for defaults shared by
