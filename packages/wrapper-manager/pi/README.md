@@ -22,7 +22,7 @@ The current Nix-managed Pi packages are:
 - `pi-background-task`
 - `pi-subagents`
 - `pi-web-access`
-- `pi-mcp-adapter`
+- `pi-mcp-adapter` (with a managed `playwright` server, see below)
 - `pi-cc-extensions`
 - `@juicesharp/rpiv-ask-user-question`
 - `@juicesharp/rpiv-todo` (patched; adds `/reset-todo`, see below)
@@ -203,6 +203,89 @@ Option+Enter action becomes steering. Built-in and extension commands are
 dispatched before the input event, so they remain immediate; ordinary prompts,
 skills, and prompt templates wait until the active task settles unless sent
 with Option+Enter.
+
+## Playwright MCP (browser automation)
+
+Agents can drive a real browser themselves, so they do not need manual
+screenshots to iterate on a website. The wrapper adds a `playwright` entry to
+Pi's own `mcp.json` (`<Pi agent dir>/mcp.json`) on every launch, pointing at a
+Nix-built `playwright-mcp` (`playwright-mcp.nix`, from nixpkgs, version-matched
+to its browsers). **It is switched off by default** (see below).
+Agents reach it through the `mcp` tool: `mcp({ connect: "playwright" })` starts the
+server (a listing alone does not connect it after a fresh `/mcp enable` and
+`/reload`), and `mcp({ server: "playwright" })` then lists the 23 tools. The adapter prefixes them with the server name (`playwright_browser_navigate`,
+`playwright_browser_snapshot`, `playwright_browser_click`, `playwright_browser_type`,
+`playwright_browser_take_screenshot`, `playwright_browser_console_messages`,
+`playwright_browser_network_requests`, `playwright_browser_evaluate`, ...); the bare
+`browser_*` name only works when `server: "playwright"` is passed as well.
+The shared `AGENTS.md` tells them when and how to use it.
+
+What an agent gets that a screenshot does not: an accessibility snapshot as
+text with element refs it can click or type into, console messages, failed
+network requests, and viewport control. A screenshot is still available and is
+returned inline to models that accept images.
+
+Defaults and why:
+
+- **Off until you enable it.** The entry ships with `"disabled": true`, so agents
+  are not offered the tools and nothing starts. It stays visible in `/mcp`. To
+  turn it on for the current project, run `/mcp enable playwright` (or toggle
+  it in the `/mcp` panel with `ctrl+d` and save), then `/reload`. That writes
+  `{"mcpServers":{"playwright":{"disabled":false}}}` to the project's
+  `.pi/mcp.json`, so the choice is per project and survives restarts;
+  `/mcp disable playwright` and `/reload` removes it and stops the browser. The
+  `.pi/` directory is not git-ignored by default. To enable it everywhere, set
+  `"disabled": false` on the `playwright` entry in `<Pi agent dir>/mcp.json`;
+  the launch-time merge only adds `disabled: true` when the key is absent, so
+  deleting the key turns it back off. The browser files are installed with Pi
+  either way (about 600 MB); disabling only stops it being offered or started.
+- **Chromium only, headless.** No Firefox or WebKit, which keeps the closure at
+  about 630 MB instead of 1.4 GB, and no browser window, so it works on VMs
+  without a display and does not take focus on macOS. Set
+  `PLAYWRIGHT_MCP_HEADLESS=0` in the environment Pi starts from to watch it.
+- **Throwaway profile.** The browser starts with an in-memory profile: no saved
+  logins, cookies or history, and nothing carries between sessions. For a
+  persistent profile, set `PLAYWRIGHT_MCP_USER_DATA_DIR`.
+- **Output outside the project.** Screenshots and saved snapshots go to
+  `${XDG_STATE_HOME:-~/.local/state}/pi/playwright-mcp` rather than
+  `.playwright-mcp/` in the repository (Playwright's default), and old files
+  are evicted past 256 MiB. Override with `PLAYWRIGHT_MCP_OUTPUT_DIR` and
+  `PLAYWRIGHT_MCP_OUTPUT_MAX_SIZE`.
+- **Lazy, with an idle timeout.** The browser starts on first use and the
+  adapter closes the server, and with it the browser, after ten idle minutes
+  (`idleTimeout`). The next call starts a fresh page. Quitting Pi also stops it.
+- **Proxy tool, not 23 extra tools.** Direct tools would add their schemas to
+  every session's prompt. To make some direct, toggle them in `/mcp`; the
+  adapter stores that as `directTools` on the `playwright` entry, which the
+  launch-time merge preserves.
+
+The merge resets `command`, `lifecycle` and `idleTimeout` on the managed entry so
+the store path stays current, and sets `disabled: true` only when that key is
+absent. Everything else in the file is kept: other servers, `settings`, and
+extra keys on `playwright` such as `directTools`. To change a managed key for one
+project, override it in that project's `.pi/mcp.json`, which takes precedence.
+Any `PLAYWRIGHT_MCP_*` variable in Pi's environment reaches the server.
+
+Security: the browser can reach anything the machine can, including localhost
+and private networks, and `browser_evaluate` and `browser_run_code_unsafe` run
+arbitrary code. Page content is untrusted input and a prompt-injection route,
+which the shared rules tell agents to treat accordingly. Playwright's
+`--allowed-origins` and `--blocked-origins` are not a security boundary.
+`file://` URLs and paths outside the workspace are blocked by default. The
+server is skipped on platforms where nixpkgs does not provide `playwright-mcp`.
+
+Tests (no model calls):
+
+- `python3 tests/playwright-mcp.py <playwright-mcp binary> --expect-clean-cwd`
+  drives the server over stdio against a local page and checks headless mode,
+  output location, and that no browser outlives the server.
+- `python3 tests/playwright-mcp-pi.py <pi wrapper>` runs the same flow through
+  Pi's MCP adapter with a throwaway config. It checks the `mcp.json` merge, that
+  it is off by default and starts nothing, that `/mcp enable` plus reload turns
+  it on for a project, and that `/mcp disable` plus reload stops the browser.
+
+Both were run on aarch64-darwin. The Linux builds come from the same nixpkgs
+expressions but have not been run here.
 
 ## Parallel tool calls
 

@@ -289,6 +289,30 @@
       };
     };
   };
+  # Headless Chromium for agents to drive web pages themselves (navigate,
+  # accessibility snapshots, clicks, console/network, screenshots).
+  playwrightMcp = pkgs.callPackage ./playwright-mcp.nix {};
+  hasPlaywrightMcp = lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.playwright-mcp;
+  # Merged into Pi's own mcp.json (not the shared ~/.config/mcp/mcp.json) so the
+  # store path can change on every update without touching other tools' config.
+  managedMcpServers = builtins.toJSON {
+    mcpServers = lib.optionalAttrs hasPlaywrightMcp {
+      playwright = {
+        command = lib.getExe playwrightMcp;
+        lifecycle = "lazy";
+        # Closes the browser after ten idle minutes so it cannot linger.
+        idleTimeout = 10;
+      };
+    };
+  };
+  # Defaults applied only when the key is absent, so a user's own choice wins.
+  # Playwright stays off until enabled: `/mcp` (per project, then `/reload`) or
+  # `"disabled": false` in <Pi agent dir>/mcp.json (everywhere).
+  managedMcpDefaults = builtins.toJSON {
+    mcpServers = lib.optionalAttrs hasPlaywrightMcp {
+      playwright.disabled = true;
+    };
+  };
   managedKeybindings = builtins.toJSON {
     "tui.altScreen.previousPrompt" = "ctrl+shift+up";
     "tui.altScreen.nextPrompt" = "ctrl+shift+down";
@@ -433,6 +457,42 @@
       rm -f "$ccstyle_tmp"
     else
       mv "$ccstyle_tmp" "$ccstyle"
+    fi
+    trap - EXIT
+
+    mcp="$config_dir/mcp.json"
+    mcp_tmp=$(mktemp "$config_dir/.mcp.json.XXXXXX")
+    trap 'rm -f "$mcp_tmp" "$mcp_tmp.input"' EXIT
+
+    if [ -f "$mcp" ]; then
+      mcp_input="$mcp"
+    else
+      printf '{}\n' > "$mcp_tmp.input"
+      mcp_input="$mcp_tmp.input"
+    fi
+
+    # Managed keys (command, lifecycle, idleTimeout) are reset on every launch.
+    # Defaults (disabled) apply only when absent. Anything else on a managed
+    # server, such as directTools, and all other servers and settings are kept.
+    ${pkgs.jq}/bin/jq --argjson managed '${managedMcpServers}' \
+      --argjson defaults '${managedMcpDefaults}' '
+      .mcpServers = (
+        ((.mcpServers // {}) | if type == "object" then . else {} end) as $existing
+        | reduce ($managed.mcpServers | to_entries[]) as $server ($existing;
+            .[$server.key] = (
+              ($defaults.mcpServers[$server.key] // {})
+              * ((.[$server.key] // {}) | if type == "object" then . else {} end)
+              * $server.value
+            ))
+      )
+    ' "$mcp_input" > "$mcp_tmp"
+
+    rm -f "$mcp_tmp.input"
+    chmod 600 "$mcp_tmp"
+    if [ -f "$mcp" ] && cmp -s "$mcp_tmp" "$mcp"; then
+      rm -f "$mcp_tmp"
+    else
+      mv "$mcp_tmp" "$mcp"
     fi
     trap - EXIT
   '';
