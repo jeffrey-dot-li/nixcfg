@@ -9,7 +9,7 @@
     gc.automatic = false;
 
     # nix but cooler
-    # package = pkgs.lix;
+    package = pkgs.lix;
 
     # Make builds run with low priority so my system stays responsive
     # daemonCPUSchedPolicy = "idle";

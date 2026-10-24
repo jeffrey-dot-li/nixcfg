@@ -2,10 +2,6 @@
   inputs,
   lib,
 }: {
-  overlays = [
-    (import inputs.rust-overlay)
-  ];
-
   config = {
     allowInsecurePredicate = pkg: let
       pname = lib.getName pkg;

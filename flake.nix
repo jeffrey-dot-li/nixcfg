@@ -89,28 +89,13 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    nvim-osc52 = {
-      url = "github:ojroques/nvim-osc52/main";
-      flake = false;
-    };
-    lix = {
-      url = "https://git.lix.systems/lix-project/lix/archive/main.tar.gz";
-      flake = false;
-    };
-
-    lix-module = {
-      url = "https://git.lix.systems/lix-project/nixos-module/archive/main.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.lix.follows = "lix";
-    };
-
+    # NixOS module that patches the Node server VS Code Remote-SSH downloads so it runs on NixOS.
+    # Only used by the `latte` host. Could be replaced by `programs.nix-ld` (already enabled there).
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     agenix.url = "github:ryantm/agenix";
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-    rust-overlay.url = "github:oxalica/rust-overlay";
 
     wrapper-manager = {
-      url = "github:viperML/wrapper-manager";
+      url = "git+https://codeberg.org/viperML/wrapper-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -123,16 +108,6 @@
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
-    nil = {
-      url = "github:oxalica/nil?ref=main";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
     };
   };
 }

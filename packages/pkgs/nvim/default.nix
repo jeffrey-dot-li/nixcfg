@@ -11,10 +11,6 @@
         inherit (value) src;
       }
   ) (pkgs.callPackages ./_sources/generated.nix {});
-  nvim-osc52 = pkgs.vimUtils.buildVimPlugin {
-    name = "nvim-osc52";
-    src = inputs.nvim-osc52;
-  };
   min-plugins = let
     vip = pkgs.vimPlugins;
   in {
@@ -129,23 +125,6 @@
         require("auto-session").setup({})
       '';
     };
-    nvim-osc52 = {
-      package = nvim-osc52;
-      setup = ''
-        vim.g.clipboard = {
-        name = "OSC 52",
-        copy = {
-        ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-        ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
-        },
-        paste = {
-        ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
-        ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
-        },
-        }
-      '';
-    };
-
     alpha-nvim = {
       package = vip.alpha-nvim;
       setup = ''
@@ -270,6 +249,19 @@
   nvfConfig = {
     config.vim = {
       luaConfigRC.custom = customRC;
+      luaConfigRC.osc52 = ''
+        vim.g.clipboard = {
+          name = "OSC 52",
+          copy = {
+            ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+            ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+          },
+          paste = {
+            ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+            ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+          },
+        }
+      '';
       extraPlugins = plugins;
       # package = inputs.neovim-overlay.packages.${pkgs.system}.neovim;
       viAlias = false;
