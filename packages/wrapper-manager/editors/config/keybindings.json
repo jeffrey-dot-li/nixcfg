@@ -628,6 +628,10 @@
     "when": "inQuickOpen && inViewsPicker"
   },
   {
+    "key": "cmd+\\",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
     "key": "shift+cmd+[",
     "command": "-workbench.action.debug.prevConsole",
     "when": "inDebugRepl"
