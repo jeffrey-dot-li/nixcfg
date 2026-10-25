@@ -12,7 +12,6 @@ Every root input in `flake.nix`, what it is, and why it is here. Keep this in sy
 | `nvf` | `github:notashelf/nvf` | Neovim configuration framework in Nix. | Builds the `nvim` and `nvim-min` packages. | `packages/pkgs/nvim` |
 | `wrapper-manager` | `git+https://codeberg.org/viperML/wrapper-manager` | Builds wrapped programs (env, flags, config baked in) from Nix modules. | Builds the wrapped `fish`, `git`, `kitty`, `codex`, `pi`, editors, `terraform`, `tflint`. Single maintainer; update deliberately. | `packages/wrapper-manager`, `packages/default.nix` |
 | `agenix` | `github:ryantm/agenix` | Age-encrypted secrets for NixOS. | Decrypts secrets on `latte` and provides the `agenix` CLI. Handles secrets, so read the diff when bumping. | `hosts/nixos`, `hosts/nixos/latte/cloudflare.nix` |
-| `vscode-server` | `github:nix-community/nixos-vscode-server` | NixOS module that patches the Node server VS Code Remote-SSH downloads so it runs on NixOS. | Lets VS Code Remote-SSH work on `latte`. Could be replaced by `programs.nix-ld` (already enabled there); untested. | `hosts/nixos` (`latte` only) |
 
 ## Notes
 

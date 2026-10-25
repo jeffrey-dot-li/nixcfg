@@ -41,5 +41,4 @@
     '';
   };
   environment.shells = [pkgs.bash];
-  services.vscode-server.enable = true;
 }

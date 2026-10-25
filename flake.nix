@@ -89,9 +89,6 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    # NixOS module that patches the Node server VS Code Remote-SSH downloads so it runs on NixOS.
-    # Only used by the `latte` host. Could be replaced by `programs.nix-ld` (already enabled there).
-    vscode-server.url = "github:nix-community/nixos-vscode-server";
     agenix.url = "github:ryantm/agenix";
 
     wrapper-manager = {
