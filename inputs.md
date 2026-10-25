@@ -6,7 +6,6 @@ Every root input in `flake.nix`, what it is, and why it is here. Keep this in sy
 | --- | --- | --- | --- | --- |
 | `nixpkgs` | `github:nixos/nixpkgs/nixos-unstable` | The Nix package collection and NixOS modules. | Base of every package and system; also provides Lix (`nix.package = pkgs.lix`). Every other input follows it. | All hosts, packages |
 | `nix-darwin` | `github:LnL7/nix-darwin` | NixOS-style system configuration for macOS. | Builds the `applin` and `co-applin` Darwin systems. | `hosts/darwin` |
-| `home-manager` | `github:nix-community/home-manager` | Per-user config management. | **Currently unreferenced** outside `flake.nix` (only locked); candidate for removal. | none found |
 | `flake-parts` | `github:hercules-ci/flake-parts` | Module system for structuring flake outputs. | Structure of `flake.nix` (`mkFlake`, `perSystem`, `withSystem`). | `flake.nix` |
 | `treefmt-nix` | `github:numtide/treefmt-nix` | Multi-language formatter wrapper (flake-parts module). | Provides `nix fmt` with `alejandra` and excludes `secrets/*.age`. | `flake.nix` |
 | `nvf` | `github:notashelf/nvf` | Neovim configuration framework in Nix. | Builds the `nvim` and `nvim-min` packages. | `packages/pkgs/nvim` |
