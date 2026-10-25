@@ -38,25 +38,14 @@
 
   extensions = curatedExtensions ++ [customTheme];
 
-  # Same mechanism `pkgs.vscode-with-extensions` uses internally to select a
-  # pre-installed extension set via `--extensions-dir`. Built directly here
-  # (rather than delegating to `vscode-with-extensions`) because that helper
-  # hardcodes the app bundle's main executable name to "Electron" on Darwin,
-  # which is only true for upstream VS Code - Cursor's bundle ships its main
-  # executable as "Cursor".
-  extensionsDir = pkgs.buildEnv {
-    name = "vscode-extensions";
-    paths =
-      extensions
-      ++ [
-        (pkgs.writeTextFile {
-          name = "vscode-extensions-json";
-          destination = "/share/vscode/extensions/extensions.json";
-          text = pkgs.vscode-utils.toExtensionJson extensions;
-        })
-      ];
-  };
-  extensionsDirFlag = "--extensions-dir ${extensionsDir}/share/vscode/extensions";
+  # Manifest of the curated extensions. The launch script symlinks each one
+  # into the editor's normal (writable) extensions dir and merges these
+  # entries into the editor's own `extensions.json`, so extensions installed
+  # from the UI live next to them. Not using `pkgs.vscode-with-extensions`
+  # because that helper hardcodes the Darwin app bundle's main executable to
+  # "Electron", which is only true for upstream VS Code - Cursor's bundle
+  # ships its main executable as "Cursor".
+  extensionsJson = pkgs.writeText "extensions.json" (pkgs.vscode-utils.toExtensionJson extensions);
 
   # Base settings shared by both editors. Machine-specific values (home
   # directories, downloaded tool paths, fixed store paths from a previous
@@ -91,37 +80,25 @@
   cursorSettingsFile = mkPrettyJson "cursor-settings.json" (substituteToolPaths (builtins.toJSON cursorSettings));
   keybindingsFile = ./config/keybindings.json;
 
-  # Restore the managed settings/keybindings symlinks in the editor's `User`
-  # directory on every launch. Authentication, workspace history, caches, and
-  # other editor state under the same directory are left untouched. A
-  # pre-existing regular file is backed up once, the first time it is
-  # replaced by a managed symlink.
+  # On every launch, layer the nix-managed config over the editor's mutable
+  # `User` directory (rules are in editor-sync.py): nix wins for the settings
+  # keys it sets, nix owns the part of keybindings.json above a marker comment,
+  # and curated extensions are symlinked in next to user-installed ones.
+  # Authentication, workspace history, caches, and other editor state are left
+  # untouched, and a failure never stops the editor from starting.
   mkRestoreScript = {
     name,
     relUserDir,
+    relExtensionsDir,
     settingsFile,
   }:
-    pkgs.writeShellScript "restore-${name}-settings" ''
-      set -eu
-      target_dir="$HOME/${relUserDir}"
-      mkdir -p "$target_dir"
-
-      restore_link() {
-        managed="$1"
-        dest="$2"
-        if [ -L "$dest" ]; then
-          if [ "$(readlink "$dest")" = "$managed" ]; then
-            return 0
-          fi
-          rm -f "$dest"
-        elif [ -e "$dest" ]; then
-          mv "$dest" "$dest.bak-$(date +%s)"
-        fi
-        ln -s "$managed" "$dest"
-      }
-
-      restore_link "${settingsFile}" "$target_dir/settings.json"
-      restore_link "${keybindingsFile}" "$target_dir/keybindings.json"
+    pkgs.writeShellScript "sync-${name}-config" ''
+      ${pkgs.python3}/bin/python3 -I ${./editor-sync.py} \
+        --user-dir "$HOME/${relUserDir}" \
+        --settings ${settingsFile} \
+        --keybindings ${keybindingsFile} \
+        --ext-dir "$HOME/${relExtensionsDir}" \
+        --ext-json ${extensionsJson} || true
     '';
 
   # Build one editor's wrapper-manager configuration. `appExecutableName` is
@@ -134,15 +111,14 @@
     longName,
     appExecutableName,
     relUserDir,
+    relExtensionsDir,
     settingsFile,
   }: let
-    restoreScript = mkRestoreScript {inherit name relUserDir settingsFile;};
+    restoreScript = mkRestoreScript {inherit name relUserDir relExtensionsDir settingsFile;};
   in {
     inherit basePackage;
     wrapperType = "shell";
     wrapFlags = [
-      "--add-flags"
-      extensionsDirFlag
       "--run"
       restoreScript
     ];
@@ -152,7 +128,6 @@
       appExecutable="$out/Applications/${longName}.app/Contents/MacOS/${appExecutableName}"
       if [ -e "$appExecutable" ]; then
         wrapProgram "$appExecutable" \
-          --add-flags ${lib.escapeShellArg extensionsDirFlag} \
           --run ${lib.escapeShellArg (toString restoreScript)}
       fi
     '';
@@ -167,6 +142,7 @@ in {
       if isDarwin
       then "Library/Application Support/Code/User"
       else ".config/Code/User";
+    relExtensionsDir = ".vscode/extensions";
     settingsFile = vscodeSettingsFile;
   };
 
@@ -179,6 +155,7 @@ in {
       if isDarwin
       then "Library/Application Support/Cursor/User"
       else ".config/Cursor/User";
+    relExtensionsDir = ".cursor/extensions";
     settingsFile = cursorSettingsFile;
   };
 }
