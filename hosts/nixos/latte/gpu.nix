@@ -15,7 +15,7 @@
       (lib.getDev cuda_cudart)
       (lib.getStatic cuda_cudart)
       # This package contains libcuda.so.1
-      (lib.getLib config.boot.kernelPackages.nvidiaPackages.beta)
+      (lib.getLib config.boot.kernelPackages.nvidiaPackages.production)
     ];
     postBuild = ''
       ln -s $out/lib $out/lib64
@@ -36,7 +36,7 @@ in {
     # If need to update, run `nix flake update` to update flake parts.
     # Nvidia requirements are https://www.nvidia.com/en-us/drivers/results/
     # Currently version 570.133.07, CUDA Version 12.8
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.production;
   };
   hardware.nvidia-container-toolkit.enable = true;
   programs.nix-ld.enable = true;
