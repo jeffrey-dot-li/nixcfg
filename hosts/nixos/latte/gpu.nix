@@ -4,6 +4,19 @@
   pkgs,
   ...
 }: let
+  # Pinned so `nix flake update` never changes the driver behind our back.
+  # 595.45.04 (the old `beta` alias) hung games in vkWaitForPresent2KHR.
+  # To bump: copy version + hashes from nvidiaPackages in
+  # pkgs/os-specific/linux/nvidia-x11/default.nix, and check it builds
+  # against the kernel pinned below. Needs a reboot (`nixos-rebuild boot`).
+  nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+    version = "595.104.02";
+    sha256_64bit = "sha256-5CHCAuTHn1jDx/MWG75xRU67PYiTb4ggWg4yfNBMWco=";
+    sha256_aarch64 = "sha256-PafStmwNMufeDp3VtpTGGCoW+53Gor/mieO1m1pI7gI=";
+    openSha256 = "sha256-FWk5ra2yjz8VAxAA8GXrSoeBj/XC1BKvsKsBKR09joE=";
+    settingsSha256 = "sha256-4Kxro6tvI5aX4nu2RspgyBsW+Jq3/VYjSAS5UGdzTCU=";
+    persistencedSha256 = "sha256-JsMLPqJuZwAtHngsQODMsmgO7F2tVkQ2arc7fYa2bwo=";
+  };
   cuda-symlink = pkgs.symlinkJoin {
     name = "cudatoolkit";
     paths = with pkgs.cudaPackages; [
@@ -15,7 +28,7 @@
       (lib.getDev cuda_cudart)
       (lib.getStatic cuda_cudart)
       # This package contains libcuda.so.1
-      (lib.getLib config.boot.kernelPackages.nvidiaPackages.production)
+      (lib.getLib nvidiaPackage)
     ];
     postBuild = ''
       ln -s $out/lib $out/lib64
@@ -23,6 +36,10 @@
     '';
   };
 in {
+  # Pinned to the 6.18 LTS line: the NVIDIA module is built per kernel, and
+  # 595.45.04 failed to build on 7.3. Change together with nvidiaPackage.
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
+
   services.xserver.videoDrivers = ["nvidia"];
 
   hardware.nvidia = {
@@ -31,12 +48,8 @@ in {
     # This needs to be true for 5070Ti for some reason. Not 100% sure why and what impacts it has.
     open = true;
     nvidiaSettings = true;
-    # Look at latest nixpkgs (nixos-unstable version). Then look at
-    # https://github.com/NixOS/nixpkgs/blob/18dd725c29603f582cf1900e0d25f9f1063dbf11/pkgs/os-specific/linux/nvidia-x11/default.nix#L66
-    # If need to update, run `nix flake update` to update flake parts.
     # Nvidia requirements are https://www.nvidia.com/en-us/drivers/results/
-    # Currently version 570.133.07, CUDA Version 12.8
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = nvidiaPackage;
   };
   hardware.nvidia-container-toolkit.enable = true;
   programs.nix-ld.enable = true;
