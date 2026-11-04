@@ -48,6 +48,11 @@ jobs:
         with:
           name: jeffrey-dot-li
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          # Skip buildNpmPackage dependency caches: fixed-output fetches Nix can
+          # always refetch from npm, but each is ~0.2-0.5 GB, identical on every
+          # Linux runner (so they race to push it), and slow enough to miss the
+          # post-job drain timeout ("Failed to push some store paths").
+          pushFilter: "-npm-deps$"
 
       - name: Check formatting
         run: nix build ".#checks.${{ matrix.system }}.treefmt" --print-build-logs
