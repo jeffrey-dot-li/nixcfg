@@ -1,0 +1,346 @@
+diff -ruN a/dist/adopted-runner.js b/dist/adopted-runner.js
+--- a/dist/adopted-runner.js	1969-12-31 19:00:00.000000000 -0500
++++ b/dist/adopted-runner.js	2026-11-04 17:14:49.072487541 -0500
+@@ -0,0 +1,163 @@
++// Runner for an adopted command: a process Pi already started (the bash tool's
++// child) that outlived its foreground limit. The command keeps running as Pi's
++// child, writing to `meta.adopted.output`; this runner lives in the task's tmux
++// pane, replays that output into the pane (so pipe-pane fills output.log and the
++// screen is live), forwards cancellation to the command's process group, and
++// writes result.json from the exit status Pi records in `meta.adopted.exit`.
++import { closeSync, existsSync, linkSync, openSync, readFileSync, readSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
++import { dirname, join } from "node:path";
++const taskDir = process.argv[2];
++if (!taskDir)
++    throw new Error("Task directory argument is required");
++const metaPath = join(taskDir, "meta.json");
++const resultPath = join(taskDir, "result.json");
++const gatePath = join(taskDir, "start.signal");
++const cancelPath = join(taskDir, "cancel.json");
++const meta = JSON.parse(readFileSync(metaPath, "utf8"));
++const { pid, output, exit } = meta.adopted;
++// Signal handling comes first: task_kill can arrive while this runner is still
++// starting, and the default SIGINT/SIGHUP action would end the pane without
++// stopping the command. The registry also signals the group directly.
++let startedAt;
++// Ctrl+C in the pane (task_kill's graceful step) reaches only this runner, since
++// the command is not in the pane's process group; forward it.
++process.on("SIGINT", () => signalGroup("SIGINT"));
++for (const signal of ["SIGTERM", "SIGHUP"]) {
++    process.on(signal, () => {
++        // Forced termination (kill-session or Pi quitting): the graceful Ctrl+C
++        // step has already been tried, so stop the whole group.
++        // Record the result first: the pane is closing, so writing to it may fail.
++        if (startedAt)
++            finalize(null, signal, "runner terminated");
++        signalGroup("SIGKILL");
++        process.exit(128);
++    });
++}
++const POLL_MS = 100;
++// Writes to a pane that tmux is tearing down fail asynchronously; ignore them.
++process.stdout.on("error", () => undefined);
++// The exit file is written when Pi sees the child's stdio close, which can
++// trail the process group's last member by a moment.
++const EXIT_GRACE_MS = 2_000;
++await waitForGate(gatePath, 10_000);
++startedAt = meta.adoptedStartedAt ?? new Date().toISOString();
++let finalized = false;
++let fd;
++const buffer = Buffer.alloc(64 * 1024);
++function drain() {
++    try {
++        fd ??= openSync(output, "r");
++        for (;;) {
++            const read = readSync(fd, buffer, 0, buffer.length, null);
++            if (read <= 0)
++                return;
++            process.stdout.write(buffer.subarray(0, read));
++        }
++    }
++    catch {
++        // Output file not created yet or already cleaned up; nothing to replay.
++    }
++}
++function cancellation() {
++    try {
++        return JSON.parse(readFileSync(cancelPath, "utf8"));
++    }
++    catch {
++        return undefined;
++    }
++}
++function groupAlive() {
++    try {
++        process.kill(-pid, 0);
++        return true;
++    }
++    catch (error) {
++        return error.code === "EPERM";
++    }
++}
++function signalGroup(signal) {
++    try {
++        process.kill(-pid, signal);
++    }
++    catch {
++        // Already gone.
++    }
++}
++function finalize(exitCode, signal, fallbackReason) {
++    if (finalized || existsSync(resultPath))
++        return;
++    finalized = true;
++    const cancel = cancellation();
++    const status = cancel
++        ? cancel.reason === "timed_out"
++            ? "timed_out"
++            : "cancelled"
++        : fallbackReason === "runner terminated"
++            ? "interrupted"
++            : exitCode === 0
++                ? "completed"
++                : "failed";
++    const reason = cancel?.reason ?? fallbackReason;
++    const result = {
++        schemaVersion: 1,
++        taskId: meta.taskId,
++        status,
++        exitCode,
++        signal,
++        startedAt,
++        endedAt: new Date().toISOString(),
++        ...(reason ? { reason } : {}),
++    };
++    const temp = `${resultPath}.${process.pid}.tmp`;
++    writeFileSync(temp, `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600, flag: "wx" });
++    try {
++        linkSync(temp, resultPath);
++    }
++    catch (error) {
++        if (error.code !== "EEXIST")
++            throw error;
++    }
++    finally {
++        unlinkSync(temp);
++    }
++    if (fd !== undefined)
++        closeSync(fd);
++    // The output and exit files live in a private temporary directory owned by
++    // this hand-off; output.log now holds the complete stream.
++    rmSync(dirname(output), { recursive: true, force: true });
++}
++function readExit() {
++    try {
++        return JSON.parse(readFileSync(exit, "utf8"));
++    }
++    catch {
++        return undefined;
++    }
++}
++let goneSince;
++for (;;) {
++    drain();
++    const status = readExit();
++    if (status) {
++        drain();
++        finalize(status.exitCode ?? null, status.signal ?? null);
++        break;
++    }
++    if (!groupAlive()) {
++        goneSince ??= Date.now();
++        if (Date.now() - goneSince >= EXIT_GRACE_MS) {
++            drain();
++            finalize(null, null, "command ended without reporting an exit status (Pi may have exited)");
++            break;
++        }
++    }
++    await new Promise((resolve) => setTimeout(resolve, POLL_MS));
++}
++async function waitForGate(path, timeoutMs) {
++    const deadline = Date.now() + timeoutMs;
++    while (!existsSync(path)) {
++        if (Date.now() >= deadline)
++            throw new Error("Timed out waiting for start signal");
++        await new Promise((resolve) => setTimeout(resolve, 20));
++    }
++}
+diff -ruN a/dist/index.js b/dist/index.js
+--- a/dist/index.js	2026-11-04 17:07:46.121940805 -0500
++++ b/dist/index.js	2026-11-04 17:08:25.944827128 -0500
+@@ -8,6 +8,25 @@
+ import { isTerminalStatus } from "./types.js";
+ import { newInstanceId } from "./utils.js";
+ const GLOBAL_KEY = Symbol.for("pi-background-task.instance-id");
++/**
++ * Cross-extension API (the managed bash tool uses it to move long-running calls
++ * into the background): `adopt(piSessionId, input)` -> task summary. Keyed by
++ * Pi session so several in-process sessions each reach their own registry.
++ */
++const API_KEY = Symbol.for("pi-background-task.api");
++function backgroundTaskApi() {
++    const globalState = globalThis;
++    globalState[API_KEY] ??= {
++        registries: new Map(),
++        async adopt(piSessionId, input) {
++            const registry = this.registries.get(piSessionId);
++            if (!registry)
++                throw new Error("Background task runtime is not initialized for this session");
++            return registry.adopt(input);
++        },
++    };
++    return globalState[API_KEY];
++}
+ function processInstanceId() {
+     const globalState = globalThis;
+     globalState[GLOBAL_KEY] ??= newInstanceId();
+@@ -19,12 +38,13 @@
+         if (entry.type !== "message" || !entry.message || typeof entry.message !== "object")
+             continue;
+         const message = entry.message;
+-        if (message.role !== "toolResult" || message.toolName !== "task_start")
++        if (message.role !== "toolResult" || (message.toolName !== "task_start" && message.toolName !== "bash"))
+             continue;
+         const details = message.details;
+         if (!details || typeof details !== "object")
+             continue;
+-        const taskId = details.taskId;
++        // bash results carry backgroundTaskId when the call moved to the background.
++        const taskId = message.toolName === "bash" ? details.backgroundTaskId : details.taskId;
+         if (typeof taskId === "string")
+             ids.add(taskId);
+     }
+@@ -137,6 +157,7 @@
+         notifier?.dispose();
+         registry?.dispose();
+         registry = new TaskRegistry(ctx.cwd, processInstanceId(), runnerPath, ctx.sessionManager.getSessionId(), () => branchTaskIds(ctx.sessionManager));
++        backgroundTaskApi().registries.set(ctx.sessionManager.getSessionId(), registry);
+         notifier = new CompletionNotifier(pi, registry);
+         reminders = new TaskReminders(pi, registry, ctx.sessionManager);
+         try {
+@@ -186,6 +207,11 @@
+         notifier = undefined;
+         const current = registry;
+         registry = undefined;
++        const api = backgroundTaskApi();
++        for (const [sessionId, candidate] of api.registries) {
++            if (candidate === current)
++                api.registries.delete(sessionId);
++        }
+         if (current)
+             await current.shutdown(event.reason === "quit");
+         if (ctx.hasUI)
+diff -ruN a/dist/registry.js b/dist/registry.js
+--- a/dist/registry.js	2026-11-04 17:07:46.122688729 -0500
++++ b/dist/registry.js	2026-11-04 17:15:15.239565572 -0500
+@@ -64,6 +64,8 @@
+             createdAt,
+             ...(input.timeoutSeconds !== undefined ? { timeoutSeconds: input.timeoutSeconds } : {}),
+             notifyOnCompletion: input.notifyOnCompletion ?? true,
++            // Adopted: an already-running process handed over by the bash tool (see adopt()).
++            ...(input.adopted ? { adopted: input.adopted, adoptedStartedAt: input.adoptedStartedAt } : {}),
+         };
+         const paths = await this.store.createTask(meta);
+         try {
+@@ -92,6 +94,28 @@
+             throw error;
+         }
+     }
++    /**
++     * Track a command that is already running as a child of this Pi process,
++     * e.g. a bash tool call that outlived its foreground limit. `pid` leads the
++     * command's process group; the caller appends the command's output to
++     * `output` and, when it exits, writes `{ exitCode, signal }` JSON to `exit`
++     * (both in a private directory the task removes once finished). The task's
++     * tmux pane runs adopted-runner.js, so logs, screen, wait, kill, timeouts
++     * and completion notifications behave as for task_start tasks; input cannot
++     * be sent because the command has no terminal.
++     */
++    async adopt(input) {
++        if (!Number.isInteger(input.pid) || input.pid <= 1)
++            throw new Error("adopt requires the command's process group id");
++        return this.start({
++            command: input.command,
++            name: input.name,
++            cwd: input.cwd,
++            notifyOnCompletion: input.notifyOnCompletion ?? true,
++            adopted: { pid: input.pid, output: input.output, exit: input.exit },
++            adoptedStartedAt: input.startedAt ?? new Date().toISOString(),
++        });
++    }
+     async get(taskId) {
+         assertTaskId(taskId);
+         const ref = await this.store.findTask(taskId);
+@@ -107,6 +131,15 @@
+             if (!owned)
+                 status = "unknown";
+             else if (!(await this.backendFor(meta).hasSession(meta.sessionName))) {
++                // An adopted command outlives its pane; once nothing tracks it, stop it.
++                if (meta.adopted) {
++                    try {
++                        process.kill(-meta.adopted.pid, "SIGKILL");
++                    }
++                    catch {
++                        // Already gone.
++                    }
++                }
+                 const interrupted = {
+                     schemaVersion: TASK_SCHEMA_VERSION,
+                     taskId,
+@@ -196,6 +229,8 @@
+         const summary = await this.get(taskId);
+         if (isTerminalStatus(summary.status) || summary.status === "unknown")
+             throw new Error(`Task is not running: ${taskId}`);
++        if (meta.adopted)
++            throw new Error(`${taskId} was moved to the background from a bash call and has no terminal input; use task_kill to stop it`);
+         if (input.text === undefined && !input.enter && !input.key)
+             throw new Error("Provide text, enter, or key");
+         const backend = this.backendFor(meta);
+@@ -216,7 +251,33 @@
+             return current;
+         await this.store.writeCancellation(paths, { reason, requestedAt: new Date().toISOString() });
+         const backend = this.backendFor(meta);
+-        if (!force && (await backend.hasSession(meta.sessionName))) {
++        // An adopted command runs outside the pane (as Pi's child), so signal its
++        // process group directly rather than relying on the runner to forward.
++        const signalAdopted = (signal) => {
++            if (!meta.adopted)
++                return;
++            try {
++                process.kill(-meta.adopted.pid, signal);
++            }
++            catch {
++                // Already gone.
++            }
++        };
++        if (!force && meta.adopted) {
++            signalAdopted("SIGINT");
++            const ended = await this.waitForResult(paths, 1_500);
++            if (ended) {
++                if (reason === "cancelled")
++                    await this.markNotified([taskId]);
++                return this.get(taskId);
++            }
++        }
++        signalAdopted("SIGKILL");
++        if (meta.adopted && (await backend.hasSession(meta.sessionName))) {
++            // Give the runner a moment to record the (cancelled) result itself.
++            await this.waitForResult(paths, 1_000);
++        }
++        if (!force && !meta.adopted && (await backend.hasSession(meta.sessionName))) {
+             await backend.sendKey(meta.sessionName, "C-c").catch(() => undefined);
+             const ended = await this.waitForResult(paths, 1_500);
+             if (ended) {
+diff -ruN a/dist/tmux.js b/dist/tmux.js
+--- a/dist/tmux.js	2026-11-04 17:07:46.122979607 -0500
++++ b/dist/tmux.js	2026-11-04 17:08:25.944418291 -0500
+@@ -22,7 +22,8 @@
+     }
+     async start(meta, paths) {
+         const runnerExecutable = process.env.PI_BACKGROUND_TASK_NODE || "@node@";
+-        const runnerCommand = `${shellQuote(runnerExecutable)} ${shellQuote(this.runnerPath)} ${shellQuote(paths.dir)}`;
++        const runnerPath = meta.adopted ? this.runnerPath.replace(/runner\.js$/, "adopted-runner.js") : this.runnerPath;
++        const runnerCommand = `${shellQuote(runnerExecutable)} ${shellQuote(runnerPath)} ${shellQuote(paths.dir)}`;
+         await this.run([
+             "new-session",
+             "-d",

@@ -165,14 +165,39 @@ command display. A single `Ctrl+O` then expands the full command and output
 instead of opening pi-cc's separately truncated Input/Output preview, whose
 second-level expansion is mouse-only in fullscreen mode.
 
-The same Bash override enforces a **60-second maximum execution timeout**.
-Missing, non-finite, or non-positive timeouts become 60 seconds; longer requests
-are clamped, and shorter positive timeouts are honored. The built-in backend
-terminates the process tree on timeout and retains output/error handling. The
-renderer shows the effective timeout. A timeout reports potential partial
-changes and directs the agent to inspect before retrying; nothing is restarted
-automatically. Tool guidance and shared rules direct potentially long-running
-commands to `task_start`, followed by checking task status/logs after completion.
+The same Bash override caps foreground execution at **60 seconds**, and moves
+calls that outlive it to the background instead of killing them
+(`extensions/bash-background.ts`):
+
+- **No `timeout`** (or a non-finite / non-positive one): the command runs like
+  Pi's own Bash (same shell, detached process group, piped output, no terminal),
+  and its output is also appended to a private temp file. If it is still
+  running at 60 seconds it is handed to pi-background-task: the tool call
+  returns the output so far plus "moved to background task `bg_…`", the process
+  keeps running as Pi's child, and the task tracks it with completion
+  notifications on. The result carries `details.backgroundTaskId`, which makes
+  the task visible on that session branch like a `task_start` result.
+- **Explicit `timeout`**: clamped to 60 seconds and killed at that time, as
+  before. A timeout reports potential partial changes and directs the agent to
+  inspect before retrying; nothing is restarted automatically.
+- **Without pi-background-task** (e.g. `--no-extensions`) or if the hand-off
+  fails, the call is killed at 60 seconds.
+
+No reparenting is involved: `patches/pi-background-task-adopt.patch` adds
+`TaskRegistry.adopt()` (reached through a `Symbol.for("pi-background-task.api")`
+global, keyed by Pi session). The task's tmux pane runs `adopted-runner.js`,
+which replays the temp file into the pane (so `task_logs` has the complete
+stream, including the part already returned), and turns the exit status the
+Bash backend writes on exit into the task result. `task_kill` signals the
+command's process group directly (SIGINT, then SIGKILL). Differences from a
+`task_start` task: no `task_send` (the command has no terminal), and if Pi
+crashes the task ends as failed without an exit code. Like other tasks, it is
+stopped when Pi quits.
+
+The renderer shows `(timeout Ns)` for explicit timeouts and
+`(background after 60s)` otherwise. Tool guidance and shared rules still prefer
+`task_start` for work known to be long-running, followed by checking task
+status/logs after completion.
 Shared rules specify a launch-then-yield workflow: keep completion notifications
 on, do not immediately call `task_wait` or poll, and finish the turn when no
 independent work remains. The completion notification resumes the conversation.
@@ -191,15 +216,27 @@ This is instruction-level policy, not shell syntax filtering or a guarantee
 against programs that daemonize or otherwise escape process tracking.
 
 This cap applies to the model-facing `bash` tool while the managed extension is
-loaded, not user `!`/`!!` commands, other tools, or background tasks. Disabling
+loaded, not user `!`/`!!` commands, other tools, or background tasks.
+`PI_BASH_BACKGROUND_AFTER_SECONDS` lowers the threshold (for testing). Disabling
 or replacing the extension bypasses it; this is a harness policy, not a security
 sandbox. Process termination is initiated at the timeout; OS scheduling and
 cleanup can make the tool's final result arrive slightly later.
 
-Tests: `node tests/bash-timeout.mjs` checks clamping and delegation. For a
-real process-termination check, load `tests/bash-timeout-runtime.ts` explicitly
-using `pi --no-extensions -e <absolute-fixture-path>`, then run
-`/test-bash-timeout`. It takes about one minute and makes no model requests.
+Tests:
+
+- `node tests/bash-timeout.mjs`: timeout clamping, delegation, renderer, and the
+  wrapper's hand-off/fallback/explicit-timeout paths with a real process.
+- `node tests/bash-background.mjs`: the backgrounding backend against real
+  processes (fast commands, hand-off with full output and exit status, kill on
+  explicit timeout, fallback, abort, exit during the hand-off).
+- `node tests/background-task-adopt.mjs <patched pi-background-task path>`: a
+  real registry and tmux adopting a process (logs, exit status, cleanup,
+  `task_kill` stopping the group, branch visibility).
+- For a real process-termination check, load `tests/bash-timeout-runtime.ts`
+  explicitly using `pi --no-extensions -e <absolute-fixture-path>`, then run
+  `/test-bash-timeout`. Without pi-background-task loaded it exercises the
+  kill-at-60-seconds fallback; it takes about one minute and makes no model
+  requests.
 
 The managed `queue-input-follow-up.ts` extension swaps Pi's two busy-input
 routes: ordinary Enter submissions become follow-ups, while the explicit

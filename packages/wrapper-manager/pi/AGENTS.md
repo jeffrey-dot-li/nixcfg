@@ -17,15 +17,21 @@ out of this file.
   for independent work. If a sibling reports a missing file or stale state,
   suspect ordering before concluding the earlier step failed; re-check in a
   later message rather than redoing the work.
-- Foreground Bash commands have an enforced maximum timeout of 60 seconds.
-- Run commands that might take longer through `task_start` (background tasks).
+- Foreground Bash is limited to 60 seconds. A Bash call without a `timeout`
+  that is still running at 60 seconds moves to a background task: the call
+  returns the output so far and a task ID, the command keeps running, and a
+  completion notification follows. Do not rerun it; use `task_logs`,
+  `task_status` or `task_kill` with that ID. An explicit `timeout` (at most 60
+  seconds) kills the command at that time instead.
+- Prefer `task_start` for work known to take longer (builds, test suites,
+  servers), so it gets a clear name from the start.
 - Never launch background or detached processes through foreground Bash.
   Do not use trailing `&`, `nohup`, `disown`, `setsid`, ad-hoc tmux/screen
   sessions, or daemon/detach flags to leave a process running after the tool
   returns. This applies even when the launch command itself takes under a
   minute. Use `task_start` for dev servers, port-forwards, tunnels, watchers,
   and other persistent processes so the session can track their resources.
-- A foreground timeout interrupts execution and may leave partial effects.
+- An explicit timeout interrupts execution and may leave partial effects.
   Inspect those effects before retrying; never automatically restart a
   side-effecting command in the background.
 
