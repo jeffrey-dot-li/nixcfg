@@ -328,8 +328,17 @@ commands and would be what the marketplace pulls in instead.
    environment, which may not include `~/.nix-profile/bin`. A machine setting
    (not a user setting) is required because the path is per-host. If the file
    has comments (JSONC), `json.load` fails: edit it by hand instead.
-   Optionally copy the fish terminal profile from Cursor's machine settings
-   into VS Code's so plain terminals use fish too.
+   Also set the fish terminal profile in **each** editor's machine settings.
+   Cursor's usually has it already, but VS Code's starts empty, so VS Code
+   terminals stay in bash. The `.bashrc` hook from Step 3 would also catch
+   this, but it isn't always present. Add to the same `python3` block:
+
+   ```python
+   d["terminal.integrated.defaultProfile.linux"] = "fish"
+   d["terminal.integrated.profiles.linux"] = {
+       "fish": {"path": os.path.expanduser("~/.nix-profile/bin/fish"), "args": ["-l"]}
+   }
+   ```
 
 4. **Verify** in the remote window: run **Developer: Reload Window**, then
    **Pi: Open** (or the terminal icon in the editor toolbar); the Pi session

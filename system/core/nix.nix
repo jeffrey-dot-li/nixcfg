@@ -41,7 +41,7 @@
 
       # extra-sandbox-paths = [config.programs.ccache.cacheDir];
 
-      experimental-features =  ["flakes" "nix-command" "pipe-operator"];
+      experimental-features = ["flakes" "nix-command" "pipe-operator"];
 
       # use binary cache, its not gentoo
       substituters = [
