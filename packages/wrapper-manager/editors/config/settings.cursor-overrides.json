@@ -9,6 +9,10 @@
   ],
   "terminal.integrated.commandsToSkipShell": [
     "workbench.action.toggleAuxiliaryBar",
-    "composer.startComposerPrompt"
+    "composer.startComposerPrompt",
+    "piAgent.copyTerminalSelection",
+    "piAgent.toggleTerminal",
+    "piAgent.newSession",
+    "workbench.action.showAllEditors"
   ]
 }

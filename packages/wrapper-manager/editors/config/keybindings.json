@@ -1059,5 +1059,41 @@
     "key": "alt+cmd+c",
     "command": "copyFilePath",
     "when": "filesExplorerFocus && !inputFocus"
+  },
+  {
+    // Pi Coding: cmd+b shows/hides the Pi session terminal (the "chat" pane),
+    // mirroring cmd+t for the bottom terminal; alt+cmd+b still toggles the
+    // session list in the secondary sidebar.
+    "key": "cmd+b",
+    "command": "piAgent.toggleTerminal"
+  },
+  {
+    "key": "cmd+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
+  },
+  {
+    // ...and cmd+shift+b starts a new Pi session, like cmd+shift+t for terminals.
+    "key": "shift+cmd+b",
+    "command": "piAgent.newSession"
+  },
+  {
+    // cmd+n: File: Show All Editors By Appearance, everywhere. No `when`, and
+    // user rules are evaluated after all defaults, so this beats every other
+    // cmd+n (including extension/Cursor ones); the known defaults are also
+    // unbound below so nothing competes in the Keyboard Shortcuts view.
+    "key": "cmd+n",
+    "command": "workbench.action.showAllEditors"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.files.newUntitledFile"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.chat.newChat"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.openChat"
   }
 ]

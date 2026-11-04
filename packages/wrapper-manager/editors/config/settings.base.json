@@ -717,7 +717,11 @@
   "window.autoDetectColorScheme": false,
   "workbench.colorTheme": "My Custom Theme",
   "terminal.integrated.commandsToSkipShell": [
-    "workbench.action.toggleAuxiliaryBar"
+    "workbench.action.toggleAuxiliaryBar",
+    "piAgent.copyTerminalSelection",
+    "piAgent.toggleTerminal",
+    "piAgent.newSession",
+    "workbench.action.showAllEditors"
   ],
   "[toml]": {
     "editor.formatOnSave": false
