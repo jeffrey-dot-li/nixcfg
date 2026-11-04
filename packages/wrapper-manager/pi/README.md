@@ -344,15 +344,27 @@ instructions layer after Pi's standard `AGENTS.md` context, work when Pi starts
 from a repository subdirectory, and are globally ignored by the managed Git
 configuration.
 
-The Nix-pinned `@smoose/pi-footer` replaces Pi's compressed footer with a
-responsive segment-based status line. The wrapper sets a default `footer`
-configuration only when none exists, showing model, project and Git, current
-context usage, latest cache-hit rate, uncached input/output token totals, and
-extension statuses. It omits large cumulative cache-read/write totals. Use
-`/footer` to try temporary presets; set `footer` in writable
-`~/.pi/agent/settings.json` to customize the persistent layout. This package
-also replaces Pi's input editor with its prompted editor; if input behavior
-regresses, remove the package before changing other input extensions.
+The footer is drawn by pi-cc-extensions (`enableCustomFooter`), laid out for
+half-width VS Code panes in `managedCcFooter`, which is written to
+`<Pi agent dir>/pi-cc-extensions.json` on every launch. It has two lines, with
+the most important chips first because lines truncate from the right:
+
+```
+Claude Opus 5.5 ◔ medium · 64%/1.0M · cache 99% · $0.12
+nixcfg · main · 1 bg task · MCP 0/1 · Pi Workflow · 535 msgs
+```
+
+`patches/pi-cc-extensions-compact-footer.patch` shows the model's display name
+instead of `provider/id`, the context percentage without a bar gauge, and the
+Git branch without `[status](+add −del)`, and drops the session name from the
+cwd chip (the `session-info` chip shows it). Nerd Font icons and the token-rate
+chip are off. Plugin chips are `setStatus` keys (`pi-background-task`, `mcp`,
+`session-info`); unlisted ones are appended to line 2. pi-mcp-adapter's
+`mcpFooterStatus` defaults to `compact` (`MCP <connected>/<enabled>`) in
+`mcp-adapter.json` when unset. To change the layout, edit `managedCcFooter`:
+the pi-cc config panel's footer changes are reset on the next launch. The
+earlier `@smoose/pi-footer` package was removed, because pi-cc-extensions'
+footer replaced it; the wrapper drops its leftover `footer` setting.
 
 The managed `static-working-indicator.ts` extension replaces Pi's animated
 working spinner with a static dot. Cursor invalidates integrated-terminal link
@@ -361,8 +373,8 @@ and become difficult to click while Pi is busy. Streaming text can still cause
 necessary redraws, but idle thinking and tool execution no longer repaint just
 to animate the spinner.
 
-The managed `session-info-status.ts` extension adds a footer status (shown by
-the `extension_statuses` segment) with the session name set by `/name` and
+The managed `session-info-status.ts` extension adds a footer status (the
+`session-info` chip) with the session name set by `/name` and
 the number of conversation messages on the active branch, e.g.
 `refactor auth · 14 msgs`. User prompts and assistant responses are counted;
 tool results are not. Unnamed sessions show only the count. It updates on
@@ -564,3 +576,9 @@ entries, including unneeded local development links, before Nix computes and
 installs the npm dependency set. Keep this normalization when updating the
 packages unless the upstream lockfile structure and runtime requirements have
 been reviewed.
+
+## Known issues
+
+- [pi-vscode fullscreen footer drawn at the top](pi-vscode-footer-at-top.md):
+  seen once after the open-sessions change, went away by itself; what was ruled
+  out and how to investigate if it returns.

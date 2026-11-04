@@ -37,8 +37,8 @@ in
     src = fetchFromGitHub {
       owner = "jeffrey-dot-li";
       repo = "pi-vscode";
-      rev = "6617e0bef22bc17111946c7821e33ea45e21c8c6";
-      hash = "sha256-sgMu0McTv6mDnKRuhQ1a0SkcYJf4Rw0lyf+yeAWE2UQ=";
+      rev = "3ff0ed720a83ce1b6a10b6a9fcf348bccd07e551";
+      hash = "sha256-eNC3GggzPml+xyPrqGARjaOnSEE9s+yTZG9Mu9+axME=";
     };
 
     npmDepsHash = "sha256-P7I8Pa2eFfMzNtBx7JAYWZ86xQHQSwcd7y/Gfnzc9vA=";

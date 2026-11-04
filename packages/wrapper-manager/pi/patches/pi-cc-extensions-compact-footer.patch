@@ -1,0 +1,69 @@
+diff -ru a/extensions/feature/shell/footer.ts b/extensions/feature/shell/footer.ts
+--- a/extensions/feature/shell/footer.ts	2026-11-04 12:38:11.965498417 -0500
++++ b/extensions/feature/shell/footer.ts	2026-11-04 12:38:12.090391658 -0500
+@@ -450,11 +450,9 @@
+ 			const usingSubscription =
+ 				!!model &&
+ 				["kimi-coding", "xai", "github-copilot", "openai"].includes(model.provider || "");
+-			const modelLabel = model
+-				? model.id.includes("/")
+-					? model.id
+-					: `${model.provider}/${model.id}`
+-				: "no-model";
++			// nixcfg: the display name ("Claude Opus 5.5"), not provider/id, so the chip
++			// fits half-width panes. Falls back to the id without any provider prefix.
++			const modelLabel = model ? model.name || model.id.split("/").pop() || model.id : "no-model";
+ 
+ 			const thinkingLevelStr = ctx.thinkingLevel || "off";
+ 			const thinkingColor = theme.getThinkingBorderColor(thinkingLevelStr);
+@@ -471,7 +469,7 @@
+ 			const pctLabel = percent === null || percent === undefined ? "?" : `${Math.floor(percent)}%`;
+ 			const glyphs = footerGlyphs(config.footerNerdIcons);
+ 			const cacheLabel =
+-				cachePct > 0 ? `${glyphs.cache ? `${glyphs.cache} ` : ""}${Math.floor(cachePct)}%` : "";
++				cachePct > 0 ? `${glyphs.cache ? `${glyphs.cache} ` : "cache "}${Math.floor(cachePct)}%` : "";
+ 			const rateLabel = config.footerTokenRate
+ 				? formatTokenRate(
+ 						displayTokenRate(config.footerTokenRateMode),
+@@ -490,27 +488,14 @@
+ 			const tokensLabel = config.footerSessionTokens ? formatSessionTokenTotal(tokens) : "";
+ 
+ 			const gitColor = theme.getThinkingBorderColor("medium");
+-			let place = theme.fg("accent", cwdLabel);
+-			const sessionName = ctx.sessionManager.getSessionName();
+-			if (sessionName) {
+-				place += theme.fg("muted", " in ") + theme.fg("success", sessionName);
+-			}
++			// nixcfg: no " in <session name>": the session-info status already shows it.
++			const place = theme.fg("accent", cwdLabel);
+ 			const branch = footerData.getGitBranch();
+ 			let gitChip = "";
+ 			if (branch) {
+-				const s = gitStats;
+-				let stats = "";
+-				if (s && s.status)
+-					stats = theme.fg("dim", " [") + colorGitStatus(theme, s.status) + theme.fg("dim", "]");
+-				if (s && (s.add || s.del))
+-					stats +=
+-						theme.fg("dim", "(") +
+-						theme.fg("success", `+${s.add}`) +
+-						" " +
+-						theme.fg("error", `−${s.del}`) +
+-						theme.fg("dim", ")");
++				// nixcfg: branch only, without the [status](+add −del) stats.
+ 				const gitLabel = glyphs.git ? `${glyphs.git} ${branch}` : branch;
+-				gitChip = gitColor(gitLabel) + stats;
++				gitChip = gitColor(gitLabel);
+ 			}
+ 
+ 			const builtinChips = new Map<string, string>([
+@@ -520,7 +505,8 @@
+ 				],
+ 				[
+ 					FOOTER_CONTEXT_KEY,
+-					barGauge(percent ?? 0) + theme.fg("dim", ` ${pctLabel}/${fmt(contextWindow)}`),
++					// nixcfg: percentage only, no bar gauge.
++					theme.fg((percent ?? 0) >= BAR_ERROR ? "error" : (percent ?? 0) >= BAR_WARNING ? "warning" : "dim", `${pctLabel}/${fmt(contextWindow)}`),
+ 				],
+ 				[FOOTER_CACHE_KEY, cacheLabel ? theme.fg("dim", cacheLabel) : ""],
+ 				[FOOTER_RATE_KEY, rateLabel ? theme.fg("dim", rateLabel) : ""],

@@ -140,19 +140,6 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
-  piFooter = pkgs.runCommand "pi-footer-0.1.6" {nativeBuildInputs = [pkgs.gnutar pkgs.gzip];} ''
-    mkdir -p source "$out"
-    tar -xzf ${pkgs.fetchurl {
-      url = "https://registry.npmjs.org/@smoose/pi-footer/-/pi-footer-0.1.6.tgz";
-      hash = "sha256-d/HzJ1oGjKxvac7kfHr9XuF6Kg9my3Tw3hS+tbDIx8g=";
-    }} -C source --strip-components=1
-    cp -R source/. "$out/"
-    chmod u+w "$out/index.ts"
-    substituteInPlace "$out/index.ts" \
-      --replace-fail 'return join(homeDir, ".pi", "agent", "settings.json");' \
-                     'return join(process.env.PI_CODING_AGENT_DIR || join(homeDir, ".pi", "agent"), "settings.json");'
-  '';
-
   managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.11" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
@@ -184,7 +171,6 @@
   piPackages = [
     managedResourcePackage
     piBackgroundTask
-    piFooter
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.84.0";
@@ -219,6 +205,7 @@
       owner = "minuque";
       repo = "pi-cc-extensions";
       rev = "562d687829a0048081efd71d7433dcda73d7f085";
+      patches = [./patches/pi-cc-extensions-compact-footer.patch];
       hash = "sha256-NPpKC+xTXFdwWxt1kddjtEqjrgAxd9K/s9H1NhZsojU=";
       npmDepsHash = "sha256-kWkBAnEMQ3YJLps7FunEmZbR7MmTqGQKrWT4rc8mXF0=";
     })
@@ -242,19 +229,6 @@
   ];
 
   managedPackages = builtins.toJSON (map toString piPackages);
-  defaultFooter = builtins.toJSON {
-    preset = "compact";
-    segments = [
-      "model"
-      "path"
-      "git"
-      "context_pct"
-      "cache_hit"
-      "token_in"
-      "token_out"
-      "extension_statuses"
-    ];
-  };
   managedSubagents = builtins.toJSON {
     agentOverrides = {
       monitor = {
@@ -316,6 +290,28 @@
     mcpServers = lib.optionalAttrs hasPlaywrightMcp {
       playwright.disabled = true;
     };
+    # Footer chip "MCP <connected>/<enabled>" instead of
+    # "🔌 MCP: 1 server enabled (1 disabled)".
+    settings.mcpFooterStatus = "compact";
+  };
+  # pi-cc-extensions draws the footer (it replaces pi-footer's). Laid out for
+  # half-width VS Code panes: two lines, most important chips first because
+  # lines truncate from the right. The compact footer patch shows the model
+  # name instead of provider/id, the context percentage without a bar, and the
+  # git branch without stats, and drops the session name from the cwd chip
+  # (session-info shows it). Nerd icons are off: VS Code's terminal font has
+  # no Nerd Font glyphs. Plugin chips are setStatus keys: pi-background-task,
+  # mcp (pi-mcp-adapter), session-info (managed extension); unlisted ones are
+  # appended to line 2.
+  managedCcFooter = builtins.toJSON {
+    enableCustomFooter = true;
+    footerNerdIcons = false;
+    footerTokenRate = false;
+    footerSessionTokens = false;
+    footerHiddenKeys = ["rate" "tokens"];
+    footerLine1Keys = ["model" "context" "cache" "cost" "pi-usage"];
+    footerLine2Keys = ["cwd" "git" "pi-background-task" "mcp" "session-info"];
+    footerLine3Keys = [];
   };
   managedKeybindings = builtins.toJSON {
     "tui.altScreen.previousPrompt" = "ctrl+shift+up";
@@ -361,8 +357,7 @@
 
     ${pkgs.jq}/bin/jq \
       --argjson managed '${managedPackages}' \
-      --argjson managedSubagents '${managedSubagents}' \
-      --argjson defaultFooter '${defaultFooter}' '
+      --argjson managedSubagents '${managedSubagents}' '
       def source:
         if type == "string" then .
         elif type == "object" then (.source // "")
@@ -409,7 +404,8 @@
             | map(select(. != "builtin:mcp" and . != "+builtin:mcp" and . != "-builtin:mcp")))
           + ["-builtin:mcp"]
         )
-      | .footer //= $defaultFooter
+      # pi-footer was removed (pi-cc-extensions draws the footer); drop its config.
+      | del(.footer)
       | .subagents = (
           ((.subagents // {}) | if type == "object" then . else {} end)
           * $managedSubagents
@@ -453,33 +449,46 @@
     fi
     trap - EXIT
 
+    # pi-cc-extensions >= 1.0 reads pi-cc-extensions.json; it migrates a legacy
+    # claude-code-style.json once and then ignores it, so manage the new file
+    # (taking the legacy one as input the first time) and drop the legacy copy.
+    # excludeRenderers gains "bash"; the footer keys in managedCcFooter are reset
+    # on every launch (see the note above managedCcFooter). Everything else,
+    # including choices saved from its config panel, is kept.
+    ccext="$config_dir/pi-cc-extensions.json"
     ccstyle="$config_dir/claude-code-style.json"
-    ccstyle_tmp=$(mktemp "$config_dir/.claude-code-style.json.XXXXXX")
-    trap 'rm -f "$ccstyle_tmp" "$ccstyle_tmp.input"' EXIT
+    ccext_tmp=$(mktemp "$config_dir/.pi-cc-extensions.json.XXXXXX")
+    trap 'rm -f "$ccext_tmp"' EXIT
 
-    if [ -f "$ccstyle" ]; then
-      ccstyle_input="$ccstyle"
+    if [ -f "$ccext" ]; then
+      ccext_input=$(cat "$ccext")
+    elif [ -f "$ccstyle" ]; then
+      ccext_input=$(cat "$ccstyle")
     else
-      printf '{}\n' > "$ccstyle_tmp.input"
-      ccstyle_input="$ccstyle_tmp.input"
+      ccext_input='{}'
     fi
 
-    ${pkgs.jq}/bin/jq '
-      .excludeRenderers = (
-        ((.excludeRenderers // [])
-          | if type == "array" then . else [] end
-          | map(select(type == "string")))
-        + ["bash"]
-        | unique
-      )
-    ' "$ccstyle_input" > "$ccstyle_tmp"
-
-    rm -f "$ccstyle_tmp.input"
-    chmod 600 "$ccstyle_tmp"
-    if [ -f "$ccstyle" ] && cmp -s "$ccstyle_tmp" "$ccstyle"; then
-      rm -f "$ccstyle_tmp"
+    if ${pkgs.jq}/bin/jq -n --argjson input "$ccext_input" --argjson footer '${managedCcFooter}' '
+      ($input | if type == "object" then . else {} end)
+      | .excludeRenderers = (
+          ((.excludeRenderers // [])
+            | if type == "array" then . else [] end
+            | map(select(type == "string")))
+          + ["bash"]
+          | unique
+        )
+      | . * $footer
+    ' > "$ccext_tmp"; then
+      chmod 600 "$ccext_tmp"
+      if [ -f "$ccext" ] && cmp -s "$ccext_tmp" "$ccext"; then
+        rm -f "$ccext_tmp"
+      else
+        mv "$ccext_tmp" "$ccext"
+      fi
+      rm -f "$ccstyle"
     else
-      mv "$ccstyle_tmp" "$ccstyle"
+      echo "pi: could not update $ccext; left unchanged" >&2
+      rm -f "$ccext_tmp"
     fi
     trap - EXIT
 
@@ -519,7 +528,9 @@
                   * (.[$server.key] // {} | obj)
                   * $server.value
                 ))
-          )),
+          )
+          # Adapter settings defaults apply only to keys the user has not set.
+          | .settings = (($defaults.settings // {}) * (.settings // {} | obj))),
           mcp: (
             if ($mcp | obj | has("mcpServers")) then
               $mcp | .mcpServers = ($legacy | with_entries(select(.key as $k | ($managed.mcpServers | has($k)) | not)))

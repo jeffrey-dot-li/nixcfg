@@ -13,6 +13,9 @@
     "piAgent.copyTerminalSelection",
     "piAgent.toggleTerminal",
     "piAgent.newSession",
-    "workbench.action.showAllEditors"
+    "workbench.action.showAllEditors",
+    "piAgent.nextSession",
+    "piAgent.previousSession",
+    "piAgent.searchSessions"
   ]
 }
