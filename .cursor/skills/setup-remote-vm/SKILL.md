@@ -2,9 +2,11 @@
 name: setup-remote-vm
 description: >-
   Bootstrap Nix and this repo's fish shell environment on a fresh remote Linux
-  VM (primarily Debian-based GCP instances) or a root-run Coder workspace.
+  VM (primarily Debian-based GCP instances) or a root-run Coder workspace, and
+  install the Pi Coding editor extension into its VS Code / Cursor server.
   Use when the user wants to set up, provision, or migrate to a remote dev box
-  whose SSH access is already configured. Coder needs a different Nix installer
+  whose SSH access is already configured, or set up pi in remote VS Code / Cursor.
+  Coder needs a different Nix installer
   and build-user setup because its container has no systemd or mount namespaces.
 ---
 
@@ -261,6 +263,119 @@ Reconnect via the SSH host alias and confirm:
 - If accessed via Cursor/VS Code Remote-SSH, open a terminal panel there too
   and confirm it drops into fish (not just plain `ssh` from a local terminal)
   — this exercises the `.bashrc` path, not just `.profile`.
+
+## Step 5: Pi Coding extension in remote VS Code / Cursor
+
+Pi Coding (`jeffrey-dot-li.pi-coding`) is our fork of
+[dcalsky/pi-vscode](https://github.com/dcalsky/pi-vscode), at
+<https://github.com/jeffrey-dot-li/pi-vscode>. It runs the real Nix-wrapped
+`pi` TUI in a native terminal editor, with a session list in the secondary
+(right) sidebar, per-session working/waiting status, a tone when a session
+starts waiting, and reopening of open sessions after a window reload. It is
+packaged as `.#pi-vscode` (`packages/pkgs/pi-vscode/default.nix`), which
+outputs the unpacked extension, a VSIX, and `pi-vscode-install`.
+
+**Why remote needs its own install.** Under Remote-SSH the window runs on the
+laptop but extensions with `extensionKind: workspace` (this one) run in the
+editor *server* on the VM, from the VM's own extensions dir
+(`~/.vscode-server/extensions` or `~/.cursor-server/extensions`). The editors
+module (`packages/wrapper-manager/editors`) only links curated extensions
+into the *local* editors, and the fork is not on any marketplace, so the VS
+Code "Install in SSH" / `remote.SSH.defaultExtensions` paths do not apply.
+The fork's publisher is renamed to `jeffrey-dot-li` on purpose: never also
+install upstream `EthanChow.pi-coding`, which registers the same `piAgent.*`
+commands and would be what the marketplace pulls in instead.
+
+1. **Connect once** with the editor (VS Code and/or Cursor) via Remote-SSH so
+   its server exists on the VM:
+   - VS Code: `~/.vscode-server/cli/servers/Stable-<commit>/server/bin/code-server`
+   - Cursor: `~/.cursor-server/bin/linux-x64/<commit>/bin/cursor-server`
+
+2. **Install the extension** from the profile (installed in Step 2, so
+   `pi-vscode-install` is on PATH; run `nix profile upgrade nixcfg --refresh`
+   first if the profile predates `pi-vscode`):
+
+   ```sh
+   pi-vscode-install
+   ls -d ~/.vscode-server/extensions/jeffrey-dot-li.pi-coding-* \
+         ~/.cursor-server/extensions/jeffrey-dot-li.pi-coding-* 2>/dev/null
+   ```
+
+   It installs the packaged VSIX with `--force` into the newest build of every
+   VS Code / Cursor server it finds (falling back to `cursor`/`code` on PATH).
+   The extensions dir is shared across server builds, so an editor update
+   does not require reinstalling; a new fork revision does.
+
+3. **Point it at the Nix pi** with a *machine* setting, merged into the
+   existing file (Cursor's usually already holds the fish terminal profile;
+   don't overwrite it). Do this for each editor in use:
+
+   ```sh
+   for m in ~/.vscode-server/data/Machine/settings.json ~/.cursor-server/data/Machine/settings.json; do
+     [ -d "$(dirname "$(dirname "$m")")" ] || continue   # editor never connected
+     mkdir -p "$(dirname "$m")"; [ -f "$m" ] || echo '{}' > "$m"
+     cp "$m" "$m.bak"
+     python3 - "$m" <<'EOF'
+   import json, os, sys
+   p = sys.argv[1]; d = json.load(open(p))
+   d["piAgent.command"] = os.path.expanduser("~/.nix-profile/bin/pi")
+   json.dump(d, open(p, "w"), indent=4)
+   EOF
+   done
+   ```
+
+   Without it the extension falls back to `which pi` in the server's
+   environment, which may not include `~/.nix-profile/bin`. A machine setting
+   (not a user setting) is required because the path is per-host. If the file
+   has comments (JSONC), `json.load` fails: edit it by hand instead.
+   Optionally copy the fish terminal profile from Cursor's machine settings
+   into VS Code's so plain terminals use fish too.
+
+4. **Verify** in the remote window: run **Developer: Reload Window**, then
+   **Pi: Open** (or the terminal icon in the editor toolbar); the Pi session
+   list appears in the secondary sidebar (toggle with ⌥⌘B). The Extensions
+   view should list Pi Coding under **SSH: <host> – Installed**, not Local.
+   Start a session, then check on the VM that it was launched by the
+   extension:
+
+   ```sh
+   for p in $(pgrep -f 'pi-unwrapped|\.pi-wrapped'); do
+     tr '\0' ' ' </proc/$p/cmdline | grep -- '--extension .*pi-vscode-status.ts' && echo; done
+   ```
+
+   Expect `... --session-id <id> --extension .../pi-vscode-status.ts` (plus
+   `--tui-mode regular` unless `piAgent.tuiMode` is `inherit`).
+
+**Updating the fork.** Push to `jeffrey-dot-li/pi-vscode`, bump `rev` and
+`hash` in `packages/pkgs/pi-vscode/default.nix` (`npmDepsHash` too if
+`package-lock.json` changed), build `nix build .#pi-vscode`, commit and push
+nixcfg, then on the VM: `nix profile upgrade nixcfg --refresh &&
+pi-vscode-install`, and reload the window.
+
+**Fallback before nixcfg is pushed** (or with no profile on the VM): build
+locally and copy the VSIX under a *unique* name, because a previously copied
+VSIX from the Nix store is read-only and `scp` cannot overwrite it:
+
+```sh
+nix build .#pi-vscode -o result-pi-vscode
+scp result-pi-vscode/share/pi-vscode/pi-coding.vsix <host-alias>:/tmp/pi-coding-$(date +%s).vsix
+# then on the VM, per server:  <server-cli> --install-extension /tmp/pi-coding-<ts>.vsix --force
+```
+
+The VSIX is platform-independent (node-pty ships prebuilt `pty.node` for
+Linux and macOS on x64/arm64; the package skips install scripts and fixup so
+those binaries are untouched), so a VSIX built on the Mac works on the VM.
+
+**Gotchas.**
+
+- Fullscreen TUI (`piAgent.tuiMode: inherit` with pi `tuiMode: fullscreen`):
+  needs fork ≥ `1d682e5`, which replays pi's SGR mouse encoding on attach;
+  older builds leave the wheel "frozen" until pi re-sends its modes.
+- A CLI-installed extension may not appear in an already-open window until
+  **Developer: Reload Window**, and it only activates on **Pi: Open** / its
+  view, so seeing nothing before that is normal.
+- Session order in the list is by last *prompt* (fork ≥ `4fe3c6e`); older
+  builds sorted by file mtime and reshuffled ties every refresh.
 
 ## Out of scope (handle separately per-VM)
 

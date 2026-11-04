@@ -316,6 +316,7 @@
   "python.diagnostics.sourceMapsEnabled": true,
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
+  "explorer.excludeGitIgnore": true,
   "javascript.format.semicolons": "insert",
   "typescript.format.insertSpaceAfterSemicolonInForStatements": false,
   "prettier.bracketSameLine": true,
