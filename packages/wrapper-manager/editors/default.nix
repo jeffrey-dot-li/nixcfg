@@ -36,7 +36,7 @@
     '';
   };
 
-  extensions = curatedExtensions ++ [customTheme];
+  extensions = curatedExtensions ++ [customTheme pkgs.pi-vscode];
 
   # Manifest of the curated extensions. The launch script symlinks each one
   # into the editor's normal (writable) extensions dir and merges these

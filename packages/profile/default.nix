@@ -72,6 +72,8 @@
   codex,
   opencode,
   pi,
+  # VSIX + `pi-vscode-install` for installing Pi Coding on SSH remotes.
+  pi-vscode,
   # tailscale,
   terraform,
   tflint,
