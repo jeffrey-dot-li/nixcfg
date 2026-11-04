@@ -140,7 +140,7 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
-  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.11" {} ''
+  managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.12" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
     cp -R ${./extensions} "$out/extensions"
@@ -148,7 +148,7 @@
     cat > "$out/package.json" <<'JSON'
     {
       "name": "pi-managed-resources",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "pi": {
         "extensions": [
           "./extensions/load-universal-agents.ts",
@@ -158,7 +158,8 @@
           "./extensions/queue-input-follow-up.ts",
           "./extensions/static-working-indicator.ts",
           "./extensions/session-info-status.ts",
-          "./extensions/undo-last-message.ts"
+          "./extensions/undo-last-message.ts",
+          "./extensions/clipboard-tools.ts"
         ],
         "subagents": {
           "agents": ["./agents"]
@@ -317,6 +318,13 @@
     "tui.altScreen.previousPrompt" = "ctrl+shift+up";
     "tui.altScreen.nextPrompt" = "ctrl+shift+down";
     "app.message.followUp" = "alt+enter";
+    # Ctrl+X belongs to the managed clipboard-tools extension (cut the prompt,
+    # else copy the last response); Pi reserves app.message.copy's key from
+    # extensions, so the built-in copy (/tree message, sign-in URL) moves here.
+    "app.message.copy" = "ctrl+shift+x";
+    # Same for the scoped-model picker's "clear all", so Ctrl+Shift+X is
+    # consistently "Pi's built-in Ctrl+X" and startup shows no conflict warning.
+    "app.models.clearAll" = "ctrl+shift+x";
     "tui.input.newLine" = [
       "ctrl+enter"
       "shift+enter"

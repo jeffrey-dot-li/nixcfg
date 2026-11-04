@@ -144,6 +144,9 @@ The wrapper similarly merges the following shortcuts into writable
 - `Option+Enter`: queue a steering message while the agent is busy, delivered
   after the current assistant turn finishes its tool calls
 - `Ctrl+Q` or `Option+Up`: restore queued messages to the editor
+- `Ctrl+Shift+X`: Pi's built-in copy (`app.message.copy`: the selected message
+  in `/tree`, the sign-in URL on OAuth screens) and the scoped-model picker's
+  "clear all", moved off `Ctrl+X` for the clipboard extension below
 - `Escape`: Pi's existing immediate interrupt binding; it also restores queued
   messages to the editor
 - `Ctrl+Shift+Up` / `Ctrl+Shift+Down`: jump to the previous / next marked
@@ -156,7 +159,7 @@ The wrapper similarly merges the following shortcuts into writable
 encode `Option+Up` before Pi receives it.
 
 The wrapper also merges `bash` into `excludeRenderers` in writable
-`claude-code-style.json`. This keeps `pi-cc-extensions` from replacing Bash's
+`pi-cc-extensions.json`. This keeps `pi-cc-extensions` from replacing Bash's
 renderer, so the managed `expand-bash-command.ts` renderer owns the complete
 command display. A single `Ctrl+O` then expands the full command and output
 instead of opening pi-cc's separately truncated Input/Output preview, whose
@@ -365,6 +368,22 @@ chip are off. Plugin chips are `setStatus` keys (`pi-background-task`, `mcp`,
 the pi-cc config panel's footer changes are reset on the next launch. The
 earlier `@smoose/pi-footer` package was removed, because pi-cc-extensions'
 footer replaced it; the wrapper drops its leftover `footer` setting.
+
+The managed `clipboard-tools.ts` extension copies source text rather than the
+rendered screen. Fullscreen mouse selection copies rendered rows, so wrapped
+paragraphs arrive with hard line breaks and indentation; Pi ships as a
+prebuilt binary, so that path is not patched here. Instead:
+
+- `Ctrl+X` with text in the editor cuts it to the clipboard and clears the
+  editor, to set a half-written prompt aside while answering something else;
+  paste it back later. With an empty editor it copies the last assistant
+  response, like Pi's built-in `Ctrl+X`. Pi reserves the built-in copy key from
+  extensions, so `app.message.copy` moves to `Ctrl+Shift+X`.
+- `/clip` picks the last response, each of its fenced code blocks (without the
+  fences), or one of the last 20 messages, and copies its source text.
+
+Copies use Pi's clipboard (native locally; OSC 52 over SSH, see
+`PI_CLIPBOARD_OSC52`), so they work in any terminal, not only VS Code.
 
 The managed `static-working-indicator.ts` extension replaces Pi's animated
 working spinner with a static dot. Cursor invalidates integrated-terminal link
