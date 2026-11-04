@@ -1077,6 +1077,29 @@
     "command": "piAgent.newSession"
   },
   {
+    // cmd+shift+] / [ in the Pi session terminal (or the session list) move to
+    // the next / previous open Pi session. The extension contributes these too,
+    // but extension rules tie at the same weight and the IntelliJ keymap's
+    // terminalFocus -> terminal.focusNext/Previous wins that tie; user rules are
+    // evaluated last, so they take precedence. Elsewhere the keys keep their
+    // editor/terminal meaning.
+    "key": "shift+cmd+]",
+    "command": "piAgent.nextSession",
+    "when": "terminalFocus && piAgent.sessionTerminalActive || focusedView == piAgent.view"
+  },
+  {
+    "key": "shift+cmd+[",
+    "command": "piAgent.previousSession",
+    "when": "terminalFocus && piAgent.sessionTerminalActive || focusedView == piAgent.view"
+  },
+  {
+    // cmd+i in a file editor: insert a reference to the selection into the Pi
+    // prompt (user-level for the same reason as above).
+    "key": "cmd+i",
+    "command": "piAgent.addSelectionToPrompt",
+    "when": "editorTextFocus"
+  },
+  {
     // cmd+n: File: Show All Editors By Appearance, everywhere. No `when`, and
     // user rules are evaluated after all defaults, so this beats every other
     // cmd+n (including extension/Cursor ones); the known defaults are also
