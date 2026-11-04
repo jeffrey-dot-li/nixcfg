@@ -273,7 +273,7 @@ Pi Coding (`jeffrey-dot-li.pi-coding`) is our fork of
 (right) sidebar, per-session working/waiting status, a tone when a session
 starts waiting, and reopening of open sessions after a window reload. It is
 packaged as `.#pi-vscode` (`packages/pkgs/pi-vscode/default.nix`), which
-outputs the unpacked extension, a VSIX, and `pi-vscode-install`.
+outputs the unpacked extension, a VSIX, and `pi-vscode-link`.
 
 **Why remote needs its own install.** Under Remote-SSH the window runs on the
 laptop but extensions with `extensionKind: workspace` (this one) run in the
@@ -291,20 +291,26 @@ commands and would be what the marketplace pulls in instead.
    - VS Code: `~/.vscode-server/cli/servers/Stable-<commit>/server/bin/code-server`
    - Cursor: `~/.cursor-server/bin/linux-x64/<commit>/bin/cursor-server`
 
-2. **Install the extension** from the profile (installed in Step 2, so
-   `pi-vscode-install` is on PATH; run `nix profile upgrade nixcfg --refresh`
-   first if the profile predates `pi-vscode`):
+2. **Link the extension from the profile, once per host** (installed in
+   Step 2, so `pi-vscode-link` is on PATH; run `nix profile upgrade nixcfg
+   --refresh` first if the profile predates `pi-vscode`):
 
    ```sh
-   pi-vscode-install
-   ls -d ~/.vscode-server/extensions/jeffrey-dot-li.pi-coding-* \
-         ~/.cursor-server/extensions/jeffrey-dot-li.pi-coding-* 2>/dev/null
+   pi-vscode-link
+   ls -la ~/.vscode-server/extensions/jeffrey-dot-li.pi-coding \
+          ~/.cursor-server/extensions/jeffrey-dot-li.pi-coding 2>/dev/null
    ```
 
-   It installs the packaged VSIX with `--force` into the newest build of every
-   VS Code / Cursor server it finds (falling back to `cursor`/`code` on PATH).
-   The extensions dir is shared across server builds, so an editor update
-   does not require reinstalling; a new fork revision does.
+   For each server it finds, it symlinks `extensions/jeffrey-dot-li.pi-coding`
+   to `~/.nix-profile/share/vscode/extensions/jeffrey-dot-li.pi-coding` (the
+   *profile* path, not a store path) and registers it in the server's
+   `extensions.json`. It also removes earlier copied (VSIX) installs, and sets
+   `piAgent.command` (step 3) if unset. After this, **`nix profile upgrade` is
+   the whole update**: the link follows the profile, so the next window
+   reload runs the new build. Nothing runs at login. Re-run it only if a
+   server's extensions dir is wiped or a new editor connects for the first
+   time. The extensions dir is shared across server builds, so editor updates
+   don't break the link. (`pi-vscode-install` is an alias.)
 
 3. **Point it at the Nix pi** with a *machine* setting, merged into the
    existing file (Cursor's usually already holds the fish terminal profile;
@@ -358,10 +364,10 @@ commands and would be what the marketplace pulls in instead.
 **Updating the fork.** Push to `jeffrey-dot-li/pi-vscode`, bump `rev` and
 `hash` in `packages/pkgs/pi-vscode/default.nix` (`npmDepsHash` too if
 `package-lock.json` changed), build `nix build .#pi-vscode`, commit and push
-nixcfg, then on the VM: `nix profile upgrade nixcfg --refresh &&
-pi-vscode-install`, and reload the window.
+nixcfg, then on the VM: `nix profile upgrade nixcfg --refresh`, and reload
+the window (the link from step 2 picks up the new build).
 
-**Fallback before nixcfg is pushed** (or with no profile on the VM): build
+**Fallback with no profile on the VM** (`pi-vscode-link` is the normal path): build
 locally and copy the VSIX under a *unique* name, because a previously copied
 VSIX from the Nix store is read-only and `scp` cannot overwrite it:
 

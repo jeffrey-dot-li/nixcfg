@@ -5,9 +5,12 @@
 #
 # Outputs:
 #   $out/share/vscode/extensions/<id>   unpacked extension (editors module symlinks it locally)
-#   $out/share/pi-vscode/pi-coding.vsix  VSIX for remote hosts
-#   $out/bin/pi-vscode-install           installs that VSIX into the editor(s) of the
-#                                        current host (run it on the SSH remote)
+#   $out/share/pi-vscode/pi-coding.vsix  VSIX, for hosts without this package in a profile
+#   $out/bin/pi-vscode-link              one-time setup on an SSH remote: links the
+#                                        extension from ~/.nix-profile into the VS Code /
+#                                        Cursor servers, so `nix profile upgrade` updates
+#                                        it with no install step (see link-remote.py)
+#   $out/bin/pi-vscode-install           alias of pi-vscode-link
 {
   lib,
   buildNpmPackage,
@@ -15,6 +18,7 @@
   jq,
   vsce,
   unzip,
+  python3,
   writeShellScript,
 }: let
   # Published upstream as `EthanChow.pi-coding`. Rename the publisher so the
@@ -65,7 +69,8 @@ in
       cp pi-coding.vsix $out/share/pi-vscode/pi-coding.vsix
       unzip -q pi-coding.vsix 'extension/*' -d unpacked
       cp -r unpacked/extension/. $out/share/vscode/extensions/${extensionId}/
-      install -m755 ${finalAttrs.passthru.installScript} $out/bin/pi-vscode-install
+      install -m755 ${finalAttrs.passthru.linkScript} $out/bin/pi-vscode-link
+      ln -s pi-vscode-link $out/bin/pi-vscode-install
       runHook postInstall
     '';
 
@@ -79,32 +84,8 @@ in
       vscodeExtPublisher = publisher;
       vscodeExtName = name;
       vscodeExtUniqueId = extensionId;
-      installScript = writeShellScript "pi-vscode-install" ''
-        # Install the Pi Coding VSIX into every VS Code / Cursor server (or
-        # local CLI) found on this host. Re-run after updating the package.
-        set -u
-        vsix="$(dirname "$(readlink -f "$0")")/../share/pi-vscode/pi-coding.vsix"
-        found=0
-        install_with() {
-          echo "pi-vscode-install: $1"
-          "$1" --install-extension "$vsix" --force && found=1
-        }
-        # Remote servers (newest build of each).
-        for base in "$HOME/.cursor-server/bin/linux-x64" "$HOME/.vscode-server/cli/servers"; do
-          [ -d "$base" ] || continue
-          newest=$(ls -td "$base"/*/ 2>/dev/null | head -n1)
-          [ -n "$newest" ] || continue
-          for cli in "$newest"bin/cursor-server "$newest"server/bin/code-server; do
-            [ -x "$cli" ] && install_with "$cli"
-          done
-        done
-        # Local / integrated-terminal CLIs.
-        if [ "$found" = 0 ]; then
-          for cli in cursor code; do
-            command -v "$cli" >/dev/null && install_with "$cli"
-          done
-        fi
-        [ "$found" = 1 ] || { echo "pi-vscode-install: no VS Code or Cursor CLI found" >&2; exit 1; }
+      linkScript = writeShellScript "pi-vscode-link" ''
+        exec ${lib.getExe python3} -I ${./link-remote.py} ${extensionId} "$@"
       '';
     };
 
