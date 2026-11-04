@@ -4,14 +4,15 @@
 
 Uses a throwaway config/HOME/project, a local web page and the real `mcp`
 proxy tool, with no model calls. It checks that:
-  - the wrapper merges the playwright server into Pi's mcp.json, switched off by
-    default, resets managed keys, and keeps the user's servers, settings and
-    their own `disabled` choice;
+  - the wrapper merges the playwright server into pi-mcp-adapter's
+    mcp-adapter.json, switched off by default, resets managed keys, moves an
+    entry left in Pi's mcp.json by older wrappers (keeping the user's keys), and
+    keeps the user's other servers, settings and their own `disabled` choice;
   - while disabled, agents cannot use it and no browser or server starts;
-  - `/mcp enable playwright` + reload turns it on for that project, and an agent
+  - `/mcp-adapter enable playwright` + reload turns it on for that project, and an agent
     can then drive a page (connect, navigate, snapshot, click, console, screenshot);
   - screenshots land in the state directory, not in the project;
-  - `/mcp disable` + reload turns it off again and stops the browser;
+  - `/mcp-adapter disable` + reload turns it off again and stops the browser;
   - no browser process survives Pi exiting.
 """
 import json
@@ -69,33 +70,39 @@ with tempfile.TemporaryDirectory(prefix="pi-playwright-") as scratch:
     env = {**os.environ, "HOME": str(home), "PI_CODING_AGENT_DIR": str(config), "XDG_STATE_HOME": str(state)}
 
     # 1. Config merge: user entries survive, managed keys are reset, off by default.
+    # An older wrapper kept playwright in Pi's mcp.json; it moves to mcp-adapter.json.
     (config / "mcp.json").write_text(json.dumps({
         "mcpServers": {
             "mine": {"command": "true"},
             "playwright": {"command": "/stale/path", "idleTimeout": 999, "directTools": False},
         },
-        "settings": {"toolPrefix": "short"},
     }))
+    (config / "mcp-adapter.json").write_text(json.dumps({"settings": {"toolPrefix": "short"}}))
     subprocess.run([str(wrapper), "--version"], env=env, check=True, capture_output=True)
-    merged = json.loads((config / "mcp.json").read_text())
+    pi_mcp = json.loads((config / "mcp.json").read_text())
+    assert pi_mcp == {"mcpServers": {"mine": {"command": "true"}}}, f"managed server not moved out of mcp.json: {pi_mcp}"
+    merged = json.loads((config / "mcp-adapter.json").read_text())
     pw = merged["mcpServers"]["playwright"]
     assert pw["command"].endswith("/bin/playwright-mcp") and os.access(pw["command"], os.X_OK), pw
     assert (pw["lifecycle"], pw["idleTimeout"]) == ("lazy", 10), f"managed keys not reset: {pw}"
     assert pw["disabled"] is True, f"not off by default: {pw}"
     assert pw["directTools"] is False, "user-set key on the managed server was lost"
-    assert merged["mcpServers"]["mine"] == {"command": "true"} and merged["settings"] == {"toolPrefix": "short"}
-    before = (config / "mcp.json").stat().st_mtime_ns
+    assert merged["settings"] == {"toolPrefix": "short"}, merged
+    before = [(config / f).stat().st_mtime_ns for f in ("mcp.json", "mcp-adapter.json")]
     subprocess.run([str(wrapper), "--version"], env=env, check=True, capture_output=True)
-    assert (config / "mcp.json").stat().st_mtime_ns == before, "second launch rewrote an up-to-date mcp.json"
-    assert oct((config / "mcp.json").stat().st_mode & 0o777) == "0o600"
+    after = [(config / f).stat().st_mtime_ns for f in ("mcp.json", "mcp-adapter.json")]
+    assert after == before, "second launch rewrote up-to-date MCP config"
+    for f in ("mcp.json", "mcp-adapter.json"):
+        assert oct((config / f).stat().st_mode & 0o777) == "0o600", f
     # A user who turns it on globally keeps it on across launches.
     other = scratch / "config-enabled"
     other.mkdir()
-    (other / "mcp.json").write_text(json.dumps({"mcpServers": {"playwright": {"disabled": False}}}))
+    (other / "mcp-adapter.json").write_text(json.dumps({"mcpServers": {"playwright": {"disabled": False}}}))
     subprocess.run([str(wrapper), "--version"], env={**env, "PI_CODING_AGENT_DIR": str(other)}, check=True, capture_output=True)
-    kept = json.loads((other / "mcp.json").read_text())["mcpServers"]["playwright"]
+    kept = json.loads((other / "mcp-adapter.json").read_text())["mcpServers"]["playwright"]
     assert kept["disabled"] is False and kept["command"].endswith("/bin/playwright-mcp"), kept
-    print("PASS: merged and off by default; user servers/settings/keys and their own `disabled` kept; idempotent; mode 600")
+    assert not (other / "mcp.json").exists(), "created an mcp.json that did not exist"
+    print("PASS: merged into mcp-adapter.json and off by default; legacy mcp.json entry moved; user servers/settings/keys and their own `disabled` kept; idempotent; mode 600")
 
     # 2. Drive the page through the real adapter.
     adapter = next(p for p in json.loads((config / "settings.json").read_text())["packages"] if "pi-mcp-adapter" in p)
@@ -115,7 +122,12 @@ export default function(pi) {{
 }}
 ''')
     proc = subprocess.Popen(
-        [str(wrapper), "--mode", "rpc", "--no-session", "--no-extensions", "--no-skills", "--no-context-files", "-e", str(scratch / "fixture.ts")],
+        # A project override (`/mcp-adapter enable` writes .pi/mcp-adapter.json) makes
+        # playwright a project server, which adapter >= 7 runs only after a one-time
+        # interactive approval. Nobody can answer that here; the adapter's flag for
+        # unattended sessions allows it for this process only and saves nothing.
+        [str(wrapper), "--mode", "rpc", "--no-session", "--no-extensions", "--no-skills", "--no-context-files",
+         "-e", str(scratch / "fixture.ts"), "--mcp-project-servers", "allow"],
         cwd=project, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     events = queue.Queue()
     threading.Thread(target=lambda: [events.put(l) for l in proc.stdout], daemon=True).start()
@@ -156,18 +168,19 @@ export default function(pi) {{
         # Off by default: not usable, nothing starts.
         for params in ({"server": "playwright"}, {"tool": "playwright_browser_navigate", "args": {"url": url}}):
             result = probe_raw(**params) or ""
-            assert "playwright_browser_navigate - " not in result and "Counter demo" not in result, f"usable while disabled: {result[:300]}"
+            # A listing entry looks like "- playwright_browser_navigate(url) - ..."; an error
+            # that merely names the tool ("Tool ... not found") means it is not usable.
+            assert not re.search(r"- playwright_browser_navigate\b", result) and "Counter demo" not in result, f"usable while disabled: {result[:300]}"
         print("      while disabled, the mcp tool says:", " ".join((probe_raw(server="playwright") or "").split())[:160])
         assert not browsers(), "a browser or MCP server started while disabled"
         print("PASS: disabled by default; agents cannot use it and nothing is started")
 
-        # Turn it on for this project with /mcp, then reload.
-        notes = command("/mcp enable playwright")
-        assert any("Enabled" in n for n in notes), notes
-        override = json.loads((project / ".pi" / "mcp.json").read_text())
-        assert override == {"mcpServers": {"playwright": {"disabled": False}}}, override
+        # Turn it on for this project with /mcp-adapter, then reload.
+        notes = command("/mcp-adapter enable playwright")
+        override = json.loads((project / ".pi" / "mcp-adapter.json").read_text())
+        assert override["mcpServers"]["playwright"]["disabled"] is False, (override, notes)
         command("/reload-fixture")
-        print("PASS: /mcp enable playwright wrote a per-project override:", json.dumps(override))
+        print("PASS: /mcp-adapter enable playwright wrote a per-project override:", json.dumps(override))
 
         # A cold tool cache is filled in the background after startup, so the first
         # listing can say "not connected". Observe how an agent would experience it.
@@ -196,7 +209,7 @@ export default function(pi) {{
         assert "Count: 1" in snap, snap[:500]
         console, _ = probe(tool="playwright_browser_console_messages", args={"level": "error"})
         assert "pi adapter console error" in console, console
-        shot, images = probe(tool="playwright_browser_take_screenshot", args={"type": "png"})
+        shot, images = probe(tool="playwright_browser_take_screenshot", args={"type": "png", "scale": "css"})
         assert images and images[0]["bytes"] > 1000, f"no inline screenshot: {shot[:300]} {images}"
         print("PASS: after enabling, connect, navigate, snapshot, click by ref, console, inline screenshot via the mcp tool")
 
@@ -204,21 +217,22 @@ export default function(pi) {{
         assert pngs, f"no screenshot under {state}"
         stray = [str(q.relative_to(project)) for q in project.rglob("*") if q.is_file() and not str(q).startswith(str(project / ".pi"))]
         assert not stray, f"files written into the project: {stray}"
-        print(f"PASS: screenshot saved under the state dir ({pngs[0].relative_to(state)}); the only project file is .pi/mcp.json")
+        print(f"PASS: screenshot saved under the state dir ({pngs[0].relative_to(state)}); the only project file is .pi/mcp-adapter.json")
 
         running = browsers()
         assert running and any("--headless" in c for c in running), "expected a headless browser under Pi"
         browser_pids = list(descendants(proc.pid))
 
         # Turn it off again: reload stops the server and its browser.
-        notes = command("/mcp disable playwright")
-        assert any("Disabled" in n for n in notes), notes
+        notes = command("/mcp-adapter disable playwright")
+        override = json.loads((project / ".pi" / "mcp-adapter.json").read_text())
+        assert override["mcpServers"]["playwright"]["disabled"] is True, (override, notes)
         command("/reload-fixture")
         time.sleep(3)
         assert not browsers(), f"browser still running after disabling: {browsers()}"
         result = probe_raw(tool="playwright_browser_navigate", args={"url": url}) or ""
-        assert "Counter demo" not in result, "still usable after /mcp disable"
-        print("PASS: /mcp disable + reload turns it off and stops the browser")
+        assert "Counter demo" not in result, "still usable after /mcp-adapter disable"
+        print("PASS: /mcp-adapter disable + reload turns it off and stops the browser")
     finally:
         proc.terminate()
         try:

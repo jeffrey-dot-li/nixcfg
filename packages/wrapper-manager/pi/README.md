@@ -70,9 +70,10 @@ later `cd`/`direnv` change in the launching terminal does not apply to a running
 Pi. Restart Pi from the environment you want. Tasks started by an older Pi build
 keep the `PATH` they were started with.
 
-`node tests/task-inherit-path.py <patched-package> <pi-binary>` starts real tasks
+`python3 tests/task-inherit-path.py <patched-package> <pi-binary>` starts real tasks
 under fish, bash and zsh and checks `PATH` order and working directory; it makes
-no model calls.
+no model calls. Pass the unwrapped binary (`<pi-unwrapped>/libexec/pi/pi`): the
+wrapper prepends tmux and node to `PATH`, so the marker would not come first.
 
 ### Background task reminders
 
@@ -208,11 +209,12 @@ with Option+Enter.
 
 Agents can drive a real browser themselves, so they do not need manual
 screenshots to iterate on a website. The wrapper adds a `playwright` entry to
-Pi's own `mcp.json` (`<Pi agent dir>/mcp.json`) on every launch, pointing at a
+pi-mcp-adapter's global file (`<Pi agent dir>/mcp-adapter.json`) on every
+launch, pointing at a
 Nix-built `playwright-mcp` (`playwright-mcp.nix`, from nixpkgs, version-matched
 to its browsers). **It is switched off by default** (see below).
 Agents reach it through the `mcp` tool: `mcp({ connect: "playwright" })` starts the
-server (a listing alone does not connect it after a fresh `/mcp enable` and
+server (a listing alone does not connect it after a fresh `/mcp-adapter enable` and
 `/reload`), and `mcp({ server: "playwright" })` then lists the 23 tools. The adapter prefixes them with the server name (`playwright_browser_navigate`,
 `playwright_browser_snapshot`, `playwright_browser_click`, `playwright_browser_type`,
 `playwright_browser_take_screenshot`, `playwright_browser_console_messages`,
@@ -229,13 +231,17 @@ Defaults and why:
 
 - **Off until you enable it.** The entry ships with `"disabled": true`, so agents
   are not offered the tools and nothing starts. It stays visible in `/mcp`. To
-  turn it on for the current project, run `/mcp enable playwright` (or toggle
-  it in the `/mcp` panel with `ctrl+d` and save), then `/reload`. That writes
-  `{"mcpServers":{"playwright":{"disabled":false}}}` to the project's
-  `.pi/mcp.json`, so the choice is per project and survives restarts;
-  `/mcp disable playwright` and `/reload` removes it and stops the browser. The
-  `.pi/` directory is not git-ignored by default. To enable it everywhere, set
-  `"disabled": false` on the `playwright` entry in `<Pi agent dir>/mcp.json`;
+  turn it on for the current project, run `/mcp-adapter enable playwright` (or
+  toggle it in the `/mcp` panel with `ctrl+d` and save), then `/reload`. That
+  writes `"disabled": false` for `playwright` to the project's
+  `.pi/mcp-adapter.json`, so the choice is per project and survives restarts.
+  Because that project file changes the server, the adapter asks once per
+  project before the first connection (the prompt defaults to "Don't allow";
+  approve it). Unattended sessions can pass `--mcp-project-servers allow`;
+  `/mcp-adapter disable playwright` and `/reload` turns it off and stops the
+  browser. The `.pi/` directory is not git-ignored by default. To enable it
+  everywhere, set `"disabled": false` on the `playwright` entry in
+  `<Pi agent dir>/mcp-adapter.json`;
   the launch-time merge only adds `disabled: true` when the key is absent, so
   deleting the key turns it back off. The browser files are installed with Pi
   either way (about 600 MB); disabling only stops it being offered or started.
@@ -263,7 +269,16 @@ The merge resets `command`, `lifecycle` and `idleTimeout` on the managed entry s
 the store path stays current, and sets `disabled: true` only when that key is
 absent. Everything else in the file is kept: other servers, `settings`, and
 extra keys on `playwright` such as `directTools`. To change a managed key for one
-project, override it in that project's `.pi/mcp.json`, which takes precedence.
+project, override it in that project's `.pi/mcp-adapter.json`, which takes
+precedence.
+
+Why `mcp-adapter.json` and not Pi's `mcp.json`: since Pi 0.99 the adapter also
+reads `<Pi agent dir>/mcp.json`, but translates it from Pi's schema, where a
+server is switched off with `enabled: false` and `disabled`, `lifecycle` and
+`idleTimeout` do not exist, so those keys were silently dropped and the server
+was always on. Older wrappers wrote the entry to `mcp.json`; the launch-time
+merge moves it to `mcp-adapter.json`, keeping user keys such as `disabled` and
+`directTools`, and leaves the other servers in `mcp.json` alone.
 Any `PLAYWRIGHT_MCP_*` variable in Pi's environment reaches the server.
 
 Security: the browser can reach anything the machine can, including localhost
@@ -280,9 +295,10 @@ Tests (no model calls):
   drives the server over stdio against a local page and checks headless mode,
   output location, and that no browser outlives the server.
 - `python3 tests/playwright-mcp-pi.py <pi wrapper>` runs the same flow through
-  Pi's MCP adapter with a throwaway config. It checks the `mcp.json` merge, that
-  it is off by default and starts nothing, that `/mcp enable` plus reload turns
-  it on for a project, and that `/mcp disable` plus reload stops the browser.
+  Pi's MCP adapter with a throwaway config. It checks the `mcp-adapter.json`
+  merge and the move out of a legacy `mcp.json`, that it is off by default and
+  starts nothing, that `/mcp-adapter enable` plus reload turns it on for a
+  project, and that `/mcp-adapter disable` plus reload stops the browser.
 
 Both were run on aarch64-darwin. The Linux builds come from the same nixpkgs
 expressions but have not been run here.

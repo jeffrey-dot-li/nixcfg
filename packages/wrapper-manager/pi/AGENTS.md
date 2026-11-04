@@ -77,13 +77,13 @@ out of this file.
   says the server is "not connected", connect first; it does not connect itself.
 - It is off by default. If `mcp({ server: "playwright" })` shows it as disabled
   or missing, say so and tell the user they can enable it for this project with
-  `/mcp enable playwright` followed by `/reload`. Do not edit MCP config files,
+  `/mcp-adapter enable playwright` followed by `/reload`. Do not edit MCP config files,
   install a browser, or silently fall back to asking for a screenshot.
 - Start dev servers with `task_start` first (see Background tasks), then browse
   to `http://localhost:<port>`.
 - Prefer `playwright_browser_snapshot`: it returns the page as text with element
   refs that `playwright_browser_click` and `playwright_browser_type` take as
-  `target`. Use `playwright_browser_take_screenshot` (set `type: "png"`) only for
+  `target`. Use `playwright_browser_take_screenshot` (set `type: "png"` and `scale: "css"`; the adapter requires `scale`) only for
   visual questions such as layout, spacing or colour; it comes back inline if
   your model can view images. Debug with `playwright_browser_console_messages`
   (set `level`) and `playwright_browser_network_requests` (set `static: false`).

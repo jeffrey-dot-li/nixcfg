@@ -1,6 +1,12 @@
---- a/json-schema-validator.ts	2026-10-07 11:16:10
-+++ b/json-schema-validator.ts	2026-10-07 11:16:24
-@@ -13,0 +14,15 @@
+--- a/json-schema-validator.ts
++++ b/json-schema-validator.ts
+@@ -24,6 +24,22 @@
+ function addKnownFormats(ajv: Ajv): void {
+   addFormats(ajv);
+   for (const format of SCHEMARS_NUMERIC_FORMATS) ajv.addFormat(format, true);
++  addGoogleFormats(ajv);
++}
++
 +function addGoogleFormats(ajv: Ajv): void {
 +  // Google API schemas use protobuf Duration strings, e.g. "1.250s".
 +  // Register the format instead of ignoring unknown-format warnings globally.
@@ -14,9 +20,6 @@
 +        (seconds === 315576000000 && !/[1-9]/.test(match[2] ?? ""));
 +    },
 +  });
-+}
-+
-@@ -47,0 +63 @@
-+          addGoogleFormats(ajv);
-@@ -63,0 +80 @@
-+        addGoogleFormats(ajv);
+ }
+ 
+ type SchemaDialect =

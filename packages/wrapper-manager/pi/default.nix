@@ -1,6 +1,6 @@
 {pkgs, ...}: let
   inherit (pkgs) lib;
-  version = "0.85.1";
+  version = "1.5.0";
 
   mkPiPackage = {
     pname,
@@ -113,7 +113,9 @@
         runHook preInstall
         mkdir -p $out/node_modules/@juicesharp
         cp -R packages/${workspace}/. $out/
-        cp -RL node_modules/typebox $out/node_modules/
+        # rpiv >= 2.15 declares typebox as a peer: Pi maps `typebox` imports to
+        # its own copy, so only older releases bundle it.
+        if [ -e node_modules/typebox ]; then cp -RL node_modules/typebox $out/node_modules/; fi
         cp -RL node_modules/@juicesharp/rpiv-config $out/node_modules/@juicesharp/
         runHook postInstall
       '';
@@ -138,11 +140,11 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
-  piFooter = pkgs.runCommand "pi-footer-0.1.4" {nativeBuildInputs = [pkgs.gnutar pkgs.gzip];} ''
+  piFooter = pkgs.runCommand "pi-footer-0.1.6" {nativeBuildInputs = [pkgs.gnutar pkgs.gzip];} ''
     mkdir -p source "$out"
     tar -xzf ${pkgs.fetchurl {
-      url = "https://registry.npmjs.org/@smoose/pi-footer/-/pi-footer-0.1.4.tgz";
-      hash = "sha256-jEbDfdZxT9vokgY+EkQyuH+uL6jkBKXDqPT1J+kghQA=";
+      url = "https://registry.npmjs.org/@smoose/pi-footer/-/pi-footer-0.1.6.tgz";
+      hash = "sha256-d/HzJ1oGjKxvac7kfHr9XuF6Kg9my3Tw3hS+tbDIx8g=";
     }} -C source --strip-components=1
     cp -R source/. "$out/"
     chmod u+w "$out/index.ts"
@@ -185,56 +187,56 @@
     piFooter
     (mkPiPackage {
       pname = "pi-subagents";
-      version = "0.69.0";
+      version = "0.84.0";
       owner = "nicobailon";
       repo = "pi-subagents";
-      rev = "f4918e80b531f1bf9f1d9e847b8f86c9016108f1";
-      hash = "sha256-j6nEmECD1jDXBCgc65AJMa6QFtbRYq4TblGB7ghQ1Ms=";
-      npmDepsHash = "sha256-IQgqScaxHR4ZVjv2G/uy0GN+nlGKrkprYFLKRPWTqEI=";
+      rev = "0398b9e8d6f03dc6054dbf13dfe851c7a20bff3a";
+      hash = "sha256-yJHclk8TqJX0OGDteZYAbcW9qGDY9a8BSVy0kxcRpEU=";
+      npmDepsHash = "sha256-PaqVPgvezGFlx6gjwN85W73/FJSjdntyCEHI6ztpTsQ=";
     })
     (mkPiPackage {
       pname = "pi-web-access";
-      version = "0.29.0";
+      version = "0.46.0";
       owner = "nicobailon";
       repo = "pi-web-access";
-      rev = "192ac1875e3b8f88c78953dbc314949ec9fcaa27";
-      hash = "sha256-5YMwE44pyMmCapGt9kFLxT61Qg3OCzuJCIATRhMBv6M=";
-      npmDepsHash = "sha256-NcJX+r/aaLSkBXq1N8mpZAzL0fCJC9pE4f+alHHxyAI=";
+      rev = "4af1a7f7757d450ba0afefe2d98737384dc9a9b4";
+      hash = "sha256-i/C22ovZYwUu3a7gzBeFVaMqvhIB+N/Z63wOCPdhwLs=";
+      npmDepsHash = "sha256-aUiVi6IISo9DTfhtK/3+GVErsMhjFH1+9sMqSDaydUU=";
     })
     (mkPiPackage {
       pname = "pi-mcp-adapter";
-      version = "2.34.0";
+      version = "7.0.1";
       patches = [./patches/pi-mcp-google-duration.patch];
       owner = "nicobailon";
       repo = "pi-mcp-adapter";
-      rev = "74c5233c63ad0096077df925fd6135c3bf6b8c6b";
-      hash = "sha256-YpiJROIG0/U81wAoImjktbg/d5wGnc6o130IlOrTyEE=";
-      npmDepsHash = "sha256-4TmYcom+la6ZQN9RuFWpq6hzByJEcKe4gRnCu27gU84=";
+      rev = "0beff98460567cd228ae08d99db5f169a1ad3034";
+      hash = "sha256-OyHd9Se7HDjbu8K668Q8/Z+sq83apfqHoKn72N8PBqg=";
+      npmDepsHash = "sha256-4H3POKrLKvKP/06Wrw5PGb6JuzePpBm1f5LvvY7a3hE=";
     })
     (mkPiPackage {
       pname = "pi-cc-extensions";
-      version = "0.8.71";
+      version = "1.0.14";
       owner = "minuque";
       repo = "pi-cc-extensions";
-      rev = "e43e0041b59f5d7f03be9b9d103a5f9e954e4c11";
-      hash = "sha256-P2aoupVV8TBOSilqGplRukbdktpTJ09YC0sPkcvMKEM=";
-      npmDepsHash = "sha256-lf7AcK6bTbKh3rjbdJSozfFBBK1fUo1omFB4Efhsvms=";
+      rev = "562d687829a0048081efd71d7433dcda73d7f085";
+      hash = "sha256-NPpKC+xTXFdwWxt1kddjtEqjrgAxd9K/s9H1NhZsojU=";
+      npmDepsHash = "sha256-kWkBAnEMQ3YJLps7FunEmZbR7MmTqGQKrWT4rc8mXF0=";
     })
     (mkRpivPackage {
       pname = "rpiv-ask-user-question";
       workspace = "rpiv-ask-user-question";
-      version = "2.10.1";
-      rev = "42a272eb3363f18e072d71deccdbc27452bb0c45";
-      hash = "sha256-kgULSuw55OIqoF36kPyl69PCoDyajducrq3jeENnVKM=";
-      npmDepsHash = "sha256-9PR2jnPqSfHI/wIiAC9aFGiBXL+yw/qPPtIg++eJmOQ=";
+      version = "2.15.0";
+      rev = "ce6d3530410812ca504ec294995581a52170f9e1";
+      hash = "sha256-L+c/p6yhTDznxszJ8kkAxxGEWfizf5rFbXmiIGClWKg=";
+      npmDepsHash = "sha256-Lr0OmixTQ6C/09MwipnWeGdX6f45oKaXRrwgE8V8nRs=";
     })
     (mkRpivPackage {
       pname = "rpiv-todo";
       workspace = "rpiv-todo";
-      version = "2.10.1";
-      rev = "42a272eb3363f18e072d71deccdbc27452bb0c45";
-      hash = "sha256-kgULSuw55OIqoF36kPyl69PCoDyajducrq3jeENnVKM=";
-      npmDepsHash = "sha256-aIZ0vSkcfi5zUSt91nFTaNeJ0leehvTxxhzEHgZM9yg=";
+      version = "2.15.0";
+      rev = "ce6d3530410812ca504ec294995581a52170f9e1";
+      hash = "sha256-L+c/p6yhTDznxszJ8kkAxxGEWfizf5rFbXmiIGClWKg=";
+      npmDepsHash = "sha256-y+HhU6F59RCSHi3an9/+2AEt37bGGDeTIVtdAG5yAoI=";
       patches = [./patches/rpiv-todo-reset.patch];
     })
   ];
@@ -293,8 +295,9 @@
   # accessibility snapshots, clicks, console/network, screenshots).
   playwrightMcp = pkgs.callPackage ./playwright-mcp.nix {};
   hasPlaywrightMcp = lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.playwright-mcp;
-  # Merged into Pi's own mcp.json (not the shared ~/.config/mcp/mcp.json) so the
-  # store path can change on every update without touching other tools' config.
+  # Merged into pi-mcp-adapter's <Pi agent dir>/mcp-adapter.json (not the shared
+  # ~/.config/mcp/mcp.json) so the store path can change on every update without
+  # touching other tools' config.
   managedMcpServers = builtins.toJSON {
     mcpServers = lib.optionalAttrs hasPlaywrightMcp {
       playwright = {
@@ -306,8 +309,9 @@
     };
   };
   # Defaults applied only when the key is absent, so a user's own choice wins.
-  # Playwright stays off until enabled: `/mcp` (per project, then `/reload`) or
-  # `"disabled": false` in <Pi agent dir>/mcp.json (everywhere).
+  # Playwright stays off until enabled: `/mcp-adapter enable playwright` (per
+  # project, then `/reload`) or `"disabled": false` in
+  # <Pi agent dir>/mcp-adapter.json (everywhere).
   managedMcpDefaults = builtins.toJSON {
     mcpServers = lib.optionalAttrs hasPlaywrightMcp {
       playwright.disabled = true;
@@ -336,6 +340,10 @@
     fi
     unset pi_mcp_oauth_key_file
   '';
+  # configurePackages also adds -builtin:mcp to `extensions`: pi-mcp-adapter
+  # replaces Pi's built-in MCP (both read the same mcp.json and register /mcp).
+  # The adapter turns the built-in off itself only when installed with
+  # `pi install`, which never happens for Nix-managed packages.
   configurePackages = pkgs.writeShellScript "configure-pi-packages" ''
     config_dir="''${PI_CODING_AGENT_DIR:-"$HOME/.pi/agent"}"
     settings="$config_dir/settings.json"
@@ -394,6 +402,13 @@
           | map(select(managed_by_nix | not)))
         + $managed
       )
+      # Disable builtin:mcp; see the note above configurePackages.
+      | .extensions = (
+          ((.extensions // [])
+            | if type == "array" then . else [] end
+            | map(select(. != "builtin:mcp" and . != "+builtin:mcp" and . != "-builtin:mcp")))
+          + ["-builtin:mcp"]
+        )
       | .footer //= $defaultFooter
       | .subagents = (
           ((.subagents // {}) | if type == "object" then . else {} end)
@@ -468,40 +483,73 @@
     fi
     trap - EXIT
 
+    # Managed MCP servers live in pi-mcp-adapter's global file. Since Pi 0.99 the
+    # adapter also reads Pi's own mcp.json, but only in Pi's schema (`enabled`,
+    # no lifecycle/idleTimeout), so the adapter-only keys below would be dropped
+    # there. Managed keys (command, lifecycle, idleTimeout) are reset on every
+    # launch; `disabled` defaults to true only when absent. A managed server
+    # left in mcp.json by an older wrapper is moved over, keeping the user's
+    # own keys (such as disabled or directTools). Other servers and settings in
+    # both files are untouched.
     mcp="$config_dir/mcp.json"
+    adapter="$config_dir/mcp-adapter.json"
     mcp_tmp=$(mktemp "$config_dir/.mcp.json.XXXXXX")
-    trap 'rm -f "$mcp_tmp" "$mcp_tmp.input"' EXIT
+    adapter_tmp=$(mktemp "$config_dir/.mcp-adapter.json.XXXXXX")
+    trap 'rm -f "$mcp_tmp" "$adapter_tmp" "$mcp_tmp.both"' EXIT
 
-    if [ -f "$mcp" ]; then
-      mcp_input="$mcp"
+    mcp_input=$([ -f "$mcp" ] && cat "$mcp" || echo '{}')
+    adapter_input=$([ -f "$adapter" ] && cat "$adapter" || echo '{}')
+
+    # Unparseable input or a jq error leaves both files exactly as they were.
+    if ${pkgs.jq}/bin/jq -n \
+      --argjson managed '${managedMcpServers}' \
+      --argjson defaults '${managedMcpDefaults}' \
+      --argjson mcp "$mcp_input" \
+      --argjson adapter "$adapter_input" '
+      def servers: (.mcpServers // {}) | if type == "object" then . else {} end;
+      def obj: if type == "object" then . else {} end;
+      ($mcp | servers) as $legacy
+      | {
+          adapter: ($adapter | obj | .mcpServers = (
+            ($adapter | obj | servers) as $existing
+            | reduce ($managed.mcpServers | to_entries[]) as $server ($existing;
+                .[$server.key] = (
+                  ($defaults.mcpServers[$server.key] // {})
+                  * ($legacy[$server.key] // {} | obj | del(.command, .lifecycle, .idleTimeout))
+                  * (.[$server.key] // {} | obj)
+                  * $server.value
+                ))
+          )),
+          mcp: (
+            if ($mcp | obj | has("mcpServers")) then
+              $mcp | .mcpServers = ($legacy | with_entries(select(.key as $k | ($managed.mcpServers | has($k)) | not)))
+            else $mcp end
+          )
+        }
+    ' > "$mcp_tmp.both" &&
+      ${pkgs.jq}/bin/jq '.adapter' "$mcp_tmp.both" > "$adapter_tmp" &&
+      ${pkgs.jq}/bin/jq '.mcp' "$mcp_tmp.both" > "$mcp_tmp"; then
+      updated=1
     else
-      printf '{}\n' > "$mcp_tmp.input"
-      mcp_input="$mcp_tmp.input"
+      echo "pi: could not update $adapter / $mcp; left unchanged" >&2
+      updated=0
     fi
+    rm -f "$mcp_tmp.both"
 
-    # Managed keys (command, lifecycle, idleTimeout) are reset on every launch.
-    # Defaults (disabled) apply only when absent. Anything else on a managed
-    # server, such as directTools, and all other servers and settings are kept.
-    ${pkgs.jq}/bin/jq --argjson managed '${managedMcpServers}' \
-      --argjson defaults '${managedMcpDefaults}' '
-      .mcpServers = (
-        ((.mcpServers // {}) | if type == "object" then . else {} end) as $existing
-        | reduce ($managed.mcpServers | to_entries[]) as $server ($existing;
-            .[$server.key] = (
-              ($defaults.mcpServers[$server.key] // {})
-              * ((.[$server.key] // {}) | if type == "object" then . else {} end)
-              * $server.value
-            ))
-      )
-    ' "$mcp_input" > "$mcp_tmp"
-
-    rm -f "$mcp_tmp.input"
-    chmod 600 "$mcp_tmp"
-    if [ -f "$mcp" ] && cmp -s "$mcp_tmp" "$mcp"; then
-      rm -f "$mcp_tmp"
-    else
-      mv "$mcp_tmp" "$mcp"
+    install_json() { # <tmp> <dest>: replace dest only when the content changed
+      chmod 600 "$1"
+      if [ -f "$2" ] && cmp -s "$1" "$2"; then
+        rm -f "$1"
+      else
+        mv "$1" "$2"
+      fi
+    }
+    if [ "$updated" = 1 ]; then
+      install_json "$adapter_tmp" "$adapter"
+      # Never create an mcp.json that did not exist.
+      if [ -f "$mcp" ]; then install_json "$mcp_tmp" "$mcp"; fi
     fi
+    rm -f "$mcp_tmp" "$adapter_tmp"
     trap - EXIT
   '';
 
@@ -509,19 +557,19 @@
     {
       aarch64-darwin = {
         name = "pi-darwin-arm64.tar.gz";
-        hash = "sha256-1fcOPAz3OY6sI5/QJh7gdNmLe6f2tD/jYX8FLtW3nQY=";
+        hash = "sha256-qb8NgtWNKn0zf0rkFxtfyev/5CUJUnqDE2TEtlrfLN8=";
       };
       x86_64-darwin = {
         name = "pi-darwin-x64.tar.gz";
-        hash = "sha256-rbkYuEViXxhNi+pAjVXqyvIaqHI4eTwPW087lze85is=";
+        hash = "sha256-9BsmzZoXVKviWeBaQh+zOwCTZ3nLB4PIk6Y4nRvS7g0=";
       };
       aarch64-linux = {
         name = "pi-linux-arm64.tar.gz";
-        hash = "sha256-BC0grohe5POxAoFfMoC5YsN3sun7RN5AN5CMxTDq5NQ=";
+        hash = "sha256-XVcRtIYAdWRzaC6GNgsCaxGr91keXREutBHU2iwQDZo=";
       };
       x86_64-linux = {
         name = "pi-linux-x64.tar.gz";
-        hash = "sha256-SU5Jj0fXTSH0CzOG9qXpIaPUlTGhacq1W72soOof4lo=";
+        hash = "sha256-34cLoONEy3szWNjY8ZOXuLjSJahml4RzataKXCFp1Ts=";
       };
     }.${
       pkgs.stdenv.hostPlatform.system
@@ -576,23 +624,34 @@ in {
   wrappers.pi = {
     basePackage = pi-unwrapped;
     wrapperType = "shell";
-    wrapFlags = [
-      "--prefix"
-      "PATH"
-      ":"
-      (lib.makeBinPath [
-        pkgs.tmux
-        pkgs.nodejs
-      ])
-      "--set-default"
-      "PI_BACKGROUND_TASK_NODE"
-      "${pkgs.nodejs}/bin/node"
-      # Export pi-mcp-adapter's OAuth file-store key; see loadMcpOAuthKey.
-      "--run"
-      ". ${loadMcpOAuthKey}"
-      "--run"
-      configurePackages
-    ];
+    wrapFlags =
+      [
+        "--prefix"
+        "PATH"
+        ":"
+        (lib.makeBinPath [
+          pkgs.tmux
+          pkgs.nodejs
+        ])
+        "--set-default"
+        "PI_BACKGROUND_TASK_NODE"
+        "${pkgs.nodejs}/bin/node"
+      ]
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+        # Linux hosts here are SSH remotes (VMs). Also send copies to the terminal
+        # with OSC 52 so they reach the laptop's clipboard even when Pi cannot
+        # detect the remote session (the VS Code server's extension host, tmux).
+        "--set-default"
+        "PI_CLIPBOARD_OSC52"
+        "1"
+      ]
+      ++ [
+        # Export pi-mcp-adapter's OAuth file-store key; see loadMcpOAuthKey.
+        "--run"
+        ". ${loadMcpOAuthKey}"
+        "--run"
+        configurePackages
+      ];
     env.PI_SKIP_VERSION_CHECK.value = "1";
   };
 }
