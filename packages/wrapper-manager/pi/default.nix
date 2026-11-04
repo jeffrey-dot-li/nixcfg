@@ -328,6 +328,14 @@
       "alt+up"
     ];
   };
+  loadMcpOAuthKey = pkgs.writeText "load-pi-mcp-oauth-key.sh" ''
+    pi_mcp_oauth_key_file="''${XDG_CONFIG_HOME:-$HOME/.config}/pi-mcp-adapter/oauth-file-key"
+    if [ -z "''${PI_MCP_ADAPTER_OAUTH_FILE_KEY-}" ] && [ -r "$pi_mcp_oauth_key_file" ]; then
+      PI_MCP_ADAPTER_OAUTH_FILE_KEY=$(tr -d '[:space:]' < "$pi_mcp_oauth_key_file")
+      export PI_MCP_ADAPTER_OAUTH_FILE_KEY
+    fi
+    unset pi_mcp_oauth_key_file
+  '';
   configurePackages = pkgs.writeShellScript "configure-pi-packages" ''
     config_dir="''${PI_CODING_AGENT_DIR:-"$HOME/.pi/agent"}"
     settings="$config_dir/settings.json"
@@ -579,6 +587,9 @@ in {
       "--set-default"
       "PI_BACKGROUND_TASK_NODE"
       "${pkgs.nodejs}/bin/node"
+      # Export pi-mcp-adapter's OAuth file-store key; see loadMcpOAuthKey.
+      "--run"
+      ". ${loadMcpOAuthKey}"
       "--run"
       configurePackages
     ];

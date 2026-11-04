@@ -305,44 +305,35 @@ commands and would be what the marketplace pulls in instead.
    to `~/.nix-profile/share/vscode/extensions/jeffrey-dot-li.pi-coding` (the
    *profile* path, not a store path) and registers it in the server's
    `extensions.json`. It also removes earlier copied (VSIX) installs, and sets
-   `piAgent.command` (step 3) if unset. After this, **`nix profile upgrade` is
+   `piAgent.command` to `~/.nix-profile/bin/pi-vscode-pi` (step 3) if unset. After this, **`nix profile upgrade` is
    the whole update**: the link follows the profile, so the next window
    reload runs the new build. Nothing runs at login. Re-run it only if a
    server's extensions dir is wiped or a new editor connects for the first
    time. The extensions dir is shared across server builds, so editor updates
    don't break the link. (`pi-vscode-install` is an alias.)
 
-3. **Point it at the Nix pi** with a *machine* setting, merged into the
-   existing file (Cursor's usually already holds the fish terminal profile;
-   don't overwrite it). Do this for each editor in use:
+3. **Run pi with the terminal's environment.** The editor server, and so the
+   extension that spawns pi, is started by a non-interactive SSH bash: it has
+   no fish config, no `~/.nix-profile/bin` on `PATH`, and no direnv. A pi
+   started with that environment lacks profile tools, the repo's devenv
+   toolchain (cargo, protoc, ...) and variables from `~/.config/fish/conf.d`.
+   `pi-vscode-link` therefore sets the *machine* setting
+   `"piAgent.command": "~/.nix-profile/bin/pi-vscode-pi"`, written as an absolute
+   path. That launcher runs `fish -l -c 'direnv export fish | source; exec pi $argv'`
+   in the session's folder. It is a machine setting because the path is
+   per-host. An existing value other than the plain profile `pi` is kept. If
+   the settings file has comments (JSONC), set it by hand. To compare, check
+   `PATH` in `/proc/<pid>/environ` of a pi started by the extension against a
+   pi started in a terminal.
 
-   ```sh
-   for m in ~/.vscode-server/data/Machine/settings.json ~/.cursor-server/data/Machine/settings.json; do
-     [ -d "$(dirname "$(dirname "$m")")" ] || continue   # editor never connected
-     mkdir -p "$(dirname "$m")"; [ -f "$m" ] || echo '{}' > "$m"
-     cp "$m" "$m.bak"
-     python3 - "$m" <<'EOF'
-   import json, os, sys
-   p = sys.argv[1]; d = json.load(open(p))
-   d["piAgent.command"] = os.path.expanduser("~/.nix-profile/bin/pi")
-   json.dump(d, open(p, "w"), indent=4)
-   EOF
-   done
-   ```
-
-   Without it the extension falls back to `which pi` in the server's
-   environment, which may not include `~/.nix-profile/bin`. A machine setting
-   (not a user setting) is required because the path is per-host. If the file
-   has comments (JSONC), `json.load` fails: edit it by hand instead.
    Also set the fish terminal profile in **each** editor's machine settings.
-   Cursor's usually has it already, but VS Code's starts empty, so VS Code
-   terminals stay in bash. The `.bashrc` hook from Step 3 would also catch
-   this, but it isn't always present. Add to the same `python3` block:
+   Cursor's usually has it already, but VS Code's starts empty, so plain VS Code
+   terminals stay in bash:
 
-   ```python
-   d["terminal.integrated.defaultProfile.linux"] = "fish"
-   d["terminal.integrated.profiles.linux"] = {
-       "fish": {"path": os.path.expanduser("~/.nix-profile/bin/fish"), "args": ["-l"]}
+   ```json
+   "terminal.integrated.defaultProfile.linux": "fish",
+   "terminal.integrated.profiles.linux": {
+     "fish": { "path": "/home/<user>/.nix-profile/bin/fish", "args": ["-l"] }
    }
    ```
 

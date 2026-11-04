@@ -11,6 +11,8 @@
 #                                        Cursor servers, so `nix profile upgrade` updates
 #                                        it with no install step (see link-remote.py)
 #   $out/bin/pi-vscode-install           alias of pi-vscode-link
+#   $out/bin/pi-vscode-pi                piAgent.command on remotes: starts pi the way a
+#                                        terminal would (login fish + direnv for the cwd)
 {
   lib,
   buildNpmPackage,
@@ -71,6 +73,7 @@ in
       cp -r unpacked/extension/. $out/share/vscode/extensions/${extensionId}/
       install -m755 ${finalAttrs.passthru.linkScript} $out/bin/pi-vscode-link
       ln -s pi-vscode-link $out/bin/pi-vscode-install
+      install -m755 ${finalAttrs.passthru.launchScript} $out/bin/pi-vscode-pi
       runHook postInstall
     '';
 
@@ -84,6 +87,19 @@ in
       vscodeExtPublisher = publisher;
       vscodeExtName = name;
       vscodeExtUniqueId = extensionId;
+      # The editor server (and so the extension host that spawns pi) is started
+      # by a non-interactive SSH bash: no fish config, no ~/.nix-profile on PATH,
+      # no direnv. Run pi through a login fish with direnv applied for the
+      # session's folder, so agents get the same tools and environment as pi in
+      # an integrated terminal. The extension's arguments arrive as $argv.
+      launchScript = writeShellScript "pi-vscode-pi" ''
+        shell="''${PI_VSCODE_SHELL:-$HOME/.nix-profile/bin/fish}"
+        if [ -x "$shell" ]; then
+          exec "$shell" -l -c 'command -q direnv; and direnv export fish 2>/dev/null | source; exec pi $argv' -- "$@"
+        fi
+        # No fish: a bash login shell still puts the profile on PATH.
+        exec bash -lc 'command -v direnv >/dev/null && eval "$(direnv export bash 2>/dev/null)"; exec pi "$@"' pi "$@"
+      '';
       linkScript = writeShellScript "pi-vscode-link" ''
         exec ${lib.getExe python3} -I ${./link-remote.py} ${extensionId} "$@"
       '';

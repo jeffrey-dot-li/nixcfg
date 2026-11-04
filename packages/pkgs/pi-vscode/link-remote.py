@@ -9,7 +9,8 @@ reload the window to pick it up.
 Also, per server:
 - registers the symlink in extensions.json (the server's source of truth),
 - removes earlier copied installs (<id>-<version> dirs from VSIX installs),
-- sets the machine setting piAgent.command to the profile's pi if unset.
+- sets the machine setting piAgent.command to the profile's pi-vscode-pi
+  launcher (login fish + direnv) if unset or still the plain profile pi.
 
 Safe to re-run; it is idempotent.
 """
@@ -122,10 +123,15 @@ def link_server(server, target, version):
     except json.JSONDecodeError:
         log(f"{machine} has comments or is invalid; set piAgent.command there by hand")
     else:
-        if "piAgent.command" not in settings:
-            settings["piAgent.command"] = os.path.join(PROFILE, "bin", "pi")
+        # Launch pi through the profile's login-shell launcher (see pi-vscode-pi).
+        # Replace only unset values or the plain profile pi set by earlier
+        # versions of this script; any other user choice is kept.
+        launcher = os.path.join(PROFILE, "bin", "pi-vscode-pi")
+        current = settings.get("piAgent.command")
+        if current in (None, os.path.join(PROFILE, "bin", "pi")) and current != launcher:
+            settings["piAgent.command"] = launcher
             write_json(machine, settings)
-            log(f"set piAgent.command in {machine}")
+            log(f"set piAgent.command to {launcher} in {machine}")
 
     log(f"{link} -> {target}")
     return True
