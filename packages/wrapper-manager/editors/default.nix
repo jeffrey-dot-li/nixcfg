@@ -145,17 +145,4 @@ in {
     relExtensionsDir = ".vscode/extensions";
     settingsFile = vscodeSettingsFile;
   };
-
-  wrappers.cursor = mkEditor {
-    name = "cursor";
-    basePackage = pkgs.code-cursor;
-    longName = "Cursor";
-    appExecutableName = "Cursor";
-    relUserDir =
-      if isDarwin
-      then "Library/Application Support/Cursor/User"
-      else ".config/Cursor/User";
-    relExtensionsDir = ".cursor/extensions";
-    settingsFile = cursorSettingsFile;
-  };
 }
