@@ -207,7 +207,10 @@
       owner = "minuque";
       repo = "pi-cc-extensions";
       rev = "562d687829a0048081efd71d7433dcda73d7f085";
-      patches = [./patches/pi-cc-extensions-compact-footer.patch];
+      patches = [
+        ./patches/pi-cc-extensions-compact-footer.patch
+        ./patches/pi-cc-extensions-compact-one-line.patch
+      ];
       hash = "sha256-NPpKC+xTXFdwWxt1kddjtEqjrgAxd9K/s9H1NhZsojU=";
       npmDepsHash = "sha256-kWkBAnEMQ3YJLps7FunEmZbR7MmTqGQKrWT4rc8mXF0=";
     })

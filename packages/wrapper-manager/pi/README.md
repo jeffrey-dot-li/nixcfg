@@ -406,6 +406,20 @@ the pi-cc config panel's footer changes are reset on the next launch. The
 earlier `@smoose/pi-footer` package was removed, because pi-cc-extensions'
 footer replaced it; the wrapper drops its leftover `footer` setting.
 
+### Compact transcript view
+
+pi-cc-extensions' `mode` can be `on` (default), `compact` or `off`; switch it
+in `/ccstyle` (Style). It is not managed, so the choice persists. In `compact`
+mode each turn's tool calls fold into one clickable summary row (`Ran for 11s,
+bash×2, read×1 · click to show more`; Ctrl+O expands every turn), edits and
+writes keep their single lines, and while a turn runs the row previews its
+current tool or thinking. `patches/pi-cc-extensions-compact-one-line.patch`
+makes a finished turn fold to that row alone: upstream keeps the last tool
+card under it, and its repaint calls `ctx.ui.requestRender`, which Pi's
+extension UI context does not have (the patch requests one through
+`ctx.ui.setStatus`). It also drops the separate `│ Ran 1 command, read 1 file`
+agent-summary line in compact mode, where the row already shows the counts.
+
 The managed `clipboard-tools.ts` extension copies source text rather than the
 rendered screen. Fullscreen mouse selection copies rendered rows, so wrapped
 paragraphs arrive with hard line breaks and indentation; Pi ships as a

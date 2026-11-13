@@ -129,7 +129,26 @@ try {
     /Command timed out after 0.2 seconds/,
   );
   delete process.env.PI_BASH_BACKGROUND_AFTER_SECONDS;
-  console.log("PASS: timeout clamping/defaults, native delegation, renderer, guidance, abort and exit errors, hand-off to background, fallback and explicit-timeout kill");
+
+  // Subagent runners (PI_SUBAGENT_CHILD=1): plain Bash, no cap, no hand-off.
+  useRealExec(false);
+  process.env.PI_SUBAGENT_CHILD = "1";
+  let child;
+  register({ registerTool: definition => { child = definition; } });
+  delete process.env.PI_SUBAGENT_CHILD;
+  assert.equal(child.description, "Native Bash", "native description, no 60s/background wording");
+  assert.ok(child.promptGuidelines.some((line) => line.includes("no time limit")));
+  assert.ok(!child.promptGuidelines.some((line) => /task_start|background task|60 seconds/.test(line)));
+  for (const params of [{ command: "make test" }, { command: "make test", timeout: 600 }]) {
+    const createdBefore = created.length;
+    await child.execute("id", params, signal, update, ctx);
+    assert.deepEqual(calls.at(-1)[1], params, "parameters reach native Bash unchanged");
+    assert.equal(created.length, createdBefore, "no backgrounding backend");
+  }
+  const childRender = (args) => child.renderCall(args, { fg: (_, text) => text, bold: text => text }, { expanded: true }).render(200)[0];
+  assert.equal(childRender({ command: "make test" }), "$ make test");
+  assert.equal(childRender({ command: "make test", timeout: 600 }), "$ make test (timeout 600s)");
+  console.log("PASS: timeout clamping/defaults, native delegation, renderer, guidance, abort and exit errors, hand-off to background, fallback and explicit-timeout kill, uncapped Bash in subagents");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

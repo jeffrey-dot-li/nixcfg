@@ -1,0 +1,80 @@
+diff -ru a/extensions/feature/agent-summary/index.ts b/extensions/feature/agent-summary/index.ts
+--- a/extensions/feature/agent-summary/index.ts	2026-11-13 09:58:05
++++ b/extensions/feature/agent-summary/index.ts	2026-11-13 09:58:11
+@@ -11,6 +11,7 @@
+ 
+ import { wrapTextWithAnsi } from "@earendil-works/pi-tui";
+ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
++import { config } from "../../config/config.ts";
+ import { formatDuration } from "../../utils/format.ts";
+ import { bindAgentSummary, summarySegments, type SummarySegment } from "./core.ts";
+ import type { AgentSummaryData } from "./core.ts";
+@@ -67,6 +68,8 @@
+ 
+ export default function (pi: ExtensionAPI): void {
+ 	pi.registerEntryRenderer(AGENT_SUMMARY_ENTRY_TYPE, (entry, _options, theme) => {
++		// Compact mode's per-turn summary row already shows these counts.
++		if (config.mode === "compact") return undefined;
+ 		const segments = summarySegments(entry.data as AgentSummaryData);
+ 		if (segments.length === 0) return undefined;
+ 		const duration = formatDuration((entry.data as AgentSummaryData).durationMs);
+diff -ru a/extensions/renderer/compact-mode.ts b/extensions/renderer/compact-mode.ts
+--- a/extensions/renderer/compact-mode.ts	2026-11-13 09:58:05
++++ b/extensions/renderer/compact-mode.ts	2026-11-13 10:04:35
+@@ -1091,14 +1091,18 @@
+ }
+ 
+ /** live 槽位卡：按 pad 缩进；首行 `↳` 由卡自身的 live 排布加，行不增不减。 */
+-function compactLiveSlot(card: any, pad = 0): any {
++function compactLiveSlot(card: any, pad = 0, isLive?: () => boolean): any {
+ 	const innerOf = (width: number) => Math.max(0, width - Math.max(0, pad));
+ 	return {
+ 		render(width: number): string[] {
++			// Checked at render time: however the round ends, the next frame after
++			// it stops being live folds it to the summary row alone.
++			if (isLive && !isLive()) return [];
+ 			const indent = " ".repeat(Math.max(0, pad));
+ 			return card.render(innerOf(width)).map((line: string) => `${indent}${line}`);
+ 		},
+ 		childAtRow(localRow: number, width: number) {
++			if (isLive && !isLive()) return null;
+ 			return card.childAtRow?.(localRow, innerOf(width)) ?? null;
+ 		},
+ 		invalidate() {
+@@ -1380,6 +1384,17 @@
+ 			round.settleUntil = undefined;
+ 			pendingFoldRounds.delete(round);
+ 			renderRound(round);
++			// The fold changes what the round tail shows (the slot card goes away),
++			// so repaint now instead of on the next unrelated render. Pi's extension
++			// UI context has no requestRender; clearing an unused status key is a
++			// public call that requests one.
++			try {
++				const ui = uiRef as any;
++				if (typeof ui?.requestRender === "function") ui.requestRender();
++				else ui?.setStatus?.("pi-cc-compact-fold", undefined);
++			} catch {
++				/* no UI */
++			}
+ 		}, FOLD_SETTLE_MS);
+ 	};
+ 
+@@ -1942,7 +1957,9 @@
+ 		}
+ 		round.pendingLiveTool = missingTool;
+ 		// 槽位单块：活动思考最新；否则本回合最近的工具（运行中原位增长，完成也留着）。
+-		const slotTool = thinkingKids.length > 0 ? undefined : (runningTool ?? lastTool);
++		// Keep the latest tool card only while the round is live, so a finished
++		// round folds to its one summary row.
++		const slotTool = thinkingKids.length > 0 ? undefined : (runningTool ?? (roundLive(round) ? lastTool : undefined));
+ 		const cardItems: Array<{ child?: any; tool?: any }> = slotTool
+ 			? [{ tool: slotTool }]
+ 			: thinkingKids.map((child) => ({ child }));
+@@ -1964,6 +1981,7 @@
+ 							true,
+ 						),
+ 						pad,
++						() => roundLive(round),
+ 					),
+ 				);
+ 			}

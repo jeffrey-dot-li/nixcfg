@@ -47,6 +47,15 @@ try {
   assert.ok(refreshed.systemPrompt.includes("Use the new rules."));
   assert.ok(!refreshed.systemPrompt.includes("Keep answers concise."));
 
+  // Background subagent runners get a note scoping the Bash limit and task rules.
+  assert.ok(!refreshed.systemPrompt.includes("Running as a subagent"), "no subagent note in the main session");
+  process.env.PI_SUBAGENT_CHILD = "1";
+  const child = await events.get("before_agent_start")({ systemPrompt: existing });
+  delete process.env.PI_SUBAGENT_CHILD;
+  assert.ok(child.systemPrompt.includes("Use the new rules."));
+  assert.match(child.systemPrompt, /Running as a subagent[\s\S]*Bash has no time limit/);
+  assert.ok(child.systemPrompt.endsWith(existing), "note goes before the existing prompt");
+
   const fallback = await instance().get("before_agent_start")({ systemPrompt: existing });
   assert.deepEqual(fallback, refreshed, "fallback before startup");
   writeFileSync(rulesPath, " \n ");

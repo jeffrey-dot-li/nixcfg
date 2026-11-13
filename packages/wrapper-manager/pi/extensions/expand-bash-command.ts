@@ -26,6 +26,15 @@ function explicitTimeout(requested: unknown): boolean {
 	return typeof requested === "number" && Number.isFinite(requested) && requested > 0;
 }
 
+/** Pi does not export renderCall's argument types. */
+function renderBashCall(args: any, theme: any, context: any, suffix: string): ResponsiveText {
+	const command = typeof args?.command === "string" ? args.command : "(invalid command)";
+	const displayedCommand = context.expanded ? command : previewCommand(command);
+	const component = (context.lastComponent as ResponsiveText | undefined) ?? new ResponsiveText();
+	component.setText(theme.fg("toolTitle", theme.bold(`$ ${displayedCommand}`)) + (suffix ? theme.fg("muted", suffix) : ""));
+	return component;
+}
+
 function promotionNote(promotion: Promotion): string {
 	return `[Still running after ${promotion.afterSeconds}s: moved to background task ${promotion.taskId} (${promotion.name}). It keeps running; you will be notified when it finishes. Use task_logs for its output (the full stream, including the part above), task_status, or task_kill to stop it. Do not rerun it.]`;
 }
@@ -73,9 +82,31 @@ function previewCommand(command: string): string {
  * renders the complete command (including newlines) while the row is expanded.
  * It also caps foreground Bash at 60 seconds: an explicit timeout kills at that
  * time, and a call without one moves to a background task (bash-background.ts).
+ *
+ * Subagents are exempt. Background subagent runners (PI_SUBAGENT_CHILD=1) load
+ * this extension, but their tool allowlists exclude the task_* tools, so there
+ * Bash runs like Pi's own: no cap, no hand-off, and an explicit timeout is
+ * honored as given. (Foreground subagents never load ambient extensions and
+ * already get Pi's plain Bash.)
  */
 export default function expandBashCommand(pi: ExtensionAPI) {
 	const bash = createBashTool(process.cwd());
+
+	if (process.env.PI_SUBAGENT_CHILD === "1") {
+		pi.registerTool({
+			...bash,
+			promptGuidelines: [
+				...(bash.promptGuidelines ?? []),
+				"Bash has no time limit here. Run long commands (builds, test suites) in the foreground and wait for them; pass a timeout only to bound a command that could hang.",
+				"Never launch background or detached processes through Bash: no trailing &, nohup, disown, setsid, ad-hoc tmux/screen sessions, or daemon/detach flags.",
+				"Tool calls in the same message run concurrently with no ordering guarantee. A bash call alongside write/edit may run before the file exists or changes. Run bash that depends on a write/edit in a later message, after that result returns.",
+			],
+			renderCall(args, theme, context) {
+				return renderBashCall(args, theme, context, explicitTimeout(args?.timeout) ? ` (timeout ${args.timeout}s)` : "");
+			},
+		});
+		return;
+	}
 
 	pi.registerTool({
 		...bash,
@@ -127,19 +158,14 @@ export default function expandBashCommand(pi: ExtensionAPI) {
 			}
 		},
 		renderCall(args, theme, context) {
-			const command = typeof args?.command === "string" ? args.command : "(invalid command)";
-			const timeout = theme.fg(
-				"muted",
+			return renderBashCall(
+				args,
+				theme,
+				context,
 				explicitTimeout(args?.timeout)
 					? ` (timeout ${effectiveBashTimeout(args?.timeout)}s)`
 					: ` (background after ${MAX_BASH_TIMEOUT_SECONDS}s)`,
 			);
-			const displayedCommand = context.expanded ? command : previewCommand(command);
-			const component =
-				(context.lastComponent as ResponsiveText | undefined) ?? new ResponsiveText();
-
-			component.setText(theme.fg("toolTitle", theme.bold(`$ ${displayedCommand}`)) + timeout);
-			return component;
 		},
 	});
 }
