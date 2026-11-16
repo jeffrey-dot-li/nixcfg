@@ -433,46 +433,24 @@ prebuilt binary, so that path is not patched here. Instead:
 - `/clip` picks the last response, each of its fenced code blocks (without the
   fences), or one of the last 20 messages, and copies its source text.
 
-Copies use Pi's clipboard (native locally; OSC 52 over SSH, see
-`PI_CLIPBOARD_OSC52`), so they work in any terminal, not only VS Code.
+### Manual tool approval
 
-The managed `static-working-indicator.ts` extension replaces Pi's animated
-working spinner with a static dot. Cursor invalidates integrated-terminal link
-decorations on each redraw, causing hovered file references and URLs to flicker
-and become difficult to click while Pi is busy. Streaming text can still cause
-necessary redraws, but idle thinking and tool execution no longer repaint just
-to animate the spinner.
+`pi-ask-permission` asks before tool calls: yes, always yes (for a command
+prefix, this session/project/everywhere) or deny, with an optional note the
+model reads. The wrapper seeds `<agent dir>/extensions/pi-ask-permission/config.json`
+when it is missing with `mode: "auto"` and `workspace.outside: "allow"`, so
+sessions run without prompts. To try a model you do not trust, switch the
+session with `/perm mode manual` (or Alt+M); reads and read-only bash still run
+on their own. `/perm` opens its settings, which then own the file.
 
-The managed `session-info-status.ts` extension adds a footer status (the
-`session-info` chip) with the session name set by `/name` and
-the number of conversation messages on the active branch, e.g.
-`refactor auth · 14 msgs`. User prompts and assistant responses are counted;
-tool results are not. Unnamed sessions show only the count. It updates on
-rename, each message, `/tree` navigation, compaction, and session switches.
-
-The managed `undo-last-message.ts` extension adds `/undo`. It is equivalent to
-selecting the most recent user message in `/fork`: the conversation rewinds to
-just before that message and its text is restored to the editor. Unlike
-`/fork`, the previous session file is then deleted, so only one conversation
-remains in `/resume`. Any other `/tree` branches in that file are deleted with
-it. Repeat `/undo` to go back further. A running response is aborted first.
-
-`rpiv-todo` is patched (`patches/rpiv-todo-reset.patch`) to add `/reset-todo`,
-which clears every todo on the current branch — useful after a long session
-leaves the list cluttered with stale items. It persists a reset marker as a
-custom session entry, so replay (restart, `/tree`, resume) agrees with the
-cleared list instead of resurrecting the old todos from the last `todo` tool
-result. It also tells the model, on its next turn, that the list and ids were
-cleared, since the old list otherwise stays in the model's context until then.
-IDs restart at 1 after a reset. The patch only touches `index.ts` and
-`state/replay.ts`; it does not change the `todo` tool or `/todos` output.
-
-The managed `guard-invalid-slash.ts` input extension prevents accidental
-submission of mistyped slash commands. In the interactive editor, input that
-starts with `/` is submitted normally only when Pi recognizes the command. An
-unknown command is not added to the conversation or queue, and its text stays
-in the editor for correction. Normal prompts and non-interactive RPC, print,
-and JSON input retain Pi's standard behavior.
+Manual mode is supervisor mode: the seeded config enables the package's judge
+with DeepSeek V4.1 Flash (`agent-control-plane/oss/deepseek-v4-1-flash-1017`,
+through Pi's model registry) for every tool. Each call the agent model makes is
+reviewed first; a confident approval runs (the transcript shows `◈ approved …
+97% · risk 0.00`), a confident denial blocks it and tells the agent, and an
+unsure answer, timeout (30 s) or error asks you. `auto` sessions never reach the
+judge. `/perm judge off` keeps manual approval without the supervisor,
+`/perm judge log` lists its decisions, and `/perm judge test` checks the model.
 
 ## Validating Pi toolchain changes
 
@@ -519,7 +497,7 @@ model arguments still take precedence; this configuration does not impose a
 | -------- | ------------------------------------------------------ | ----------------------------------------- | -------- |
 | Monitor  | `monitor`                                              | `agent-control-plane/gpt-6-luna`          | `low`    |
 | Playbook | `scout`                                                | `agent-control-plane/gpt-6-luna`          | `high`   |
-| Playbook | `delegate`                                             | `cohere-oss-v2/deepseek-v4-1-flash`       | `high`   |
+| Playbook | `delegate`                                             | `agent-control-plane/oss/deepseek-v4-1-flash-1017` | `high`   |
 | Working  | `worker`, `reviewer`, `researcher`, `evidence-auditor` | `agent-control-plane/gpt-6.1-sol`           | `medium` |
 | Highest  | `oracle`                                               | `agent-gateway-dev/us.openai.gpt-6-astra` | disabled |
 

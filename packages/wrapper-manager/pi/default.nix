@@ -141,6 +141,29 @@
         --replace-fail '"@node@"' '"${pkgs.nodejs}/bin/node"'
     '';
 
+  # Manual tool approval (`/perm`, Alt+M). Its repo has no lockfile, so it is
+  # assembled from the npm tarballs; shell-quote is its only dependency and has
+  # none of its own.
+  piAskPermission =
+    pkgs.runCommand "pi-ask-permission-3.0.0" {
+      nativeBuildInputs = [pkgs.gnutar pkgs.gzip];
+    } ''
+      mkdir -p "$out/node_modules/shell-quote"
+      tar -xzf ${pkgs.fetchurl {
+        url = "https://registry.npmjs.org/pi-ask-permission/-/pi-ask-permission-3.0.0.tgz";
+        hash = "sha512-HI1rVBWOFqjSs8x0meLJ2HkZoyteSlcqHdiy4IW65sdGpi1DSIZv97/PN9LXnORUROdaP8LeaKtP0fX6gjPPhA==";
+      }} -C "$out" --strip-components=1
+      tar -xzf ${pkgs.fetchurl {
+        url = "https://registry.npmjs.org/shell-quote/-/shell-quote-1.12.0.tgz";
+        hash = "sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==";
+      }} -C "$out/node_modules/shell-quote" --strip-components=1
+      # Its only bash override restarts the "Took" timer after the dialog; it
+      # would clash with expand-bash-command.ts's bash, so "Took" includes the
+      # time spent deciding instead.
+      chmod -R u+w "$out"
+      substituteInPlace "$out/src/index.ts" --replace-fail "registerBashTimer(pi);" ""
+    '';
+
   managedResourcePackage = pkgs.runCommand "pi-managed-resources-1.0.12" {} ''
     mkdir -p "$out"
     cp -R ${./agents} "$out/agents"
@@ -173,6 +196,7 @@
   piPackages = [
     managedResourcePackage
     piBackgroundTask
+    piAskPermission
     (mkPiPackage {
       pname = "pi-subagents";
       version = "0.84.0";
@@ -245,7 +269,7 @@
         thinking = "high";
       };
       delegate = {
-        model = "cohere-oss-v2/deepseek-v4-1-flash";
+        model = "agent-control-plane/oss/deepseek-v4-1-flash-1017";
         thinking = "high";
       };
       worker = {
@@ -317,6 +341,22 @@
     footerLine1Keys = ["model" "context" "cache" "cost" "pi-usage"];
     footerLine2Keys = ["cwd" "git" "pi-background-task" "mcp" "session-info"];
     footerLine3Keys = [];
+  };
+  askPermissionDefaults = builtins.toJSON {
+    mode = "auto";
+    workspace = {
+      roots = ["."];
+      outside = "allow";
+    };
+    judge = {
+      enabled = true;
+      provider = "pi";
+      model = "agent-control-plane/oss/deepseek-v4-1-flash-1017";
+      tools = ["*"];
+      whenUnsure = "ask";
+      whenItFails = "ask";
+      timeoutMs = 30000;
+    };
   };
   managedKeybindings = builtins.toJSON {
     "tui.altScreen.previousPrompt" = "ctrl+shift+up";
@@ -401,7 +441,9 @@
           or ($source | startswith("npm:@juicesharp/rpiv-ask-user-question@"))
           or ($source == "npm:@juicesharp/rpiv-todo")
           or ($source | startswith("npm:@juicesharp/rpiv-todo@"))
-          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|background-task|footer|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions)|rpiv-(ask-user-question|todo))-[0-9]"));
+          or ($source == "npm:pi-ask-permission")
+          or ($source | startswith("npm:pi-ask-permission@"))
+          or ($source | test("^/nix/store/[a-z0-9]+-(pi-(bg|background-task|footer|subagents|managed-(agents|resources)|web-access|mcp-adapter|cc-extensions|ask-permission)|rpiv-(ask-user-question|todo))-[0-9]"));
 
       .packages = (
         ((.packages // [])
@@ -503,6 +545,19 @@
       rm -f "$ccext_tmp"
     fi
     trap - EXIT
+
+    # pi-ask-permission starts every session in `auto` with calls outside the
+    # project allowed, so nothing prompts or reaches the judge until
+    # `/perm mode manual` (Alt+M) when trying a model. Manual mode is then
+    # "supervisor mode": the judge (DeepSeek V4.1 Flash via pi's own model
+    # registry) reviews every tool call first, and only calls it is unsure of
+    # or fails on reach you. `/perm judge off` leaves plain manual approval.
+    # Only seeded when the file is missing; afterwards /perm owns it.
+    askperm="$config_dir/extensions/pi-ask-permission/config.json"
+    if [ ! -e "$askperm" ]; then
+      mkdir -p "$(dirname "$askperm")"
+      printf '%s\n' '${askPermissionDefaults}' > "$askperm"
+    fi
 
     # Managed MCP servers live in pi-mcp-adapter's global file. Since Pi 0.99 the
     # adapter also reads Pi's own mcp.json, but only in Pi's schema (`enabled`,
