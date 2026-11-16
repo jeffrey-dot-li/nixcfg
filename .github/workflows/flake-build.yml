@@ -29,7 +29,7 @@ jobs:
               extra-sandbox-paths = /System/Library/Frameworks /System/Library/PrivateFrameworks /usr/lib
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: cachix/install-nix-action@v31
         with:
@@ -37,13 +37,13 @@ jobs:
             accept-flake-config = true
             ${{ matrix.extra_nix_config }}
 
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v17
         if: github.event_name == 'pull_request'
         with:
           name: jeffrey-dot-li
           skipPush: true
 
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v17
         if: github.event_name != 'pull_request'
         with:
           name: jeffrey-dot-li
@@ -63,14 +63,14 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             accept-flake-config = true
 
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v17
         with:
           name: jeffrey-dot-li
           skipPush: true
